@@ -121,7 +121,7 @@ exports.list = async (req, res) => {
         return res.json({ data: data, success: true, status: status.OK });
     }
     catch (err) {
-        return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Get Project failed.' });
+        return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Get Employee failed.' });
 
     }
 }

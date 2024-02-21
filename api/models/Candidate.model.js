@@ -1,144 +1,137 @@
 const mongoose = require('mongoose');
-const { Schema } = mongoose;
+ const { Schema } = mongoose;
 
-const EmployeeSchema = new Schema({
-    employee_id: {
+const CandidateSchema = new Schema({
+    candidate_id:{
         type: String,
         required: true
-    },
-    employee_first_name: {
+   },
+   candidate_first_name:{
         type: String,
         required: true
-    },
-    employee_last_name: {
+   },
+   candidate_last_name:{
         type: String,
         required: true
-    },
-    employee_mobile: {
+   },
+candidate_mobile:{
         type: String,
         required: true
-    },
-    employee_alternate_mobile: {
+   },
+candidate_alternate_mobile:{
         type: String,
         required: true
-    },
-    employee_email: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    employee_password: {
+   },
+candidate_email:{
         type: String,
         required: true
-    },
-    employee_address: {
+   },
+candidate_skype:{
         type: String,
         required: true
-    },
-    employee_city: {
+   },
+  candidate_profile:{
         type: String,
         required: true
-    },
-    employee_state: {
+   },
+   candidate_skills:{
         type: String,
         required: true
-    },
-    employee_other_info: {
+   },
+   candidate_experience:{
         type: String,
         required: true
-    },
-    employee_dob: {
+   },
+   candidate_expected_salary:{
+        type: String,
+        required: true
+   },
+   candidate_expected_joining_date:{
+        type: Date,
+        default: Date.now
+   },
+   candidate_joining_immediate:{
+        type: String,
+        required: true
+   },
+
+
+   candidate_marrital_status:{
         type: Date,
         default: Date.now
     },
-    employee_doj: {
-        type: Date,
-        default: Date.now
-    },
-    employee_skills: {
+   candidate_written_round:{
         type: String,
         required: true
     },
-    employee_experience: {
+    candidate_machine_round:{
         type: String,
         required: true
     },
-    employee_resume: {
+    candidate_technical_interview_round:{
         type: String,
         required: true
     },
-    employee_id_proof: {
+    candidate_hr_interview_round:{
         type: String,
         required: true
     },
-    employee_permanant_address_proof: {
+    candidate_selection_status:{
         type: String,
         required: true
     },
-    employee_local_address_proof: {
+    candidate_feedback:{
+        type: String,
+        required: true
+    }, 
+    candidate_from_consultancy:{
         type: String,
         required: true
     },
-    employee_reference_one_name: {
+   candidate_info1:{
         type: String,
         required: true
-    },
-    employee_reference_one_mobile: {
+   },
+candidate_info2:{
         type: String,
         required: true
-    },
-    employee_reference_two_name: {
+   },
+candidate_info3:{
         type: String,
         required: true
-    },
-    employee_reference_two_mobile: {
+   },
+candidate_info4:{
         type: String,
         required: true
-    },
-    employee_info1: {
+   },
+candidate_info5:{
         type: String,
         required: true
-    },
-    employee_info2: {
+   },
+candidate_info6:{
         type: String,
         required: true
-    },
-    employee_info3: {
+   },
+candidate_info7:{
         type: String,
         required: true
-    },
-    employee_info4: {
+   },
+candidate_info8:{
         type: String,
         required: true
-    },
-    employee_info5: {
+   },
+candidate_info9:{
         type: String,
         required: true
-    },
-    employee_info6: {
+   },
+candidate_info10:{
         type: String,
         required: true
-    },
-    employee_info7: {
-        type: String,
-        required: true
-    },
-    employee_info8: {
-        type: String,
-        required: true
-    },
-    employee_info9: {
-        type: String,
-        required: true
-    },
-    employee_info10: {
-        type: String,
-        required: true
-    }
+   },
 },
     {
         timestamps: { createdAt: "created_at", updatedAt: "updated_at" }
     });
-const Employee = mongoose.model('employee', EmployeeSchema);
+const Candidate = mongoose.model('candidate', CandidateSchema);
 
-module.exports = Employee;
+module.exports = Candidate;

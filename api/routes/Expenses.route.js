@@ -1,19 +1,18 @@
-const employeeController = require("../controllers/Employee.controller")
+const expensesController = require("../controllers/Expenses.controller")
 const express = require("express");
 const router = express.Router();
 
 router.route('/list')
-    .get(employeeController.list)
+    .get(expensesController.list)
 router.route('/create')
-    .post(employeeController.create)
+    .post(expensesController.create)
 router.route('/edit')
-    .put(employeeController.edit)
+    .put(expensesController.edit)
 router.route('/delete')
-    .delete(employeeController.delete);
+    .delete(expensesController.delete);
 
 router.route('/multi-delete')
-    .delete(employeeController.multidelete)
+    .delete(expensesController.multidelete)
 // router.route('/export')
 //     .delete(employeeController.export)
-
 module.exports = router;                                                                                                                     

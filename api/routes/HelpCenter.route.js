@@ -1,19 +1,17 @@
-const employeeController = require("../controllers/Employee.controller")
+const helpCenterController = require("../controllers/HelpCenter.controller")
 const express = require("express");
 const router = express.Router();
 
 router.route('/list')
-    .get(employeeController.list)
+    .get(helpCenterController.list)
 router.route('/create')
-    .post(employeeController.create)
+    .post(helpCenterController.create)
 router.route('/edit')
-    .put(employeeController.edit)
+    .put(helpCenterController.edit)
 router.route('/delete')
-    .delete(employeeController.delete);
+    .delete(helpCenterController.delete);
 
 router.route('/multi-delete')
-    .delete(employeeController.multidelete)
-// router.route('/export')
-//     .delete(employeeController.export)
+    .delete(helpCenterController.multidelete)
 
 module.exports = router;                                                                                                                     
