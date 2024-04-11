@@ -1,0 +1,25 @@
+const consultancyController = require("../controllers/Consultancy.controller")
+const express = require("express");
+const router = express.Router();
+
+router.route('/list')
+    .get(consultancyController.list)
+router.route('/create')
+    .post(consultancyController.create)
+router.route('/edit')
+    .put(consultancyController.edit)
+router.route('/delete')
+    .delete(consultancyController.delete);
+
+router.route('/multi-delete')
+    .delete(consultancyController.multidelete)
+
+
+
+router.route('/get')
+    .get(consultancyController.getConsultancyById)
+// router.route('/export')
+//     .delete(employeeController.export)
+// router.route('/import')
+//     .delete(employeeController.import)
+module.exports = router;                                                                                             

@@ -1,0 +1,116 @@
+.loginContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+}
+
+.form {
+    width: 50%; /* Adjust this value as needed */
+    display: flex;
+    flex-direction: column;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.formField {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.formActions {
+    display: flex;
+    justify-content: center;
+}
+
+.formSubmitBtn {
+    /* padding: 0.5rem 1rem;
+    background-color: #eee;
+    border: none;
+    cursor: pointer;
+    text-decoration: none; */
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.formLabelAgain {
+    text-align: center;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* .loginContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: auto;  
+    margin-top:30px
+  }
+  
+  .form {
+    width: 300px;
+    text-align: center;
+    font-size: 30px;
+  }
+  
+  .formGroup {
+    margin-bottom: 20px;
+  }
+  
+  .formLabel {
+    display: block;
+    margin-bottom: 7px;
+    font-weight: bold;
+  }
+  .formLabelAgain{
+    width: 300px;
+    text-align: center;
+    font-size: 15px;
+  }
+  .formField {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .formActions {
+    margin-top: 20px;
+  }
+  
+  .formSubmitBtn {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .formSubmitBtn:hover {
+    background-color: #0056b3;
+  }
+  
+
+
+  */
