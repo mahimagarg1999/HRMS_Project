@@ -50,68 +50,67 @@ const ChangePassword = () => {
         navigate('/admin')
     };
     return (
-<>
+        <>
 
-        <div>
-            <Nav />
-            {/* {showOverlay && (
-                <div className="overlay"> */}
-            <div style={{ backgroundColor: '#28769a' }}>
-                <h1 className='headerUser'>ChangePassword</h1>
-            </div>
-            <div >
-                <div class="row">
-                    <div class="col-md-6 offset-md-3">
-                        <div class="signup-form">
-                            <form onSubmit={handleSubmit}>
-                                <div>
-                                    <button onClick={handleClose} className="closeButton1">x</button>
+            <div>
+                <Nav />
+                 
+                <div style={{ backgroundColor: '#28769a' }}>
+                    <h1 className='headerUser'>ChangePassword</h1>
+                </div>
+                <div >
+                    <div class="row">
+                        <div class="col-md-6 offset-md-3">
+                            <div class="signup-form">
+                                <form onSubmit={handleSubmit}>
+                                    <div>
+                                        <button onClick={handleClose} className="closeButton1">x</button>
 
-                                    <label>Email:</label>
-                                    <input
-                                        type="email"
-                                        value={employee_email}
-                                        onChange={(e) => setCurrentPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label>Current Password:</label>
-                                    <input
-                                        type="password"
-                                        value={currentPassword}
-                                        onChange={(e) => setCurrentPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label>New Password:</label>
-                                    <input
-                                        type="password"
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label>Confirm New Password:</label>
-                                    <input
-                                        type="password"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <button type="submit">Change Password</button>
-                                <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
+                                        <b><label>Email:</label></b>
+                                        <input
+                                            type="email"
+                                            value={employee_email}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <b>  <label>Current Password*</label></b>
+                                        <input
+                                            type="password"
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <b> <label>New Password*</label></b>
+                                        <input
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <b> <label>Confirm New Password*</label></b>
+                                        <input
+                                            type="password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <button type="submit">Change Password</button>
+                                    <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
 
-                            </form>
-                        </div></div></div>
-            </div>
-            {/* </div>
+                                </form>
+                            </div></div></div>
+                </div>
+                {/* </div>
             )} */}
-        </div>
-        <Footer />
+            </div>
+            <Footer />
         </>
     );
 }

@@ -6,7 +6,7 @@ import Home from './component/Home/home.js';
 import SignUp from './component/signup/signup.js'
 import Employee from './component/user/Employee/Employee.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { BrowserRouter as Router, Route, Routes, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Candidate from './component/user/Candidate/Candidate.js'
 import Helpcenter from './component/user/HelpCenterModel/HelpCenter.js';
 import Expenses from './component/user/ExpensesModel/Expenses.js'
@@ -18,11 +18,11 @@ import UserModel from './component/user/UserModel/UserModel.js';
 import UserHome from './component/user/UserHome/UserHome';
 import Userdata from './component/Admin/UserDataModule/Userdata.js';
 import AboutHome from './component/Admin/AboutModule/AboutModule.js';
+import HelpCenterModoule from './component/Admin/AdminHelpCenterModule/AdminHelpCenter.js';
 
 
 function App() {
   return (
-
     <Router>
       <Routes>
         {/* <Route path="/signup" element={<Signup />} /> */}
@@ -48,6 +48,7 @@ function App() {
         <Route path="/edit-profile" element={<EditProfile />} />
 
         <Route path="/admin-about" element={<AboutHome />} />
+        <Route path="/adminhelpcenter" element={<HelpCenterModoule />} />
 
 
       </Routes>

@@ -21,4 +21,8 @@ router.route('/get')
 router.route('/changepassword')
     .put(employeeController.changePassword)
 
+router.route('/search').get(employeeController.search)
+router.route('/sortorder').get(employeeController.sortOrder)
+
+
 module.exports = router;                                                                                                                     

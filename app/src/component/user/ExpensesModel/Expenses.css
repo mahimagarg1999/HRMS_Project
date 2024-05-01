@@ -136,3 +136,24 @@ th {
    color: white;
    text-align: center
 }
+ 
+ /* /============== */
+ .containerOnce {
+   position: relative;
+   margin-left: 83%;
+   margin-bottom: 10px;
+ }
+ 
+ .containerOnce input[type="text"] {
+   /* width: calc(15% - 30px); Adjust width to leave space for the icon */
+   padding-left: 30px; /* Space for the icon */
+   border: 2px solid black;
+ }
+ 
+ .containerOnce::before {
+   content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'); /* Inline SVG as background image */
+   position: absolute;
+   left: 5px; /* Adjust the icon position */
+   top: 65%;
+   transform: translateY(-50%);
+ }

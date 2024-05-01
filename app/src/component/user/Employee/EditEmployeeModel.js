@@ -8,8 +8,45 @@ import Modal from 'react-modal';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
 
 const ModalBox = ({ isOpen, onRequestClose, employeeId }) => {
+    const [selectedFile, setSelectedFile] = useState('');
+    const [idproof, setidproofFile] = useState('');
+    const [marksheet, setmarksheet] = useState('');
+    const [e_letter, seteletter] = useState('');
+    const [pancard, setPancard] = useState('');
+    const [data, setData] = useState([]);
+    const [message, setMessage] = useState('');
 
-    const [data, setData] = useState([])
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file instanceof Blob) {
+            const reader = new FileReader();
+            console.log("e----->", e.target.name);
+            reader.onloadend = () => {
+                if (e.target && e.target.name === 'id') {
+                    console.log('hii')
+                    setidproofFile(reader.result);
+                } else if (e.target && e.target.name === 'resume_file') {
+                    setSelectedFile(reader.result);
+                }
+                else if (e.target && e.target.name === 'mark') {
+                    setmarksheet(reader.result);
+                }
+                else if (e.target && e.target.name === 'pancard') {
+                    setPancard(reader.result);
+                }
+                else {
+                    seteletter(reader.result);
+                    console.log('', e_letter)
+                }
+                console.log('idproof', idproof)
+                console.log('selectedFile', selectedFile)
+
+            };
+            reader.readAsDataURL(file);
+        } else {
+            console.error("The selected file is not a Blob.");
+        }
+    };
     useEffect(() => {
 
         if (isOpen) {
@@ -21,7 +58,7 @@ const ModalBox = ({ isOpen, onRequestClose, employeeId }) => {
 
                         const response = await axios.get(`${BASE_API_URL}employee/get?employeeid=${employeeId}`);
                         setData(response.data.data)
-                        console.log('data', data)
+                        console.log('data-----', data)
 
                     } catch (error) {
                         console.log('model open error')
@@ -43,13 +80,41 @@ const ModalBox = ({ isOpen, onRequestClose, employeeId }) => {
         }));
     };
 
-    const handleSubmit = (e) => {
-        console.log("data", data)
+    const handleSubmit = async (e) => {
+        const mydata = data;
+
+        if (selectedFile == '') {
+            console.log('hii')
+        }
+        else {
+            mydata.employee_resume = selectedFile
+
+        }
+        mydata.employee_id_proof = idproof
+        mydata.employee_marksheet = marksheet
+        mydata.employee_pan_card = pancard
+        mydata.employee_experience_letter = e_letter
+
+
+        const pdfdoc = {
+            resumePdfName: "pdf",
+            proofPdfName: "pdf",
+            panPdfName: "pdf",
+            marksheetPdfName: "pdf",
+            experiencePdfName: 'pdf',
+            id: employeeId
+        };
+        const mergedData = { ...mydata, ...pdfdoc };
+
+
+        console.log("data", mergedData)
         e.preventDefault();
         // Handle form submission here
         try {
-            const response = axios.put(`${BASE_API_URL}employee/edit`, data);
+            const response = await axios.put(`${BASE_API_URL}employee/edit`, mergedData);
             console.log(response.data); // Handle the response as needed
+            setMessage(response.data.msg);
+
         } catch (error) {
             console.error('Error:', error);
         }
@@ -60,20 +125,20 @@ const ModalBox = ({ isOpen, onRequestClose, employeeId }) => {
             isOpen={isOpen}
             onRequestClose={onRequestClose}
             ariaHideApp={false}
-            style={{
-                overlay: {
+        // style={{
+        //     overlay: {
 
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)'
-                },
-                content: {
-                    width: '90%',
-                    height: '90%',
-                    margin: 'auto',
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                    padding: '20px'
-                }
-            }}
+        //         backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        //     },
+        //     content: {
+        //         width: '90%',
+        //         height: '90%',
+        //         margin: 'auto',
+        //         borderRadius: '8px',
+        //         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+        //         padding: '20px'
+        //     }
+        // }}
         >
             <button onClick={onRequestClose}>Close</button>
 
@@ -82,110 +147,143 @@ const ModalBox = ({ isOpen, onRequestClose, employeeId }) => {
                     <div class="signup-form">
                         <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
                             <div style={{ textAlign: 'center' }}>
-                                <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Edit Your profile</h4>
+                                <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Edit {data.employee_first_name} Profile</h4>
 
                             </div>
                             <div class="row">
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Employee Code</b></label>
+                                    <input type="text" name="employee_code" value={data.employee_code} onChange={handleInputChange} class="form-control" placeholder="Emp Code" />
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label><b>Employee First Name</b></label>
                                     <input type="text" name="employee_first_name" value={data.employee_first_name} onChange={handleInputChange} class="form-control" placeholder="First Name" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Employee Last Name</b></label>
                                     <input type="text" name="employee_last_name" value={data.employee_last_name} onChange={handleInputChange} class="form-control" placeholder="Last Name" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Employee Mobile No</b></label>
                                     <input type="text" name="employee_mobile" value={data.employee_mobile} onChange={handleInputChange} class="form-control" placeholder="Mobile Number" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Employee Alternate Mobile No</b></label>
                                     <input type="text" name="employee_alternate_mobile" value={data.employee_alternate_mobile} onChange={handleInputChange} class="form-control" placeholder="Alternate Mobile Number" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Employee Email</b></label>
                                     <input type="email" name="employee_email" value={data.employee_email} onChange={handleInputChange} class="form-control" placeholder="Email" />
                                 </div>
+
+
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Id Proof</b></label>
+                                    <input type="file" name="id" onChange={handleFileChange} accept=".pdf" />
+                                    <a style={{ color: 'red' }} href={`http://localhost:5000/${data.employee_id_proof}`} target="_blank">{data.employee_id_proof == '' ? '' : 'Show Id Proof'}</a>
+
+                                    {/* {setidproofFile && <p>Selected PDF: {setidproofFile.name}</p>} */}
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label><b>Employee Resume</b></label>
+                                    <input type="file" name="resume_file" onChange={handleFileChange} accept=".pdf" />
+                                    <a style={{ color: 'red' }} href={`http://localhost:5000/${data.employee_resume}`} target="_blank">{data.employee_resume == '' ? '' : 'Show Resume'}</a>
+
+                                    {/* {setidproofFile && <p>Selected PDF: {setidproofFile.name}</p>} */}
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label><b>Highest Education</b></label>
+                                    <input type="file" name="mark" onChange={handleFileChange} accept=".pdf" />
+                                    <a style={{ color: 'red' }} href={`http://localhost:5000/${data.employee_marksheet
+                                        }`} target="_blank">{data.employee_marksheet == '' ? '' : 'Show Marksheet'
+                                        }</a>
+
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label><b>Pan Card</b></label>
+                                    <input type="file" name="pancard" onChange={handleFileChange} accept=".pdf" />
+                                    <a style={{ color: 'red' }} href={`http://localhost:5000/${data.employee_pan_card
+                                        }`} target="_blank">{data.employee_pan_card == '' ? '' : 'Show Pan Card'
+                                        }</a>
+
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label><b> Expirence Letter</b></label>
+                                    <input type="file" name="e_letter" onChange={handleFileChange} accept=".pdf" />
+                                    <a style={{ color: 'red' }} href={`http://localhost:5000/${data.employee_experience_letter
+                                        }`} target="_blank">{data.employee_experience_letter == '' ? '' : 'Show Experience Letter'
+                                        }</a>
+
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label><b>Employee Password</b></label>
                                     <input type="text" name="employee_password" value={data.employee_password} onChange={handleInputChange} class="form-control" placeholder="Password" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Employee Address</b></label>
                                     <input type="text" name="employee_address" value={data.employee_address} onChange={handleInputChange} class="form-control" placeholder="Address" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Employee City</b></label>
                                     <input type="text" name="employee_city" value={data.employee_city} onChange={handleInputChange} class="form-control" placeholder="City" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Employee State</b></label>
                                     <input type="text" name="employee_state" value={data.employee_state} onChange={handleInputChange} class="form-control" placeholder="State" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Employee Other Info</b></label>
                                     <input type="text" name="employee_other_info" value={data.employee_other_info} onChange={handleInputChange} class="form-control" placeholder="Employee Other Info" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Date of Birth</b></label>
                                     <input type="date" name="employee_dob" value={data.employee_dob} onChange={handleInputChange} class="form-control" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Date of Joining</b></label>
                                     <input type="date" name="employee_doj" value={data.employee_doj} onChange={handleInputChange} class="form-control" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Employee Skills</b></label>
                                     <input type="text" name="employee_skills" value={data.employee_skills} onChange={handleInputChange} class="form-control" placeholder="Skills" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Employee Experience</b></label>
                                     <input type="text" name="employee_experience" value={data.employee_experience} onChange={handleInputChange} class="form-control" placeholder="Experience" />
                                 </div>
+
                                 <div class="mb-3 col-md-6">
-                                    <input type="text" name="employee_resume" value={data.employee_resume} onChange={handleInputChange} class="form-control" placeholder="Resume" />
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <input type="text" name="employee_id_proof" value={data.employee_id_proof} onChange={handleInputChange} class="form-control" placeholder="Id Proof" />
-                                </div>
-                                <div class="mb-3 col-md-6">
+                                    <label><b>Address Proof</b></label>
                                     <input type="text" name="employee_permanant_address_proof" value={data.employee_permanant_address_proof} onChange={handleInputChange} class="form-control" placeholder="Permanant Address Proof" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Local Address Proof</b></label>
                                     <input type="text" name="employee_local_address_proof" value={data.employee_local_address_proof} onChange={handleInputChange} class="form-control" placeholder="Local Address Proof" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>First Reference Name</b></label>
                                     <input type="text" name="employee_reference_one_name" value={data.employee_reference_one_name} onChange={handleInputChange} class="form-control" placeholder="Reference One Name" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>First Reference Mobile No.</b></label>
                                     <input type="text" name="employee_reference_one_mobile" value={data.employee_reference_one_mobile} onChange={handleInputChange} class="form-control" placeholder="Reference One Mobile" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Second Reference Name</b></label>
                                     <input type="text" name="employee_reference_two_name" value={data.employee_reference_two_name} onChange={handleInputChange} class="form-control" placeholder="Reference Two Name" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                    <label><b>Second Reference Mobile No.</b></label>
                                     <input type="text" name="employee_reference_two_mobile" value={data.employee_reference_two_mobile} onChange={handleInputChange} class="form-control" placeholder="Reference Two Mobile" />
                                 </div>
-                                <div class="mb-3 col-md-6">
-                                    <input type="text" name="employee_info1" value={data.employee_info1} onChange={handleInputChange} class="form-control" placeholder="info 1" />
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <input type="text" name="employee_info2" value={data.employee_info2} onChange={handleInputChange} class="form-control" placeholder="info 2" />
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <input type="text" name="employee_info3" value={data.employee_info3} onChange={handleInputChange} class="form-control" placeholder="info 3" />
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <input type="text" name="employee_info4" value={data.employee_info4} onChange={handleInputChange} class="form-control" placeholder="info 4" />
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <input type="text" name="employee_info5" value={data.employee_info5} onChange={handleInputChange} class="form-control" placeholder="info 5" />
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <input type="text" name="employee_info6" value={data.employee_info6} onChange={handleInputChange} class="form-control" placeholder="info 6" />
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <input type="text" name="employee_info7" value={data.employee_info7} onChange={handleInputChange} class="form-control" placeholder="info 7" />
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <input type="text" name="employee_info8" value={data.employee_info8} onChange={handleInputChange} class="form-control" placeholder="info 8" />
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <input type="text" name="employee_info9" value={data.employee_info9} onChange={handleInputChange} class="form-control" placeholder="info 9" />
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <input type="text" name="employee_info10" value={data.employee_info10} onChange={handleInputChange} class="form-control" placeholder="info 10" />
-                                </div>
+
                             </div>
+
                             <div class="col-md-12">
-                                <button type="submit">EDit here</button>
+                                <button type="submit">Edit here</button>
                             </div>
+                            <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
+
                         </form>
 
 

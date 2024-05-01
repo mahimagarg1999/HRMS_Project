@@ -17,4 +17,8 @@ router.route('/get')
     .get(expensesController.getExpensesById)
 // router.route('/export')
 //     .delete(employeeController.export)
+router.route('/search').get(expensesController.search)
+router.route('/sortorder').get(expensesController.sortOrder)
+
+
 module.exports = router;                                                                                                                     

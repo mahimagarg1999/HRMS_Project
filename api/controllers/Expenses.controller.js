@@ -7,7 +7,7 @@ exports.create = async (req, res) => {
     try {
         var obj = {
             // expenses_id:req.body.expenses_id,
-            expenses_purpose: req.body.expenses_purpose,
+            expenses_purpose: capitalizeWords(req.body.expenses_purpose),
             expenses_bill: req.body.expenses_bill,
             expenses_amount: req.body.expenses_amount,
             expenses_voucher: req.body.expenses_voucher,
@@ -15,6 +15,7 @@ exports.create = async (req, res) => {
             expenses_by_cash: req.body.expenses_by_cash,
             expenses_by_cheque: req.body.expenses_by_cheque,
             expenses_cash_recieved_by: req.body.expenses_cash_recieved_by,
+            date_of_expenses: req.body.date_of_expenses
         }
         const newmanageExpensesModel = new manageExpensesModel(obj);
         let result = await newmanageExpensesModel.save();
@@ -27,6 +28,11 @@ exports.create = async (req, res) => {
 
     }
 }
+function capitalizeWords(str) {
+    if (typeof str !== 'string') return str; // Return the input if it's not a string
+    return str.replace(/\b\w/g, char => char.toUpperCase()); // Capitalize the first letter of each word
+}
+
 
 
 //update by id
@@ -42,7 +48,7 @@ exports.edit = async (req, res) => {
             {
                 $set: {
                     // expenses_id:req.body.expenses_id,
-                    expenses_purpose: req.body.expenses_purpose,
+                    expenses_purpose: capitalizeWords(req.body.expenses_purpose),
                     expenses_bill: req.body.expenses_bill,
                     expenses_amount: req.body.expenses_amount,
                     expenses_voucher: req.body.expenses_voucher,
@@ -50,6 +56,8 @@ exports.edit = async (req, res) => {
                     expenses_by_cash: req.body.expenses_by_cash,
                     expenses_by_cheque: req.body.expenses_by_cheque,
                     expenses_cash_recieved_by: req.body.expenses_cash_recieved_by,
+                    date_of_expenses: req.body.date_of_expenses
+
                 }
             },
         ).lean().exec();
@@ -140,5 +148,66 @@ exports.getExpensesById = async (req, res) => {
     }
 
 }
+exports.sortOrder = async (req, res) => {
+    const sortOrder = req.query.order === 'desc' ? -1 : 1;
+    const columnName = req.query.coloum;
 
+    try {
+        let sortObject = {};
+        sortObject[columnName] = sortOrder;
+
+        // Custom pipeline stage for case-insensitive sorting
+        const result = await manageExpensesModel.aggregate([
+            {
+                $addFields: {
+                    // Create a new field with the lowercase version of the column
+                    lowercaseColumn: { $toLower: `$${columnName}` }
+                }
+            },
+            { $sort: { lowercaseColumn: sortOrder } }, // Sort based on the lowercase field
+            { $project: { lowercaseColumn: 0 } } // Exclude the lowercase field from the result
+        ]);
+
+        res.json(result);
+    } catch (err) {
+        console.error('Error fetching data:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+exports.search = async (req, res) => {
+    try {
+        const query = req.query.search;
+
+        if (!query) {
+            return res.status(400).json({ error: 'No search query provided' });
+        }
+        const searchQuery = {
+            $or: [
+                { expenses_purpose: { $regex: new RegExp(query, "i") } },
+                { expenses_amount: { $regex: new RegExp(query, "i") } },
+                { expenses_voucher: { $regex: new RegExp(query, "i") } }
+
+            ]
+        };
+        // Check if the query contains both first and last names
+        // if (query.includes(' ')) {
+        //     const [expensesPurpose, expensesAmount] = query.split(' ');
+
+            // Update search query to match both first and last names together
+            // searchQuery.$or.push({
+            //     $and: [
+            //         { expenses_purpose: { $regex: new RegExp(expensesPurpose, "i") } },
+            //         { expenses_amount: { $regex: new RegExp(expensesAmount, "i") } }
+            //     ]
+            // });
+        // }
+        // Perform search using Mongoose's find method
+        const results = await manageExpensesModel.find(searchQuery);
+
+        res.json(results);
+    } catch (err) {
+        console.error("Error:", err);
+        return res.status(500).json({ success: false, status: 500, msg: 'Internal Server Error' });
+    }
+}
 

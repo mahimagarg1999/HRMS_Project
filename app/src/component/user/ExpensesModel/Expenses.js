@@ -21,6 +21,10 @@ const ExpensesModule = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [sortColumn, setSortColumn] = useState(null);
     const [sortDirection, setSortDirection] = useState('ascending');
+    const [query, setQuery] = useState('');
+
+
+
     const [ids, setId] = useState([]);
 
     const handlePageChange = ({ selected }) => {
@@ -43,35 +47,41 @@ const ExpensesModule = () => {
         settogle(!togle)
         setModalIsOpen(false);
     };
-    const handleSort = (column) => {
+    const handleSort = async (column) => {
         console.log("checking sorting", sortColumn, column)
         if (column === sortColumn) {
             // If the same column is clicked again, reverse the sorting direction
-            setSortDirection(sortDirection === 'ascending' ? 'descending' : 'ascending');
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+            try {
+                const response = await axios.get(`${BASE_API_URL}expenses/sortorder?order=${sortDirection}&coloum=${sortColumn}`);
+                settableData(response.data)
+            } catch (error) {
+                console.error('Error:', error);
+            }
             console.log("direction", sortDirection)
         } else {
             // If a new column is clicked, set it as the sorting column and reset the direction
             setSortColumn(column);
-            setSortDirection('ascending');
+            setSortDirection('asc');
         }
     };
-    const sortedData = () => {
-        if (sortColumn) {
-            const sorted = [...tableData].sort((a, b) => {
-                const valueA = a[sortColumn];
-                const valueB = b[sortColumn];
-                if (typeof valueA === 'string' && typeof valueB === 'string') {
-                    // Case-insensitive string comparison
-                    return sortDirection === 'ascending' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
-                } else {
-                    // Numerical or other comparison
-                    return sortDirection === 'ascending' ? valueA - valueB : valueB - valueA;
-                }
-            });
-            return sortDirection === 'ascending' ? sorted : sorted.reverse();
-        }
-        return tableData; // Return original data if no sorting column is selected
-    };
+    // const sortedData = () => {
+    //     if (sortColumn) {
+    //         const sorted = [...tableData].sort((a, b) => {
+    //             const valueA = a[sortColumn];
+    //             const valueB = b[sortColumn];
+    //             if (typeof valueA === 'string' && typeof valueB === 'string') {
+    //                 // Case-insensitive string comparison
+    //                 return sortDirection === 'ascending' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+    //             } else {
+    //                 // Numerical or other comparison
+    //                 return sortDirection === 'ascending' ? valueA - valueB : valueB - valueA;
+    //             }
+    //         });
+    //         return sortDirection === 'ascending' ? sorted : sorted.reverse();
+    //     }
+    //     return tableData; // Return original data if no sorting column is selected
+    // };
     const [formData, setFormData] = useState({
         expenses_purpose: '',
         expenses_bill: '',
@@ -98,6 +108,8 @@ const ExpensesModule = () => {
     }, [togle]);
 
     const openPopup = () => {
+        setMessage('');
+        // setFormData('');
         setIsOpen(true);
     };
 
@@ -207,13 +219,36 @@ const ExpensesModule = () => {
             console.error('Error:', error);
         }
     };
+    const handleChange = async (event) => {
+        setQuery(event.target.value);
+        console.log(event.target.value)
+        if (event.target.value !== '') {
+            try {
+                const response = await axios.get(`${BASE_API_URL}expenses/search?search=${event.target.value}`, {
+                });
+                console.log(query)
+                settableData(response.data)
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        else {
+            try {
+                const response = await axios.get(`${BASE_API_URL}expenses/list`);
+                console.log(response.data.data); // Handle the response as needed
+                settableData(response.data.data)
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    };
 
     return (
         <>
             <div >
                 <Nav />
                 <div style={{ backgroundColor: '#28769a' }}>
-                    <h1 className='headerUser'>Welcome TO Expenses Page</h1>
+                    <h1 className='headerUser'>WELCOME TO EXPENSES PAGE</h1>
                 </div>
                 <div >
 
@@ -227,6 +262,7 @@ const ExpensesModule = () => {
                                         Add Expenses +
                                     </button>
                                 </h5> */}
+
                                     <div>
                                         <button className="backButton" onClick={openPopup}>
                                             Add &nbsp;<FontAwesomeIcon icon={faPlusCircle} />
@@ -244,83 +280,111 @@ const ExpensesModule = () => {
                                                             <div class="signup-form">
                                                                 <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
                                                                     <div style={{ textAlign: 'center' }}>
-                                                                        <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Create Your Account</h4>
+                                                                        <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Add Expenses</h4>
                                                                         <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
                                                                     </div>
                                                                     <div class="row">
                                                                         <div class="mb-3 col-md-6">
+                                                                            <label><b>Expenses Purpose*</b></label>
                                                                             <input type="text" name="expenses_purpose" value={formData.expenses_purpose} onChange={handleInputChange} class="form-control" placeholder="Expenses purpose" />
                                                                             {errors.expenses_purpose && <span className="error" style={{ color: 'red' }}>{errors.expenses_purpose}</span>}
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
+                                                                            <label><b>Expenses Bill</b></label>
                                                                             <input type="text" name="expenses_bill" value={formData.expenses_bill} onChange={handleInputChange} class="form-control" placeholder="Expenses Bill" />
                                                                             {errors.expenses_bill && <span className="error" style={{ color: 'red' }}>{errors.expenses_bill}</span>}
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <input type="text" name="expenses_amount" value={formData.expenses_amount} onChange={handleInputChange} class="form-control" placeholder="Expenses Amount" />
+                                                                            <label><b>Expenses Amount</b></label>
+                                                                            <input type="number" name="expenses_amount" value={formData.expenses_amount} onChange={handleInputChange} class="form-control" placeholder="Expenses Amount" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
+                                                                            <label><b>Expenses Voucher</b></label>
                                                                             <input type="text" name="expenses_voucher" value={formData.expenses_voucher} onChange={handleInputChange} class="form-control" placeholder="Expenses Voucher" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
+                                                                            <label><b>Expenses Remark</b></label>
                                                                             <input type="text" name="expenses_remark" value={formData.expenses_remark} onChange={handleInputChange} class="form-control" placeholder="Expenses Remark" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
+                                                                            <label><b>Expenses By Cash</b></label>
                                                                             <input type="text" name="expenses_by_cash" value={formData.expenses_by_cash} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cash" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
+                                                                            <label><b>Expenses By Cheque</b></label>
                                                                             <input type="text" name="expenses_by_cheque" value={formData.expenses_by_cheque} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cheque" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
+                                                                            <label><b>Expenses Cash Recieved By </b></label>
                                                                             <input type="text" name="expenses_cash_recieved_by" value={formData.expenses_cash_recieved_by} onChange={handleInputChange} class="form-control" placeholder="Expenses Cash Recieved By" />
                                                                         </div>
-                                                                        <span style={{ color: 'green' }}>{message && <p>{message}</p>}</span>
-
+ 
                                                                     </div>
                                                                     <div class="col-md-12">
-                                                                        <button type="submit">Signup Now</button>
+                                                                        <button type="submit">Add Expenses</button>
                                                                     </div>
+                                                                    <span style={{ color: 'green',textAlign: 'center' }}>{message && <p>{message}</p>}</span>
+
                                                                 </form>
-                                                                <p class="text-center mt-3 text-secondary">If you have account, Please <a href="#">Login Now</a></p>
-                                                            </div>
+                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>       </div>
                                         </div>
                                     )}
                                 </div>
+
+
+                                <div class="containerOnce">
+                                    <input
+                                        type="text"
+                                        value={query}
+                                        onChange={handleChange}
+                                        placeholder="Search"
+                                    />
+                                </div>
                                 <div className="table-responsive">
+                                    {/* <form > */}
+                                    {/* <input
+                                            type="text"
+                                            value={query}
+                                            onChange={handleChange}
+                                            placeholder="Search by first name, last name, or both"
+                                        /> */}
+                                    {/* </form> */}
                                     <table className="table">
                                         <thead className="thead-light">
                                             <tr>
 
-                                                <th scope="col" onClick={() => handleSort('id')}>id  {sortColumn === 'id' && (
-                                                    <FontAwesomeIcon icon={sortDirection === 'ascending' ? faSortUp : faSortDown} />
-                                                )}</th>
+                                                {/* <th scope="col"  >Id   </th> */}
                                                 <th scope="col" onClick={() => handleSort('expenses_purpose')}>Expenses Purpose{sortColumn === 'expenses_purpose' && (
-                                                    <FontAwesomeIcon icon={sortDirection === 'ascending' ? faSortUp : faSortDown} />
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
 
                                                 <th scope="col" onClick={() => handleSort('expenses_amount')}>Expenses Amount {sortColumn === 'expenses_amount' && (
-                                                    <FontAwesomeIcon icon={sortDirection === 'ascending' ? faSortUp : faSortDown} />
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
+                                                )}</th>
+                                                 <th scope="col" onClick={() => handleSort('expenses_bill')}>Expenses Bill {sortColumn === 'expenses_bill' && (
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
                                                 <th scope="col" onClick={() => handleSort('expenses_voucher')}>Expenses Voucher {sortColumn === 'expenses_voucher' && (
-                                                    <FontAwesomeIcon icon={sortDirection === 'ascending' ? faSortUp : faSortDown} />
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
-                                                <th scope="col"  >ACTIONS</th>
+                                                <th scope="col"  >Actions</th>
 
                                             </tr>
                                         </thead>
                                         <tbody className="customtable">
-                                            {sortedData().slice(offset, offset + itemsPerPage).map((data, index) => (
+                                            {tableData.slice(offset, offset + itemsPerPage).map((data, index) => (
 
                                                 <tr key={index}>
 
-                                                    <td>{data._id}</td>
+                                                    {/* <td>{data._id}</td> */}
                                                     <td>{data.expenses_purpose} </td>
                                                     <td>{data.expenses_amount}</td>
+                                                    <td>{data.expenses_bill}</td>
                                                     <td>{data.expenses_voucher}</td>
                                                     <td>
                                                         <button className="editButton" onClick={() => DeleteData(data._id)} >  <FontAwesomeIcon icon={faTrash} /></button>

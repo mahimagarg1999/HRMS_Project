@@ -54,6 +54,20 @@
   .formSubmitBtn:hover {
     background-color: #0056b3;
   }  
+  /* css for password */
+  .password-input-container {
+    position: relative;
+  }
+  
+  
+  
+  .password-toggle-icon {
+    position: absolute;
+    left: 93% !important; /* Adjust as needed */
+    top: 45%;
+    transform: translateY(-50%);
+    cursor: pointer;
+  }
 
 /* .form {
     width: 300px;

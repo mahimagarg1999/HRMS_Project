@@ -12,6 +12,7 @@ const ExpensesSchema = new Schema({
         required: true
     },
     expenses_amount: {
+        // type: Number,
         type: String,
     },
     expenses_voucher: {
@@ -28,6 +29,10 @@ const ExpensesSchema = new Schema({
     },
     expenses_cash_recieved_by: {
         type: String,
+    },
+    date_of_expenses:{
+        type: Date,
+        default: Date.now
     }
 });
 

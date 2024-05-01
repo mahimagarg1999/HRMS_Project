@@ -66,6 +66,8 @@ const Nav = ( ) => {
                 {/* <li  ><Link to="/admin-user" className="nav-item">User</Link></li> */}
                 <li  ><Link to="/changepassword" className="nav-item">Change password</Link></li>
                 <li  ><Link to="/edit-profile" className="nav-item">Edit Profile</Link></li>
+                <li  ><Link to="/adminhelpcenter" className="nav-item">Help Center</Link></li>
+
                 <li ><Link to="/admin-about" className="nav-item">About</Link></li>
                 <li className="nav-item" onClick={logout}> Logout </li>
 
@@ -78,11 +80,8 @@ const Nav = ( ) => {
                 <i class="zmdi zmdi-search"></i>
               </div>
               <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" >
-                {/* <i className="zmdi zmdi-shopping-cart"></i> */}
-              </div>
-              {/* <a class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="0">
-            <i class="zmdi zmdi-favorite-outline"></i>
-          </a> */}
+               </div>
+              
             </div>
           </nav>
         </div>

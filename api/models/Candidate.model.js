@@ -26,7 +26,7 @@ const CandidateSchema = new Schema({
     candidate_skype: {
         type: String,
     },
-    candidate_profile: {
+    candidate_linkedIn_profile: {
         type: String,
     },
     candidate_skills: {
@@ -45,17 +45,12 @@ const CandidateSchema = new Schema({
         type: Date,
         default: Date.now
     },
-    candidate_joining_immediate: {
-        type: String,
-    },
 
 
     candidate_marrital_status: {
         type: String,
     },
-    candidate_written_round: {
-        type: String,
-    },
+
     candidate_machine_round: {
         type: String,
     },
@@ -71,39 +66,26 @@ const CandidateSchema = new Schema({
     candidate_feedback: {
         type: String,
     },
-    candidate_from_consultancy: {
+ 
+    source_of_candidate: {
         type: String,
     },
-    candidate_info1: {
+     candidate_address: {
         type: String,
     },
-    candidate_info2: {
+    candidate_document_proof: {
         type: String,
     },
-    candidate_info3: {
-        type: String,
+    tenth_percentage: {
+        type: Number
     },
-    candidate_info4: {
-        type: String,
+    twelfth_percentage: {
+        type: Number
     },
-    candidate_info5: {
-        type: String,
-    },
-    candidate_info6: {
-        type: String,
-    },
-    candidate_info7: {
-        type: String,
-    },
-    candidate_info8: {
-        type: String,
-    },
-    candidate_info9: {
-        type: String,
-    },
-    candidate_info10: {
-        type: String,
-    },
+    graduationPercentage: {
+        type: Number
+    }
+
 },
     {
         timestamps: { createdAt: "created_at", updatedAt: "updated_at" }
