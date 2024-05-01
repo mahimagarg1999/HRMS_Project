@@ -1,171 +1,144 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
-import './UserModel.css';
-import ModalBox from './EditUserModel.js';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit } from '@fortawesome/free-solid-svg-icons';
+import React, { useEffect, useState } from 'react';
 import Nav from '../../navComponent/Nav';
-
-const UserModel = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [tableData, settableData] = useState([])
-    const [togle, settogle] = useState([true])
-
-    const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [selectedUserId, setSelectedUserId] = useState(null);
-    const [showOverlay, setShowOverlay] = useState(true);
-
-    // const [data, setData] = useState(formData);
-    const openModal = (userId) => {
-        console.log('userId', userId)
-        setModalIsOpen(true);
-        setSelectedUserId(userId);
-
-    };
+import axios from 'axios'; // Make sure to install axios with npm or yarn
+import './UserModel.css'
+import { useNavigate } from 'react-router-dom';
+import Footer from '../../FooterModule/Footer';
+import { BASE_API_URL } from '../../../lib/constants.jsx';
+const UserProfile = () => {
+    const [message, setMessage] = useState('');
+    // const [showOverlay, setShowOverlay] = useState(true); // New state to control overlay visibility
+    const [data, setData] = useState([])
+    const navigate = useNavigate();
     useEffect(() => {
+        // console.log('model open', userId)
+        // Fetch data for the given userId
+
         const fetchData = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/user/list');
-                console.log(response.data.data); // Handle the response as needed
-                settableData(response.data.data)
+                const id = localStorage.getItem("_id")
+                const response = await axios.get(`${BASE_API_URL}user/get?userid=${id}`);
+
+                setData(response.data.data)
+                // console.log('data', data)
+
             } catch (error) {
-                console.error('Error:', error);
+                console.log('model open error')
+
+                console.error('Error fetching employee data:', error);
             }
-        };
 
+        }
         fetchData();
-    }, [togle]);
-    // const openPopup = () => {
-    //     setIsOpen(true);
-    // };
 
-    // const closePopup = () => {
-    //     setIsOpen(false);
-    // };
-    const closeModal = () => {
-        settogle(!togle)
-        setModalIsOpen(false);
+    }, []);
+
+    // const toggleOverlay = () => setShowOverlay(!showOverlay);
+
+    const handleSubmit = async (e) => {
+        console.log("data", data)
+        e.preventDefault();
+        // Handle form submission here
+        try {
+            const response =await axios.put(`${BASE_API_URL}user/edit`, data);
+            console.log(response.data); // Handle the response as needed
+            setMessage(response.data.msg)
+            // if(response.)
+        } catch (error) {
+            console.error('Error:', error);
+        }
+
     };
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prevState => ({
+        setData((prevState) => ({
             ...prevState,
             [name]: value
         }));
     };
     const handleClose = () => {
-        setShowOverlay(false);
+        // setShowOverlay(false);
         // Optionally, you can reset form fields and messages here
         // setEmail('');
         // setCurrentPassword('');
         // setNewPassword('');
         // setConfirmPassword('');
         // setMessage('');
-        // navigate('/admin')
+        navigate('/admin')
     };
-
-    const [formData, setFormData] = useState({
-        fname: '',
-        lname: '',
-        email: '',
-        password: '',
-        dob: '',
-        gender: '',
-        standard: '',
-        address: '',
-        city: '',
-        state: '',
-        role: '',
-
-    });
-    // Function to handle form submission
-
-
     return (
-        // <div style={{ backgroundColor: '#28769a' }}>
-        <div style={{ backgroundColor: '#28769a' }}>
-
+<>
+        <div>
             <Nav />
-            <h1 className='headerData' >USER DATA</h1>
+            <div style={{ backgroundColor: '#28769a' }}>    
+                <h1 className='headerUser'>YOUR PROFILE</h1>
+            </div>              {/* {showOverlay && (
+                <div className="overlay"> */}
             <div >
 
-                <div class="row">
-        
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body text-center">
 
+                <div class="signup-form">
+                <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
+                    <button onClick={handleClose} className="closeButton1">x</button>
 
+                        <div style={{ textAlign: 'center' }}>
+                            <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Edit Your profile</h4>
+
+                        </div>
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label><b>First Name</b></label>
+                                <input type="text" name="fname" value={data.fname} onChange={handleInputChange} class="form-control" placeholder="First Name" />
                             </div>
-                            <div className="table-responsive">
-                            <Link to="/user" className="nav-item backButton">Back</Link>
-
-                                <table className="table">
-                                    <thead className="thead-light">
-                                        <tr>
-                                            {/* <th>
-                                                <label className="customcheckbox m-b-20">
-                                                    <input type="checkbox" id="mainCheckbox" />
-                                                    
-                                                </label>
-                                            </th> */}
-                                            <th scope="col">id</th>
-                                            <th scope="col">Name</th>
-                                            <th scope="col">Email</th>
-                                            <th scope="col"> gender</th>
-                                            <th scope="col"> Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="customtable">
-                                        {tableData.map((data, index) => (
-                                            data.role === 'user' ? (
-                                                <tr key={index}>
-                                                    {/* <td>
-                                                        <label className="customcheckbox">
-                                                            <input type="checkbox" className="listCheckbox" />
-                                                            
-                                                        </label>
-                                                    </td> */}
-                                                    <td>{data._id}</td>
-                                                    <td>{data.fname}&nbsp;{data.lname}</td>
-                                                    <td>{data.email}</td>
-                                                    <td>{data.gender}</td>
-                                                    {/* <button onClick={() => { openModal(data._id) }} style={{ backgroundColor: 'green' }}> EDIT</button> */}
-                                                    <button className="editButton" onClick={() => openModal(data._id)} >
-                                                        <FontAwesomeIcon icon={faEdit} />
-                                                    </button>
-                                                    <ModalBox isOpen={modalIsOpen} userId={selectedUserId} onRequestClose={closeModal}>
-                                                        <h2>Modal Title</h2>
-                                                        <p>Modal Content</p>
-                                                    </ModalBox>
-                                                </tr>
-                                            ) : (
-                                                <tr key={index}>
-                                                </tr>
-                                            )
-                                        ))}
-
-                                    </tbody>
-                                </table>
+                            <div class="mb-3 col-md-6">
+                            <label><b>Last Name</b></label>
+                                <input type="text" name="lname" value={data.lname} onChange={handleInputChange} class="form-control" placeholder="Last Name" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                            <label><b>Email</b></label>
+                                <input type="email" name="email" value={data.email} onChange={handleInputChange} class="form-control" placeholder="Email" disabled="true" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                            <label><b>Gender</b></label>
+                                <input type="text" name="gender" value={data.gender} onChange={handleInputChange} class="form-control" placeholder="Gender" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                            <label><b>Date of Birth</b></label>
+                                <input type="date" name="dob" value={data.dob} onChange={handleInputChange} class="form-control" placeholder="DOB" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                            <label><b>Password</b></label>
+                                <input type="text" name="password" value={data.password} onChange={handleInputChange} class="form-control" placeholder="password" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                            <label><b>Address</b></label>
+                                <input type="text" name="address" value={data.address} onChange={handleInputChange} class="form-control" placeholder="address" />
+                            </div>   <div class="mb-3 col-md-6">
+                            <label><b>City</b></label>
+                                <input type="text" name="city" value={data.city} onChange={handleInputChange} class="form-control" placeholder="city" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                            <label><b>State</b></label>
+                                <input type="text" name="state" value={data.state} onChange={handleInputChange} class="form-control" placeholder="state" />
                             </div>
 
                         </div>
-                    </div>
+                        <div class="col-md-12">
+                            <button type="submit">Edit here</button>
+                        </div>
+                        <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
+
+                    </form>
+
+
                 </div>
-
             </div>
-
-            <div>
-
-            </div>
-
-
+            {/* </div>
+            )} */}
         </div>
+        <Footer />
+        </>
     );
-
 }
 
-export default UserModel;
+export default UserProfile;

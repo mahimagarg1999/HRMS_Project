@@ -2,18 +2,19 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Nav from '../../navComponent/Nav';
+import './Userdata.css';
+import { BASE_API_URL } from '../../../lib/constants.jsx';
 
 const Userdata = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [tableData, settableData] = useState([])
     const [togle, settogle] = useState([true])
-
     // const [data, setData] = useState(formData);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/user/list');
+                const response = await axios.get(`${BASE_API_URL}user/list`);
                 console.log(response.data.data); // Handle the response as needed
                 settableData(response.data.data)
             } catch (error) {
@@ -30,9 +31,11 @@ const Userdata = () => {
 
     return (
 
-        <div style={{ backgroundColor: '#28769a' }}>
+        <div >
             <Nav />
-            <h1>USER DATA</h1>
+            <div style={{ backgroundColor: '#28769a' }}>
+                <h1 className='headerData'>USER DATA</h1>
+            </div>
             <div >
 
 

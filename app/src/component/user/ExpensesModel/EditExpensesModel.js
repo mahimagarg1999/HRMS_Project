@@ -2,23 +2,26 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios'; // For Axios
-import Popup from 'reactjs-popup';
-import 'reactjs-popup/dist/index.css';
+ import 'reactjs-popup/dist/index.css';
 import Modal from 'react-modal';
+import { BASE_API_URL } from '../../../lib/constants.jsx';
 
 const ModalBox = ({ isOpen, onRequestClose, expensesId }) => {
 
     const [data, setData] = useState([])
+    const [msg ,setmsg]=useState('')
     useEffect(() => {
 
         if (isOpen) {
+            setmsg('')
+
             console.log('model open', expensesId)
             // Fetch data for the given expensesId
             if (expensesId) {
                 const fetchData = async () => {
                     try {
 
-                        const response = await axios.get(`http://localhost:5000/api/expenses/get?expensesid=${expensesId}`);
+                        const response = await axios.get(`${BASE_API_URL}expenses/get?expensesid=${expensesId}`);
 
 
                         setData(response.data.data)
@@ -45,12 +48,13 @@ const ModalBox = ({ isOpen, onRequestClose, expensesId }) => {
         }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         console.log("data", data)
         e.preventDefault();
         // Handle form submission here
         try {
-            const response = axios.put('http://localhost:5000/api/expenses/edit', data);
+            const response = await axios.put(`${BASE_API_URL}expenses/edit`, data);
+            setmsg(response.data.msg)
             console.log(response.data); // Handle the response as needed
         } catch (error) {
             console.error('Error:', error);
@@ -89,30 +93,47 @@ const ModalBox = ({ isOpen, onRequestClose, expensesId }) => {
                             </div>
                             <div class="row">
                                 <div class="mb-3 col-md-6">
+                                <b><label> Purpose</label></b>
+
                                     <input type="text" name="expenses_purpose" value={data.expenses_purpose} onChange={handleInputChange} class="form-control" placeholder="Expenses purpose" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                <b><label> Bill</label></b>
+
                                     <input type="text" name="expenses_bill" value={data.expenses_bill} onChange={handleInputChange} class="form-control" placeholder="Expenses Bill" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                <b><label> Amount</label></b>
+
                                     <input type="text" name="expenses_amount" value={data.expenses_amount} onChange={handleInputChange} class="form-control" placeholder="Expenses Amount" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                <b><label> Voucher</label></b>
+
                                     <input type="text" name="expenses_voucher" value={data.expenses_voucher} onChange={handleInputChange} class="form-control" placeholder="Expenses Voucher" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                <b><label> Remark</label></b>
+
                                     <input type="test" name="expenses_remark" value={data.expenses_remark} onChange={handleInputChange} class="form-control" placeholder="Expenses Remark" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                <b><label> Expenses By Cash</label></b>
+
                                     <input type="text" name="expenses_by_cash" value={data.expenses_by_cash} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cash" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                <b><label> Expenses By Cheque</label></b>
+
                                     <input type="text" name="expenses_by_cheque" value={data.expenses_by_cheque} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cheque" />
                                 </div>
                                 <div class="mb-3 col-md-6">
+                                <b><label> Expenses_cash_recieved_by</label></b>
+
                                     <input type="text" name="expenses_cash_recieved_by" value={data.expenses_cash_recieved_by} onChange={handleInputChange} class="form-control" placeholder="Expenses Cash Recieved By" />
                                 </div>
                             </div>
+                          <span style={{color:'green'}}>  {msg}</span>
                             <div class="col-md-12">
                                 <button type="submit">EDit here</button>
                             </div>

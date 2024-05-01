@@ -4,14 +4,37 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios'; // For Axios
 import ModalBox from './EditExpensesModel.js';
 import Nav from '../../navComponent/Nav';
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
+import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import ReactPaginate from 'react-paginate';
+import Footer from '../../FooterModule/Footer.js';
+import { BASE_API_URL } from '../../../lib/constants.jsx';
 const ExpensesModule = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [tableData, settableData] = useState([])
     const [togle, settogle] = useState([true])
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [selectedExpensesId, setSelectedExpensesId] = useState(null);
+    const [message, setMessage] = useState('');
+    const [currentPage, setCurrentPage] = useState(0);
+    const [sortColumn, setSortColumn] = useState(null);
+    const [sortDirection, setSortDirection] = useState('ascending');
+    const [query, setQuery] = useState('');
 
+
+
+    const [ids, setId] = useState([]);
+
+    const handlePageChange = ({ selected }) => {
+        setCurrentPage(selected); // Update the current page when pagination changes
+    };
+
+    const itemsPerPage = 5; // Number of items to display per page
+    const offset = currentPage * itemsPerPage;
+    const pageCount = Math.ceil(tableData.length / itemsPerPage);
+    const currentItems = tableData.slice(offset, offset + itemsPerPage);
     // const [data, setData] = useState(formData);
     const openModal = (expensesId) => {
         console.log('expensesId', expensesId)
@@ -24,7 +47,41 @@ const ExpensesModule = () => {
         settogle(!togle)
         setModalIsOpen(false);
     };
-
+    const handleSort = async (column) => {
+        console.log("checking sorting", sortColumn, column)
+        if (column === sortColumn) {
+            // If the same column is clicked again, reverse the sorting direction
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+            try {
+                const response = await axios.get(`${BASE_API_URL}expenses/sortorder?order=${sortDirection}&coloum=${sortColumn}`);
+                 settableData(response.data)
+            } catch (error) {
+                console.error('Error:', error);
+            }
+            console.log("direction", sortDirection)
+        } else {
+            // If a new column is clicked, set it as the sorting column and reset the direction
+            setSortColumn(column);
+            setSortDirection('asc');
+        }
+    };
+    // const sortedData = () => {
+    //     if (sortColumn) {
+    //         const sorted = [...tableData].sort((a, b) => {
+    //             const valueA = a[sortColumn];
+    //             const valueB = b[sortColumn];
+    //             if (typeof valueA === 'string' && typeof valueB === 'string') {
+    //                 // Case-insensitive string comparison
+    //                 return sortDirection === 'ascending' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+    //             } else {
+    //                 // Numerical or other comparison
+    //                 return sortDirection === 'ascending' ? valueA - valueB : valueB - valueA;
+    //             }
+    //         });
+    //         return sortDirection === 'ascending' ? sorted : sorted.reverse();
+    //     }
+    //     return tableData; // Return original data if no sorting column is selected
+    // };
     const [formData, setFormData] = useState({
         expenses_purpose: '',
         expenses_bill: '',
@@ -34,38 +91,12 @@ const ExpensesModule = () => {
         expenses_by_cash: '',
         expenses_by_cheque: '',
         expenses_cash_recieved_by: '',
-        
+
     });
-    const [errors, setErrors] = useState({
-        expenses_purpose: "",
-        expenses_bill: "",
-       
-    
-    });
-    const validateForm = () => {
-        let isValid = true;
-        const newErrors = {};
-
-        if (!formData.expenses_purpose.trim()) {
-            newErrors.expenses_purpose = "expenses_purpose is required";
-            isValid = false;
-        }
-        
-        if (!formData.expenses_bill.trim()) {
-            newErrors.expenses_bill = "expenses_bill is required";
-            isValid = false;
-        }
-        
-     
-
-
-        setErrors(newErrors);
-        return isValid;
-    };
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/expenses/list');
+                const response = await axios.get(`${BASE_API_URL}expenses/list`);
                 console.log(response.data.data); // Handle the response as needed
                 settableData(response.data.data)
             } catch (error) {
@@ -77,12 +108,15 @@ const ExpensesModule = () => {
     }, [togle]);
 
     const openPopup = () => {
+        setMessage('')
+
         setIsOpen(true);
     };
 
     const closePopup = () => {
         setIsOpen(false);
     };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -94,24 +128,50 @@ const ExpensesModule = () => {
             [name]: "",
         });
     };
+    const [errors, setErrors] = useState({
+        expenses_purpose: "",
+
+        expenses_bill: "",
+
+
+    });
+
+    const validateForm = () => {
+        let isValid = true;
+        const newErrors = {};
+
+        if (!formData.expenses_purpose.trim()) {
+            newErrors.expenses_purpose = "expenses_purpose is required";
+            isValid = false;
+        }
+
+        if (!formData.expenses_bill.trim()) {
+            newErrors.expenses_bill = "expenses_bill is required";
+            isValid = false;
+        }
+
+
+        setErrors(newErrors);
+        return isValid;
+    };
 
     // Function to handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         // Handle form submission here, for example, send data to backend or perform validation
         console.log('', formData);
-        if(validateForm())
-        {
-        try {
-            const response = axios.post('http://localhost:5000/api/expenses/create', formData);
-            settogle(!togle)
-            console.log(response.data); // Handle the response as needed
-        } catch (error) {
-            console.error('Error:', error);
+        if (validateForm()) {
+            try {
+                const response = await axios.post(`${BASE_API_URL}expenses/create`, formData);
+                settogle(!togle)
+                console.log(response.data); // Handle the response as needed
+                setMessage(response.data.msg)
+            } catch (error) {
+                console.error('Error:', error);
+            }
         }
-    }
     };
-    const DeleteData = (id) => {
+    const DeleteData = async (id) => {
         const isConfirmed = window.confirm('Are you sure you want to delete this item?');
 
         // Check if the user confirmed
@@ -119,7 +179,7 @@ const ExpensesModule = () => {
             // Delete logic here
             try {
                 console.log('id', id)
-                const response = axios.delete(`http://localhost:5000/api/expenses/delete?id=${id}`)
+                const response = await axios.delete(`${BASE_API_URL}expenses/delete?id=${id}`)
 
                 console.log(response.data); // Handle the response as needed
                 settogle(!togle)
@@ -134,134 +194,247 @@ const ExpensesModule = () => {
 
     }
 
+    const handleCheckboxChange = (e, id) => {
+        // If the checkbox is checked, add the ID to the list of selected IDs
+        if (e.target.checked) {
+            setId(prevIds => [...prevIds, id]);
+        } else {
+            // If the checkbox is unchecked, remove the ID from the list of selected IDs
+            setId(prevIds => prevIds.filter(prevId => prevId !== id));
+        }
+    };
+    const DEletemulti = async () => {
+        const data = {
+            "ids": ids
+        };
+        console.log('ids', data);
 
+        try {
+            const response = await axios.delete(`${BASE_API_URL}expenses/multi-delete`, {
+                data: data // IDs ko data body mein bhejna
+            });
+            console.log(response.data); // Response ke saath kuch karne ke liye
+            settogle(!togle);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+    const handleChange = async (event) => {
+        setQuery(event.target.value);
+        console.log(event.target.value)
+        if (event.target.value !== '') {
+            try {
+                const response = await axios.get(`${BASE_API_URL}expenses/search?search=${event.target.value}`, {
+                });
+                console.log(query)
+                settableData(response.data)
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        else {
+            try {
+                const response = await axios.get(`${BASE_API_URL}expenses/list`);
+                console.log(response.data.data); // Handle the response as needed
+                settableData(response.data.data)
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    };
 
     return (
-        <div style={{ backgroundColor: '#28769a' }}>
-            <Nav />
-            <h1 className='headerUser'>Welcome TO Expenses Page</h1>
+        <>
             <div >
+                <Nav />
+                <div style={{ backgroundColor: '#28769a' }}>
+                    <h1 className='headerUser'>WELCOME TO EXPENSES PAGE</h1>
+                </div>
+                <div >
 
 
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h5 className="card-title m-b-0">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    {/* <h5 className="card-title m-b-0">
                                     <button style={{ backgroundColor: '#cfa68e', fontSize: '20px', border: 'none', marginBottom: '20px' }} onClick={openPopup}>
                                         Add Expenses +
                                     </button>
-                                </h5>
-                                {isOpen && (
+                                </h5> */}
+
                                     <div>
+                                        <button className="backButton" onClick={openPopup}>
+                                            Add &nbsp;<FontAwesomeIcon icon={faPlusCircle} />
+                                        </button>
+                                    </div>
+                                    <div> <span> <button className="multiDeleteButton" onClick={() => { DEletemulti() }}    >
+                                        <FontAwesomeIcon icon={faTrashAlt} />
+                                    </button></span></div>
+                                    {isOpen && (
                                         <div>
                                             <div>
-                                                <div class="row">
-                                                    <div class="col-md-6 offset-md-3">
-                                                        <div class="signup-form">
-                                                            <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
-                                                                <div style={{ textAlign: 'center' }}>
-                                                                    <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Create Your Account</h4>
-                                                                    <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
-                                                                </div>
-                                                                <div class="row">
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="expenses_purpose" value={formData.expenses_purpose} onChange={handleInputChange} class="form-control" placeholder="Expenses purpose" />
-                                                                        {errors.expenses_purpose && <span className="error" style={{color:'red'}}>{errors.expenses_purpose}</span>}
+                                                <div>
+                                                    <div class="row">
+                                                        <div class="col-md-6 offset-md-3">
+                                                            <div class="signup-form">
+                                                                <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
+                                                                    <div style={{ textAlign: 'center' }}>
+                                                                        <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Create Your Account</h4>
+                                                                        <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <b><label> Purpose*</label></b>
+                                                                            <input type="text" name="expenses_purpose" value={formData.expenses_purpose} onChange={handleInputChange} class="form-control" placeholder="Expenses purpose" />
+                                                                            {errors.expenses_purpose && <span className="error" style={{ color: 'red' }}>{errors.expenses_purpose}</span>}
+
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label> Bill*</label></b>
+
+                                                                            <input type="text" name="expenses_bill" value={formData.expenses_bill} onChange={handleInputChange} class="form-control" placeholder="Expenses Bill" />
+                                                                            {errors.expenses_bill && <span className="error" style={{ color: 'red' }}>{errors.expenses_bill}</span>}
+
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label> Amount</label></b>
+
+                                                                            <input type="number" name="expenses_amount" value={formData.expenses_amount} onChange={handleInputChange} class="form-control" placeholder="Expenses Amount" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label> Voucher</label></b>
+
+                                                                            <input type="text" name="expenses_voucher" value={formData.expenses_voucher} onChange={handleInputChange} class="form-control" placeholder="Expenses Voucher" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label> Remark</label></b>
+
+                                                                            <input type="text" name="expenses_remark" value={formData.expenses_remark} onChange={handleInputChange} class="form-control" placeholder="Expenses Remark" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label> Expenses By Cash</label></b>
+
+                                                                            <input type="text" name="expenses_by_cash" value={formData.expenses_by_cash} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cash" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label> Expenses By Cheque</label></b>
+
+                                                                            <input type="text" name="expenses_by_cheque" value={formData.expenses_by_cheque} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cheque" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label> Expenses_cash_recieved_by</label></b>
+
+                                                                            <input type="text" name="expenses_cash_recieved_by" value={formData.expenses_cash_recieved_by} onChange={handleInputChange} class="form-control" placeholder="Expenses Cash Recieved By" />
+                                                                        </div>
+                                                                        <span style={{ color: 'green' }}>{message && <p>{message}</p>}</span>
 
                                                                     </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="expenses_bill" value={formData.expenses_bill} onChange={handleInputChange} class="form-control" placeholder="Expenses Bill" />
-                                                                        {errors.expenses_bill && <span className="error" style={{color:'red'}}>{errors.expenses_bill}</span>}
-
+                                                                    <div class="col-md-12">
+                                                                        <button type="submit">Signup Now</button>
                                                                     </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="expenses_amount" value={formData.expenses_amount} onChange={handleInputChange} class="form-control" placeholder="Expenses Amount" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="expenses_voucher" value={formData.expenses_voucher} onChange={handleInputChange} class="form-control" placeholder="Expenses Voucher" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="expenses_remark" value={formData.expenses_remark} onChange={handleInputChange} class="form-control" placeholder="Expenses Remark" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="expenses_by_cash" value={formData.expenses_by_cash} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cash" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="expenses_by_cheque" value={formData.expenses_by_cheque} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cheque" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="expenses_cash_recieved_by" value={formData.expenses_cash_recieved_by} onChange={handleInputChange} class="form-control" placeholder="Expenses Cash Recieved By" />
-                                                                    </div>
-                                                                 
-                                                                </div>
-                                                                <div class="col-md-12">
-                                                                    <button type="submit">Signup Now</button>
-                                                                </div>
-                                                            </form>
-                                                            <p class="text-center mt-3 text-secondary">If you have account, Please <a href="#">Login Now</a></p>
+                                                                </form>
+                                                                <p class="text-center mt-3 text-secondary">If you have account, Please <a href="#">Login Now</a></p>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>       </div>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="table-responsive">
-                                <table className="table">
-                                    <thead className="thead-light">
-                                        <tr>
-                                            <th>
-                                                <label className="customcheckbox m-b-20">
-                                                    <input type="checkbox" id="mainCheckbox" />
-                                                    <span className="checkmark"></span>
-                                                </label>
-                                            </th>
-                                            <th scope="col">id</th>
-                                            <th scope="col">Expenses purpose</th>
-                                            <th scope="col">Expenses Amount</th>
-                                            <th scope="col">Expenses Voucher</th>
-                                            <th scope="col" >ACTIONS</th>
+                                                </div>       </div>
+                                        </div>
+                                    )}
+                                </div>
+                                
+ 
+<div class="containerOnce">
+  <input
+    type="text"
+    value={query}
+    onChange={handleChange}
+    placeholder="Search"
+  />
+</div>
+                                <div className="table-responsive">
+                                    {/* <form > */}
+                                    {/* <input
+                                            type="text"
+                                            value={query}
+                                            onChange={handleChange}
+                                            placeholder="Search by first name, last name, or both"
+                                        /> */}
+                                    {/* </form> */}
+                                    <table className="table">
+                                        <thead className="thead-light">
+                                            <tr>
 
-                                        </tr>
-                                    </thead>
-                                    <tbody className="customtable">
-                                        {tableData.map((data, index) => (
-                                            <tr key={index}>
-                                                <td>
-                                                    <label className="customcheckbox">
-                                                        <input type="checkbox" className="listCheckbox" />
-                                                        <span className="checkmark"></span>
-                                                    </label>
-                                                </td>
-                                                <td>{data._id}</td>
-                                                <td>{data.expenses_purpose} </td>
-                                                <td>{data.expenses_amount}</td>
-                                                <td>{data.expenses_voucher}</td>
-                                                <button onClick={() => DeleteData(data._id)} style={{ backgroundColor: 'red' }}>DELETE</button>
-                                                <button onClick={() => { openModal(data._id) }} style={{ backgroundColor: 'green' }}> EDIT</button>
-                                                <ModalBox isOpen={modalIsOpen} expensesId={selectedExpensesId} onRequestClose={closeModal}>
-                                                    <h2>Modal Title</h2>
-                                                    <p>Modal Content</p>
-                                                </ModalBox>
+                                                <th scope="col" onClick={() => handleSort('expenses_purpose')}>Expenses Purpose{sortColumn === 'expenses_purpose' && (
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
+                                                )}</th>
+
+                                                <th scope="col" onClick={() => handleSort('expenses_amount')}>Expenses Amount {sortColumn === 'expenses_amount' && (
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
+                                                )}</th>
+                                                <th scope="col" onClick={() => handleSort('expenses_voucher')}>Expenses Voucher {sortColumn === 'expenses_voucher' && (
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
+                                                )}</th>
+                                                <th scope="col"  >ACTIONS</th>
+
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody className="customtable">
+                                            {tableData.slice(offset, offset + itemsPerPage).map((data, index) => (
 
+                                                <tr key={index}>
+
+                                                    <td>{data.expenses_purpose} </td>
+                                                    <td>{data.expenses_amount}</td>
+                                                    <td>{data.expenses_voucher}</td>
+                                                    <td>
+                                                        <button className="editButton" onClick={() => DeleteData(data._id)} >  <FontAwesomeIcon icon={faTrash} /></button>
+                                                        <button className="editButton" onClick={() => openModal(data._id)} >
+                                                            <FontAwesomeIcon icon={faEdit} />
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <label className="customcheckbox">
+                                                            <input type="checkbox" className="listCheckbox" onChange={(e) => handleCheckboxChange(e, data._id)} />
+                                                            <span className="checkmark"></span>
+                                                        </label>
+                                                    </td>
+
+                                                    <ModalBox isOpen={modalIsOpen} expensesId={selectedExpensesId} onRequestClose={closeModal}>
+                                                        <h2>Modal Title</h2>
+                                                        <p>Modal Content</p>
+                                                    </ModalBox>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <ReactPaginate
+                                    previousLabel={'Previous'}
+                                    nextLabel={'Next'}
+                                    breakLabel={'...'}
+                                    pageCount={pageCount}
+                                    marginPagesDisplayed={2}
+                                    pageRangeDisplayed={5}
+                                    onPageChange={handlePageChange}
+                                    containerClassName={'pagination'}
+                                    activeClassName={'active'}
+                                />
+
+                            </div>
                         </div>
                     </div>
+
                 </div>
 
+                <div>
+
+                </div>
+
+
             </div>
-
-            <div>
-
-            </div>
-
-
-        </div>
+            <Footer />
+        </>
     );
 }
 

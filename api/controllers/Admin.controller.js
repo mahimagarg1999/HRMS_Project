@@ -3,19 +3,19 @@ const status = require("../config/status");
 
 //add expenses
 exports.create = async (req, res) => {
-     console.log("expenses test")
+    console.log("expenses test")
     try {
         var obj = {
-            admin_name:req.body.admin_name,
-            admin_email:req.body.admin_email,
-            admin_password:req.body.admin_password,
-            admin_city:req.body.admin_city,
-            admin_state:req.body.admin_state,
-            admin_address:req.body.admin_address,
-            admin_phone:req.body.admin_phone,
-            admin_other_info:req.body.admin_other_info,
-            admin_date:req.body.admin_date,
-           
+            admin_name: req.body.admin_name,
+            admin_email: req.body.admin_email,
+            admin_password: req.body.admin_password,
+            admin_city: req.body.admin_city,
+            admin_state: req.body.admin_state,
+            admin_address: req.body.admin_address,
+            admin_phone: req.body.admin_phone,
+            admin_other_info: req.body.admin_other_info,
+            admin_date: req.body.admin_date,
+
         }
         const newmanageAdminModel = new manageAdminModel(obj);
         let result = await newmanageAdminModel.save();
@@ -23,9 +23,13 @@ exports.create = async (req, res) => {
 
     }
     catch (err) {
-        console.log("err",err)
-        return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Adding Admin  failed.' });
-
+        if (err.code === 11000 && err.keyPattern && err.keyPattern.admin_email) {
+            // If the error is due to a duplicate email (code 11000 is for duplicate key error)
+            return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This email is already registered.' });
+        } else {
+            // For other errors
+            return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Adding Admin failed.' });
+        }
     }
 }
 
@@ -42,15 +46,15 @@ exports.edit = async (req, res) => {
             { _id: id },
             {
                 $set: {
-                    admin_name:req.body.admin_name,
-                    admin_email:req.body.admin_email,
-                    admin_password:req.body.admin_password,
-                    admin_city:req.body.admin_city,
-                    admin_state:req.body.admin_state,
-                    admin_address:req.body.admin_address,
-                    admin_phone:req.body.admin_phone,
-                    admin_other_info:req.body.admin_other_info,
-                    admin_date:req.body.admin_date,
+                    admin_name: req.body.admin_name,
+                    admin_email: req.body.admin_email,
+                    admin_password: req.body.admin_password,
+                    admin_city: req.body.admin_city,
+                    admin_state: req.body.admin_state,
+                    admin_address: req.body.admin_address,
+                    admin_phone: req.body.admin_phone,
+                    admin_other_info: req.body.admin_other_info,
+                    admin_date: req.body.admin_date,
                 }
             },
         ).lean().exec();
@@ -63,7 +67,7 @@ exports.edit = async (req, res) => {
         }
     }
     catch (err) {
-         return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Update Admin failed.' });
+        return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Update Admin failed.' });
 
     }
 }
@@ -103,15 +107,15 @@ exports.delete = async (req, res) => {
 
 exports.multidelete = async (req, res) => {
     try {
-         const ids = req.query.ids;
+        const ids = req.body.ids;
 
         // Check if the 'ids' parameter is not available or is not an array
         if (!ids || !Array.isArray(ids) || ids.length === 0) {
-           return res.json({ success: false, status: status.NOTFOUND, msg: "IDs parameter not available or invalid" });
+            return res.json({ success: false, status: status.NOTFOUND, msg: "IDs parameter not available or invalid" });
         }
-       
+
         // Use $in operator to match multiple IDs and delete them
-        let result = await manageAdminModel.deleteMany({ _id: { $in: ids} }).lean().exec();
+        let result = await manageAdminModel.deleteMany({ _id: { $in: ids } }).lean().exec();
 
         // Check if at least one document was deleted
         if (result.deletedCount > 0) {

@@ -5,7 +5,6 @@ const ConsultancySchema = new Schema({
     consultancy_name: {
         type: String,
         required: true,
-        
     },
     consultancy_email: {
         type: String,
@@ -31,10 +30,15 @@ const ConsultancySchema = new Schema({
         type: String,
         required: true
     },
-    consultancy_details: {
+    contact_agreement: {
         type: String,
-    }
-
+     },
+     contract_linkedIn_Profile:{
+        type:String
+     },
+     contract_person_name:{
+        type:String
+     }
 
 });
 

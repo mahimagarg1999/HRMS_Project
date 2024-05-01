@@ -16,6 +16,10 @@ router.route('/multi-delete')
     
     router.route('/get')
     .get(candidateController.getCandidateById)
+
+    router.route('/search').get(candidateController.search)
+    router.route('/sortorder').get(candidateController.sortOrder)
+
 // router.route('/export')
 //     .delete(employeeController.export)
 // router.route('/import')

@@ -1,84 +1,265 @@
 const manageConsultancyModel = require("../models/Consultancy.model")
 const status = require("../config/status");
+const fs = require('fs'); // Importing fs with promises
 
 exports.create = async (req, res) => {
-    console.log("expenses test")
     try {
-        var obj = {
-            // consultancy_id: req.body.consultancy_id,
-            consultancy_name: req.body.consultancy_name,
-            consultancy_email: req.body.consultancy_email,
-            consultancy_website: req.body.consultancy_website,
-            consultancy_mobile: req.body.consultancy_mobile,
-            consultancy_alternate_mobile: req.body.consultancy_alternate_mobile,
-            consultancy_city: req.body.consultancy_city,
-            consultancy_state: req.body.consultancy_state,
-            consultancy_address: req.body.consultancy_address,
-            consultancy_details: req.body.consultancy_details,
+        var uploadDir = process.cwd() + '/public/';
+        var agreementUploadDir = uploadDir + "consultancy/agreement/";
+
+        if (!fs.existsSync(agreementUploadDir)) {
+            fs.mkdirSync(agreementUploadDir, { recursive: true });
         }
-        const newmanageConsultancyModel = new manageConsultancyModel(obj);
-        let result = await newmanageConsultancyModel.save();
-        res.json({ success: true, status: status.OK, msg: 'Adding Consultancy is successfully.' });
+        let agreementPromise = await new Promise(async function (resolve, reject) {
+            var agreementPdfFile = req.body.contact_agreement;
+
+            if (agreementPdfFile) {
+                var agreementPdfName = req.body.agreementPdfName;
+                var current_time = new Date().getTime();
+                var fileName = current_time;
+                var extension = agreementPdfName.split('.').pop().toLowerCase();
+                var finalname = fileName + "." + extension;
+
+                if (extension == 'pdf') {
+                    var base64Data = agreementPdfFile.replace(/^data:application\/pdf;base64,/, "");
+                    const buffer = Buffer.from(base64Data, 'base64');
+                    if (buffer.length > 0) {
+                        await fs.writeFileSync(agreementUploadDir + finalname, base64Data, 'base64');
+                        resolve({ status: 'true', finalname: finalname, fileExt: extension });
+                    } else {
+                        resolve({ status: 'true', finalname: '', fileExt: '' });
+                    }
+                } else {
+                    resolve({ status: 'true', finalname: '', fileExt: '' });
+                }
+            } else {
+                resolve({ status: 'true', finalname: '', fileExt: '' });
+            }
+        });
+        if (agreementPromise.status == 'true') {
+            let agreementFinalname = agreementPromise.finalname;
+            var agreementFullPdfUrl = '';
+            if (agreementFinalname != '') {
+                agreementFullPdfUrl = "consultancy/agreement/" + agreementFinalname;
+            }
+            var obj = {
+                consultancy_name: req.body.consultancy_name,
+                consultancy_email: req.body.consultancy_email,
+                consultancy_website: req.body.consultancy_website,
+                consultancy_mobile: req.body.consultancy_mobile,
+                consultancy_alternate_mobile: req.body.consultancy_alternate_mobile,
+                consultancy_city: req.body.consultancy_city,
+                consultancy_state: req.body.consultancy_state,
+                consultancy_address: req.body.consultancy_address,
+                contact_agreement: "consultancy/agreement/" + agreementFinalname,
+                contract_person_name:req.body.contract_person_name,
+                contract_linkedIn_Profile:req.body.contract_linkedIn_Profile
+            };
+            const newmanageConsultancyModel = new manageConsultancyModel(obj);
+            let result = await newmanageConsultancyModel.save();
+
+            res.json({ success: true, status: status.CREATED, msg: 'Consultancy is created successfully.' });
+        }
+
 
     }
     catch (err) {
-        console.log("err-->", err)
-        return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Adding Consultancy failed.' });
-
+        console.log("errr", err)
+        if (err.code === 11000 && err.keyPattern && err.keyPattern.consultancy_email) {
+            return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This email is already registered.' });
+        } else {
+            return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Adding Consultancy failed.' });
+        }
     }
 }
+
+
+// exports.create = async (req, res) => {
+//     console.log("expenses test")
+//     try {
+//         var obj = {
+//              consultancy_name: req.body.consultancy_name,
+//             consultancy_email: req.body.consultancy_email,
+//             consultancy_website: req.body.consultancy_website,
+//             consultancy_mobile: req.body.consultancy_mobile,
+//             consultancy_alternate_mobile: req.body.consultancy_alternate_mobile,
+//             consultancy_city: req.body.consultancy_city,
+//             consultancy_state: req.body.consultancy_state,
+//             consultancy_address: req.body.consultancy_address,
+//             contact_agreement: req.body.contact_agreement,
+//         }
+//         const newmanageConsultancyModel = new manageConsultancyModel(obj);
+//         let result = await newmanageConsultancyModel.save();
+//         res.json({ success: true, status: status.OK, msg: 'Adding Consultancy is successfully.' });
+
+//     }
+//     catch (err) {
+//         if (err.code === 11000 && err.keyPattern && err.keyPattern.consultancy_email) {
+//              return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This email is already registered.' });
+//         } else {
+//              return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Adding Consultancy failed.' });
+//         }
+//     }
+// }
 
 
 //update by id
 exports.edit = async (req, res) => {
-    var id = req.body._id;
-    if (id === undefined) {
-        return res.json({ success: false, status: status.NOTFOUND, msg: 'Id Parameter Not Available' });
-    }
-    delete req.query.id;
+    console.log("expenses test")
     try {
-        let result = await manageConsultancyModel.findOneAndUpdate(
-            { _id: id },
-            {
-                $set: {
-                    // consultancy_id: req.body.consultancy_id,
-                    consultancy_name: req.body.consultancy_name,
-                    consultancy_email: req.body.consultancy_email,
-                    consultancy_website: req.body.consultancy_website,
-                    consultancy_mobile: req.body.consultancy_mobile,
-                    consultancy_alternate_mobile: req.body.consultancy_alternate_mobile,
-                    consultancy_city: req.body.consultancy_city,
-                    consultancy_state: req.body.consultancy_state,
-                    consultancy_address: req.body.consultancy_address,
-                    consultancy_details: req.body.consultancy_details,
-                }
-            },
-        ).lean().exec();
+        const consultancyId = req.body.id;
+        if (!consultancyId) {
+            return res.status(400).json({ success: false, msg: 'Consultancy ID is required for update.' });
+        }
+        const existingConsultancy = await manageConsultancyModel.findById(consultancyId);
+        if (!existingConsultancy) {
+            return res.status(404).json({ success: false, msg: 'Consultancy not found.' });
+        }
+        var uploadDir = process.cwd() + '/public/';
+        var agreementUploadDir = uploadDir + "consultancy/agreement/";
 
-        if (result) {
-            res.json({ success: true, status: status.OK, msg: 'Consultancy is updated successfully.' });
+        if (!fs.existsSync(agreementUploadDir)) {
+            fs.mkdirSync(agreementUploadDir, { recursive: true });
         }
-        else {
-            return res.json({ success: false, status: status.NOTFOUND, msg: 'Consultancy Id not found' });
+        let agreementPromise = await new Promise(async function (resolve, reject) {
+            var agreementPdfFile = req.body.contact_agreement;
+
+            if (agreementPdfFile) {
+                var agreementPdfName = req.body.agreementPdfName;
+                var current_time = new Date().getTime();
+                var fileName = current_time;
+                var extension = agreementPdfName.split('.').pop().toLowerCase();
+                var finalname = fileName + "." + extension;
+
+                if (extension == 'pdf') {
+                    var base64Data = agreementPdfFile.replace(/^data:application\/pdf;base64,/, "");
+                    const buffer = Buffer.from(base64Data, 'base64');
+                    if (buffer.length > 0) {
+                        await fs.writeFileSync(agreementUploadDir + finalname, base64Data, 'base64');
+                        resolve({ status: 'true', finalname: finalname, fileExt: extension });
+                    } else {
+                        resolve({ status: 'true', finalname: '', fileExt: '' });
+                    }
+                } else {
+                    resolve({ status: 'true', finalname: '', fileExt: '' });
+                }
+            } else {
+                resolve({ status: 'true', finalname: '', fileExt: '' });
+            }
+        });
+        if (agreementPromise.status == 'true') {
+            let agreementFinalname = agreementPromise.finalname;
+            var agreementFullPdfUrl = '';
+            if (agreementFinalname != '') {
+                agreementFullPdfUrl = "consultancy/agreement/" + agreementFinalname;
+            }
+            var obj = {
+                consultancy_name: req.body.consultancy_name,
+                consultancy_email: req.body.consultancy_email,
+                consultancy_website: req.body.consultancy_website,
+                consultancy_mobile: req.body.consultancy_mobile,
+                consultancy_alternate_mobile: req.body.consultancy_alternate_mobile,
+                consultancy_city: req.body.consultancy_city,
+                consultancy_state: req.body.consultancy_state,
+                consultancy_address: req.body.consultancy_address,
+                contact_agreement: "consultancy/agreement/" + agreementFinalname,
+            };
+            const updatedConsultancy = await manageConsultancyModel.findByIdAndUpdate(
+                consultancyId,
+                { $set: obj },
+                { new: true } // Return the updated document
+            );
+            // Respond with success message and updated Consultancy data
+            res.json({ success: true, msg: 'Consultancy updated successfully.', consultancy: updatedConsultancy });
         }
+
     }
     catch (err) {
-        return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Update Consultancy failed.' });
-
+        console.log("errr", err)
+        if (err.code === 11000 && err.keyPattern && err.keyPattern.consultancy_email) {
+            return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This email is already registered.' });
+        } else {
+            return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Adding Consultancy failed.' });
+        }
     }
 }
+
+// exports.edit = async (req, res) => {
+//     var id = req.body._id;
+//     if (id === undefined) {
+//         return res.json({ success: false, status: status.NOTFOUND, msg: 'Id Parameter Not Available' });
+//     }
+//     delete req.query.id;
+//     try {
+//         let result = await manageConsultancyModel.findOneAndUpdate(
+//             { _id: id },
+//             {
+//                 $set: {
+//                     // consultancy_id: req.body.consultancy_id,
+//                     consultancy_name: req.body.consultancy_name,
+//                     consultancy_email: req.body.consultancy_email,
+//                     consultancy_website: req.body.consultancy_website,
+//                     consultancy_mobile: req.body.consultancy_mobile,
+//                     consultancy_alternate_mobile: req.body.consultancy_alternate_mobile,
+//                     consultancy_city: req.body.consultancy_city,
+//                     consultancy_state: req.body.consultancy_state,
+//                     consultancy_address: req.body.consultancy_address,
+//                     contact_agreement: req.body.contact_agreement,
+//                 }
+//             },
+//         ).lean().exec();
+
+//         if (result) {
+//             res.json({ success: true, status: status.OK, msg: 'Consultancy is updated successfully.' });
+//         }
+//         else {
+//             return res.json({ success: false, status: status.NOTFOUND, msg: 'Consultancy Id not found' });
+//         }
+//     }
+//     catch (err) {
+//         return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Update Consultancy failed.' });
+
+//     }
+// }
 
 //get all users 
 exports.list = async (req, res) => {
     try {
         const data = await manageConsultancyModel.find({}).lean().exec();
-        return res.json({ data: data, success: true, status: status.OK });
+        return res.json({ data: data, success: true, status: status.OK, msg: 'Get Consultancy data successfully.' });
     }
     catch (err) {
         return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Get Consultancy failed.' });
 
     }
 }
+
+exports.sortOrder = async (req, res) => {
+    const sortOrder = req.query.order === 'desc' ? -1 : 1;
+    const columnName = req.query.coloum;
+
+    try {
+        let sortObject = {};
+        sortObject[columnName] = sortOrder;
+
+        // Custom pipeline stage for case-insensitive sorting
+        const result = await manageConsultancyModel.aggregate([
+            {
+                $addFields: {
+                    // Create a new field with the lowercase version of the column
+                    lowercaseColumn: { $toLower: `$${columnName}` }
+                }
+            },
+            { $sort: { lowercaseColumn: sortOrder } }, // Sort based on the lowercase field
+            { $project: { lowercaseColumn: 0 } } // Exclude the lowercase field from the result
+        ]);
+
+        res.json(result);
+    } catch (err) {
+        console.error('Error fetching data:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
 
 //delete user by id
 exports.delete = async (req, res) => {
@@ -102,38 +283,26 @@ exports.delete = async (req, res) => {
 }
 
 exports.multidelete = async (req, res) => {
-    // try {
-    //     const ids = req.query.ids;
-
-    //     // Check if the 'ids' parameter is not available or is not an array
-    //     if (!ids || !Array.isArray(ids) || ids.length === 0) {
-    //         return res.json({ success: false, status: status.NOTFOUND, msg: "IDs parameter not available or invalid" });
-    //     }
-
-    //     // Use $in operator to match multiple IDs and delete them
-    //     let result = await manageConsultancyModel.deleteMany({ _id: { $in: ids } }).lean().exec();
-
-    //     // Check if at least one document was deleted
-    //     if (result.deletedCount > 0) {
-    //         res.json({ success: true, status: status.OK, msg: 'Consultancy data deleted successfully.' });
-    //     } else {
-    //         return res.json({ success: false, status: status.INVALIDSYNTAX, msg: 'Delete Consultancy data  failed. No matching students found for the given IDs.' });
-    //     }
-    // } catch (err) {
-    //     return res.status(403).send({ success: false, status: status.UNAUTHORIZED, msg: 'Unauthorized.' });
-    // }
     try {
-        console.log(req.body)
-        const userIds = req.body.ids; // Assuming the request body contains an array of user IDs
-        if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
-            return res.status(400).json({ message: 'Invalid or missing user IDs' });
+        const ids = req.body.ids;
+
+        // Check if the 'ids' parameter is not available or is not an array
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.json({ success: false, status: status.NOTFOUND, msg: "IDs parameter not available or invalid" });
         }
 
-        const result = await manageConsultancyModel.deleteMany({ _id: { $in: userIds } });
-        res.status(200).json({ message: 'Users deleted successfully', result });
-    } catch (error) {
-        console.error('Error deleting users:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        // Use $in operator to match multiple IDs and delete them
+        let result = await manageConsultancyModel.deleteMany({ _id: { $in: ids } }).lean().exec();
+
+        // Check if at least one document was deleted
+        if (result.deletedCount > 0) {
+            res.json({ success: true, status: status.OK, msg: 'Consultancy data deleted successfully.' });
+        } else {
+            return res.json({ success: false, status: status.INVALIDSYNTAX, msg: 'Delete Consultancy data  failed. No matching students found for the given IDs.' });
+        }
+    } catch (err) {
+        console.log("error", err)
+        return res.status(403).send({ success: false, status: status.UNAUTHORIZED, msg: 'Unauthorized.' });
     }
 }
 
@@ -143,17 +312,51 @@ exports.getConsultancyById = async (req, res) => {
     try {
         let consultancyid = req.query.consultancyid;
         // const ID = req.query.userid;
-    if (consultancyid === undefined) { 
-        return res.json({ success: false, status: status.NOTFOUND, msg: 'Id Parameter Not Available' });
-    }
+        if (consultancyid === undefined) {
+            return res.json({ success: false, status: status.NOTFOUND, msg: 'Id Parameter Not Available' });
+        }
         const data = await manageConsultancyModel.findOne({ _id: consultancyid }).lean().exec();
         return res.json({ data: data, success: true, status: status.OK });
     }
     catch (err) {
-        console.log("error",err);
-        return res.json({ success: false, status: status.INVALIDSYNTAX, err: err, msg: 'Get Candidate failed.' });
+        console.log("error", err);
+        return res.json({ success: false, status: status.INVALIDSYNTAX, err: err, msg: 'Get Consultancy failed.' });
     }
 
 }
 
+exports.search = async (req, res) => {
+    try {
+        const query = req.query.search;
 
+        if (!query) {
+            return res.status(400).json({ error: 'No search query provided' });
+        }
+        const searchQuery = {
+            $or: [
+                { consultancy_name: { $regex: new RegExp(query, "i") } },
+                { consultancy_email: { $regex: new RegExp(query, "i") } },
+                { consultancy_mobile: { $regex: new RegExp(query, "i") } }
+
+            ]
+        };
+        // Check if the query contains both first and last names
+        // if (query.includes(' ')) {
+        //     const [name, email] = query.split(' ');
+
+        //     // Update search query to match both first and last names together
+        //     searchQuery.$or.push({
+        //         $and: [
+        //             { consultancy_name: { $regex: new RegExp(name, "i") } },
+        //          ]
+        //     });
+        // }
+        // Perform search using Mongoose's find method
+        const results = await manageConsultancyModel.find(searchQuery);
+
+        res.json(results);
+    } catch (err) {
+        console.error("Error:", err);
+        return res.status(500).json({ success: false, status: 500, msg: 'Internal Server Error' });
+    }
+}

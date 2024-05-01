@@ -18,6 +18,10 @@ router.route('/multi-delete')
 
 router.route('/get')
     .get(consultancyController.getConsultancyById)
+
+    router.route('/search').get(consultancyController.search)
+    router.route('/sortorder').get(consultancyController.sortOrder)
+
 // router.route('/export')
 //     .delete(employeeController.export)
 // router.route('/import')

@@ -147,3 +147,15 @@ th {
   margin-top:5px;
   margin-right:3px
 }
+.multiDeleteButton{
+   position: relative;
+   right: 0;
+   top: -13px;
+   border: 1px solid rgb(40, 118, 154);
+   padding: 3px 6px;
+   background-color: rgb(40, 118, 154);
+   color: white !important;
+   margin-top: 0px;
+   /* margin-right: -63px; */
+   margin-left: 85%;
+}

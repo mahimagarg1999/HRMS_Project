@@ -1,112 +1,91 @@
 const mongoose = require('mongoose');
- const { Schema } = mongoose;
+const { Schema } = mongoose;
 
 const CandidateSchema = new Schema({
-//     candidate_id:{
-//         type: String,
-//         required: true
-//    },
-   candidate_first_name:{
-        type: String,
-        required: true
-   },
-   candidate_last_name:{
-        type: String,
-        required: true
-   },
-candidate_mobile:{
-        type: String,
-        required: true
-   },
-candidate_alternate_mobile:{
-        type: String,
-   },
-candidate_email:{
-        type: String,
-        required: true
-   },
-candidate_skype:{
-        type: String,
-   },
-  candidate_profile:{
-        type: String,
-   },
-   candidate_skills:{
-        type: String,
-        required: true
-   },
-   candidate_experience:{
-        type: String,
-        required: true
-   },
-   candidate_expected_salary:{
-        type: String,
-        required: true
-   },
-   candidate_expected_joining_date:{
-        type: Date,
-        default: Date.now
-   },
-   candidate_joining_immediate:{
-        type: String,
-   },
 
-
-   candidate_marrital_status:{
+    candidate_first_name: {
+        type: String,
+        required: true
+    },
+    candidate_last_name: {
+        type: String,
+        required: true
+    },
+    candidate_mobile: {
+        type: String,
+        required: true
+    },
+    candidate_alternate_mobile: {
+        type: String,
+    },
+    candidate_email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    candidate_skype: {
+        type: String,
+    },
+    candidate_linkedIn_profile: {
+        type: String,
+    },
+    candidate_skills: {
+        type: String,
+        required: true
+    },
+    candidate_experience: {
+        type: String,
+        required: true
+    },
+    candidate_expected_salary: {
+        type: String,
+        required: true
+    },
+    candidate_expected_joining_date: {
         type: Date,
         default: Date.now
     },
-   candidate_written_round:{
+
+
+    candidate_marrital_status: {
         type: String,
     },
-    candidate_machine_round:{
+
+    candidate_machine_round: {
         type: String,
     },
-    candidate_technical_interview_round:{
+    candidate_technical_interview_round: {
         type: String,
     },
-    candidate_hr_interview_round:{
+    candidate_hr_interview_round: {
         type: String,
     },
-    candidate_selection_status:{
+    candidate_selection_status: {
         type: String,
     },
-    candidate_feedback:{
-        type: String,
-    }, 
-    candidate_from_consultancy:{
+    candidate_feedback: {
         type: String,
     },
-   candidate_info1:{
+ 
+    source_of_candidate: {
         type: String,
     },
-candidate_info2:{
+     candidate_address: {
         type: String,
     },
-candidate_info3:{
+    candidate_document_proof: {
         type: String,
     },
-candidate_info4:{
-        type: String,
+    tenth_percentage: {
+        type: Number
     },
-candidate_info5:{
-        type: String,
+    twelfth_percentage: {
+        type: Number
     },
-candidate_info6:{
-        type: String,
-    },
-candidate_info7:{
-        type: String,
-    },
-candidate_info8:{
-        type: String,
-    },
-candidate_info9:{
-        type: String,
-    },
-candidate_info10:{
-        type: String,
-    },
+    graduationPercentage: {
+        type: Number
+    }
+
 },
     {
         timestamps: { createdAt: "created_at", updatedAt: "updated_at" }

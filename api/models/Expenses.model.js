@@ -3,33 +3,37 @@ const { Schema } = mongoose;
 
 
 const ExpensesSchema = new Schema({
-   expenses_purpose:{
+    expenses_purpose: {
         type: String,
         required: true,
-        unique: true
     },
-    expenses_bill:{
+    expenses_bill: {
         type: String,
         required: true
     },
-    expenses_amount:{
+    expenses_amount: {
+        // type: Number,
         type: String,
-     },
-    expenses_voucher:{
+    },
+    expenses_voucher: {
         type: String,
-     },
-    expenses_remark:{
+    },
+    expenses_remark: {
         type: String,
-     },
-    expenses_by_cash:{
-        type: Boolean,
-     },
-    expenses_by_cheque:{
-        type: Boolean,
-     },
-    expenses_cash_recieved_by:{
+    },
+    expenses_by_cash: {
         type: String,
-     }
+    },
+    expenses_by_cheque: {
+        type: String,
+    },
+    expenses_cash_recieved_by: {
+        type: String,
+    },
+    date_of_expenses:{
+        type: Date,
+        default: Date.now
+    }
 });
 
 

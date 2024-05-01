@@ -248,23 +248,30 @@ th {
    color: white;
    text-align: center
 }
-.editButton{
-   color:rgb(40, 118, 154) !important;
-   border:none;
-   margin-left:10%
+
+.editButton {
+   color: rgb(40, 118, 154) !important;
+   border: none;
+   margin-left: 10%;
+   background-color: white;
 }
-.backButton{
-   position: absolute; /* or 'fixed' if you want it to stay in place on scroll */
-  right: 0; /* Align to the right */
-  top: 0; /* Adjust as necessary */
-  border: 1px solid;
-  padding: 3px;
-  background-color: rgb(40, 118, 154);
-  color: white !important;
-  margin-top:5px;
-  margin-right:30px
+
+.backButton {
+   position: absolute;
+   /* or 'fixed' if you want it to stay in place on scroll */
+   right: 0;
+   /* Align to the right */
+   top: 0;
+   /* Adjust as necessary */
+   border: 1px solid;
+   padding: 3px;
+   background-color: rgb(40, 118, 154);
+   color: white !important;
+   margin-top: 5px;
+   margin-right: 30px
 }
+
 .headerData {
    color: white;
    text-align: center;
- }
+}

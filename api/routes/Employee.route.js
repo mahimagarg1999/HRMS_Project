@@ -18,5 +18,11 @@ router.route('/get')
     .get(employeeController.getEmployeeById)
 // router.route('/export')
 //     .delete(employeeController.export)
+router.route('/changepassword')
+    .put(employeeController.changePassword)
+
+router.route('/search').get(employeeController.search)
+router.route('/sortorder').get(employeeController.sortOrder)
+
 
 module.exports = router;                                                                                                                     

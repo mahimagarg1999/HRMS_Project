@@ -5,8 +5,15 @@ import axios from 'axios'; // For Axios
 import ModalBox from '../../user/Candidate/EditModel.js';
 import Nav from '../../navComponent/Nav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit } from '@fortawesome/free-solid-svg-icons';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTable, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
+import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import ReactPaginate from 'react-paginate';
+import Footer from '../../FooterModule/Footer.js';
+import { BASE_API_URL } from '../../../lib/constants.jsx';
+import { Link } from 'react-router-dom';
+
+
 
 const CandidateModule = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -14,16 +21,49 @@ const CandidateModule = () => {
     const [togle, settogle] = useState([true])
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [selectedCandidateId, setSelectedCandidateId] = useState(null);
-const [msg ,setmsg]=useState('');
-    // const [data, setData] = useState(formData);
+    const [message, setMessage] = useState('');
+    const [currentPage, setCurrentPage] = useState(0);
+    const [sortColumn, setSortColumn] = useState(null);
+    const [sortDirection, setSortDirection] = useState('ascending');
+    const [ids, setId] = useState([]);
+    const [resume, setResume] = useState('');
+    const [selectedFile, setSelectedFile] = useState('');
+    const [query, setQuery] = useState('');
+
+    const handlePageChange = ({ selected }) => {
+        setCurrentPage(selected); // Update the current page when pagination changes
+    };
+
+    const itemsPerPage = 5; // Number of items to display per page
+    const offset = currentPage * itemsPerPage;
+    const pageCount = Math.ceil(tableData.length / itemsPerPage);
+    // const currentItems = tableData.slice(offset, offset + itemsPerPage);
     const openModal = (candidateId) => {
         console.log('candidateId', candidateId)
         setModalIsOpen(true);
-      setSelectedCandidateId(candidateId);
+        setSelectedCandidateId(candidateId);
+
     };
+
     const closeModal = () => {
         settogle(!togle)
         setModalIsOpen(false);
+    };
+    const handleSort = async (column) => {
+        if (column === sortColumn) {
+            // If the same column is clicked again, reverse the sorting direction
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+            try {
+                const response = await axios.get(`${BASE_API_URL}candidate/sortorder?order=${sortDirection}&coloum=${sortColumn}`);
+                settableData(response.data)
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        } else {
+            // If a new column is clicked, set it as the sorting column and reset the direction
+            setSortColumn(column);
+            setSortDirection('ascending');
+        }
     };
 
     const [formData, setFormData] = useState({
@@ -34,43 +74,95 @@ const [msg ,setmsg]=useState('');
         candidate_alternate_mobile: '',
         candidate_email: '',
         candidate_skype: '',
-        candidate_profile: '',
+        candidate_linkedIn_profile: '',
         candidate_skills: '',
         candidate_experience: '',
         candidate_expected_salary: '',
         candidate_expected_joining_date: '',
-        candidate_joining_immediate: '',
         candidate_marrital_status: '',
-        candidate_written_round: '',
         candidate_machine_round: '',
         candidate_technical_interview_round: '',
         candidate_hr_interview_round: '',
         candidate_selection_status: '',
         candidate_feedback: '',
-        candidate_from_consultancy: '',
-        candidate_info1: '',
-        candidate_info2: '',
-        candidate_info3: '',
-        candidate_info4: '',
-        candidate_info5: '',
-        candidate_info6: '',
-        candidate_info7: '',
-        candidate_info8: '',
-        candidate_info9: '',
-        candidate_info10: ''
-    });
+        source_of_candidate: '',
+        candidate_address: '',
+        candidate_document_proof: '',
+        resumePdfName: "pdf",
+        tenth_percentage:'',
+        twelfth_percentage:'',
+        graduationPercentage:''
 
+    });
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file instanceof Blob) {
+            const reader = new FileReader();
+            console.log("e----->", e.target.name);
+            reader.onloadend = () => {
+                if (e.target && e.target.name === 'candidate_document_proof') {
+                    console.log('hii')
+                    setResume(reader.result);
+                }
+
+                console.log('idproof', resume)
+                console.log('selectedFile', selectedFile)
+
+            };
+            reader.readAsDataURL(file);
+        } else {
+            console.error("The selected file is not a Blob.");
+        }
+    };
     const [errors, setErrors] = useState({
         candidate_first_name: "",
         candidate_last_name: "",
-        candidate_mobile:'',
-        candidate_email:'',
-        candidate_skills:'',
-        candidate_experience:'',
-        candidate_experience:'',
-        candidate_expected_salary:''
-    
+        candidate_mobile: '',
+        candidate_email: '',
+        candidate_skills: '',
+        candidate_experience: '',
+        candidate_expected_salary: ''
+
     });
+
+    // const [data, setData] = useState(formData);
+
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(`${BASE_API_URL}candidate/list`);
+                console.log(response.data.data); // Handle the response as needed
+                settableData(response.data.data)
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+
+        fetchData();
+    }, [togle]);
+
+    const openPopup = () => {
+        setMessage('')
+
+        setIsOpen(true);
+    };
+
+    const closePopup = () => {
+        setIsOpen(false);
+    };
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+        setErrors({
+            ...errors,
+            [name]: "",
+        });
+    };
     const validateForm = () => {
         let isValid = true;
         const newErrors = {};
@@ -79,12 +171,12 @@ const [msg ,setmsg]=useState('');
             newErrors.candidate_first_name = "candidate_last_name is required";
             isValid = false;
         }
-        
+
         if (!formData.candidate_last_name.trim()) {
             newErrors.candidate_last_name = "candidate_last_name is required";
             isValid = false;
         }
-        
+
         if (!formData.candidate_mobile.trim()) {
             newErrors.candidate_mobile = "candidate_mobile is required";
             isValid = false;
@@ -105,62 +197,29 @@ const [msg ,setmsg]=useState('');
             newErrors.candidate_expected_salary = "candidate_expected_salary is required";
             isValid = false;
         }
-       
-
-
         setErrors(newErrors);
         return isValid;
     };
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get('http://localhost:5000/api/candidate/list');
-                console.log(response.data.data); // Handle the response as needed
-                settableData(response.data.data)
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        };
-
-        fetchData();
-    }, [togle]);
-
-    const openPopup = () => {
-        setIsOpen(true);
-    };
-
-    const closePopup = () => {
-        setIsOpen(false);
-    };
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevState => ({
-            ...prevState,
-            [name]: value
-        }));
-        setErrors({
-            ...errors,
-            [name]: "",
-        });
-    };
 
     // Function to handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        formData.candidate_document_proof = resume
+
         // Handle form submission here, for example, send data to backend or perform validation
         console.log('', formData);
         if (validateForm()) {
-        try {
-            const response = axios.post('http://localhost:5000/api/candidate/create', formData);
-            setmsg(response.data.msg)
-            settogle(!togle)
-            console.log(response.data); // Handle the response as needed
-        } catch (error) {
-            console.error('Error:', error);
+            try {
+                const response = await axios.post(`${BASE_API_URL}candidate/create`, formData);
+                console.log(response.data); // Handle the response as needed
+                setMessage(response.data.msg);
+                settogle(!togle)
+            } catch (error) {
+                console.error('Error:', error);
+            }
         }
-    }
     };
-    const DeleteData = (id) => {
+    const DeleteData = async (id) => {
         const isConfirmed = window.confirm('Are you sure you want to delete this item?');
 
         // Check if the user confirmed
@@ -168,7 +227,7 @@ const [msg ,setmsg]=useState('');
             // Delete logic here
             try {
                 console.log('id', id)
-                const response = axios.delete(`http://localhost:5000/api/candidate/delete?id=${id}`)
+                const response = await axios.delete(`${BASE_API_URL}candidate/delete?id=${id}`)
 
                 console.log(response.data); // Handle the response as needed
                 settogle(!togle)
@@ -186,217 +245,372 @@ const [msg ,setmsg]=useState('');
 
     }
 
+    const handleCheckboxChange = (e, id) => {
+        // If the checkbox is checked, add the ID to the list of selected IDs
+        if (e.target.checked) {
+            setId(prevIds => [...prevIds, id]);
+        } else {
+            // If the checkbox is unchecked, remove the ID from the list of selected IDs
+            setId(prevIds => prevIds.filter(prevId => prevId !== id));
+        }
+    };
+    const Deletemulti = async () => {
+        const data = {
+            "ids": ids
+        };
+        console.log('ids', data);
 
-
+        try {
+            const response = await axios.delete(`${BASE_API_URL}candidate/multi-delete`, {
+                data: data // IDs ko data body mein bhejna
+            });
+            console.log(response.data); // Response ke saath kuch karne ke liye
+            settogle(!togle);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+    const handleChange = async (event) => {
+        setQuery(event.target.value);
+        console.log(event.target.value)
+        if (event.target.value !== '') {
+            try {
+                const response = await axios.get(`${BASE_API_URL}candidate/search?search=${event.target.value}`, {
+                });
+                console.log(query)
+                settableData(response.data)
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        else {
+            try {
+                const response = await axios.get(`${BASE_API_URL}candidate/list`);
+                console.log(response.data.data); // Handle the response as needed
+                settableData(response.data.data)
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    };
     return (
-        <div >
-            <Nav />
-            <div style={{ backgroundColor: '#28769a' }}>
-                <h1 className='headerUser'>Welcome TO CANDIDATE PAGE</h1>
-            </div>
+        <>
             <div >
+                <Nav />
+                <div style={{ backgroundColor: '#28769a' }}>
+                    <h1 className='headerUser'>WELCOME TO CANDIDATE PAGE</h1>
+                </div>
+                <div >
 
 
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h5 className="card-title m-b-0">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    {/* <h5 className="card-title m-b-0">
                                     <button style={{ backgroundColor: '#cfa68e', fontSize: '20px', border: 'none', marginBottom: '20px' }} onClick={openPopup}>
                                         Add Candidate +
                                     </button>
-                                </h5>
-                                {isOpen && (
+                                </h5> */}
                                     <div>
+                                        <button className="backButton" onClick={openPopup}>
+                                            Add &nbsp;<FontAwesomeIcon icon={faPlusCircle} />
+                                        </button>
+                                    </div>
+                                    <div> <span> <button className="multiDeleteButton" onClick={() => { Deletemulti() }}    >
+                                        <FontAwesomeIcon icon={faTrashAlt} />
+                                    </button></span></div>
+                                    {isOpen && (
                                         <div>
                                             <div>
-                                                <div class="row">
-                                                    <div class="col-md-6 offset-md-3">
-                                                        <div class="signup-form">
-                                                            <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
-                                                                <div style={{ textAlign: 'center' }}>
-                                                                    <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Create Your Account</h4>
-                                                                    <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
-                                                                </div>
-                                                                <div class="row">
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_first_name" value={formData.candidate_first_name} onChange={handleInputChange} class="form-control" placeholder="First Name" />
-                                                                        {errors.candidate_first_name && <span className="error" style={{color:'red'}}>{errors.candidate_first_name}</span>}
+                                                <div>
+                                                    <div class="row">
+                                                        <div class="col-md-6 offset-md-3">
+                                                            <div class="signup-form">
+                                                                <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
+                                                                    <div style={{ textAlign: 'center' }}>
+                                                                        <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Create Your Account</h4>
+                                                                        <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
+                                                                    </div>
+
+                                                                    <div class="row">
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <b><label>First Name*</label></b>
+                                                                            <input type="text" name="candidate_first_name" value={formData.candidate_first_name} onChange={handleInputChange} class="form-control" placeholder="First Name" />
+                                                                            {errors.candidate_first_name && <span className="error" style={{ color: 'red' }}>{errors.candidate_first_name}</span>}
+
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>Last Name*</label></b>
+
+                                                                            <input type="text" name="candidate_last_name" value={formData.candidate_last_name} onChange={handleInputChange} class="form-control" placeholder="Last Name" />
+                                                                            {errors.candidate_last_name && <span className="error" style={{ color: 'red' }}>{errors.candidate_last_name}</span>}
+
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>Mobile No*</label></b>
+
+                                                                            <input type="text" name="candidate_mobile" value={formData.candidate_mobile} onChange={handleInputChange} class="form-control" placeholder="Mobile Number" />
+                                                                            {errors.candidate_mobile && <span className="error" style={{ color: 'red' }}>{errors.candidate_mobile}</span>}
+
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label> Alternate_mobile</label></b>
+
+                                                                            <input type="text" name="candidate_alternate_mobile" value={formData.candidate_alternate_mobile} onChange={handleInputChange} class="form-control" placeholder="Alternate Mobile Number" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label> Email*</label></b>
+
+                                                                            <input type="email" name="candidate_email" value={formData.candidate_email} onChange={handleInputChange} class="form-control" placeholder="Email" />
+                                                                            {errors.candidate_email && <span className="error" style={{ color: 'red' }}>{errors.candidate_email}</span>}
+
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label> Skype Id</label></b>
+
+                                                                            <input type="text" name="candidate_skype" value={formData.candidate_skype} onChange={handleInputChange} class="form-control" placeholder="Skype ID" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label> LinkedIn Profile</label></b>
+
+                                                                            <input type="text" name="candidate_linkedIn_profile" value={formData.candidate_linkedIn_profile} onChange={handleInputChange} class="form-control" placeholder="Profile" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>  Skills*</label></b>
+
+                                                                            <input type="text" name="candidate_skills" value={formData.candidate_skills} onChange={handleInputChange} class="form-control" placeholder="Skills" />
+                                                                            {errors.candidate_skills && <span className="error" style={{ color: 'red' }}>{errors.candidate_skills}</span>}
+
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>Experience*</label></b>
+
+                                                                            <input type="text" name="candidate_experience" value={formData.candidate_experience} onChange={handleInputChange} class="form-control" placeholder="Experience" />
+                                                                            {errors.candidate_experience && <span className="error" style={{ color: 'red' }}>{errors.candidate_experience}</span>}
+
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>Expected Salary*</label></b>
+
+                                                                            <input type="text" name="candidate_expected_salary" value={formData.candidate_expected_salary} onChange={handleInputChange} class="form-control" placeholder="Expected Salary" />
+                                                                            {errors.candidate_expected_salary && <span className="error" style={{ color: 'red' }}>{errors.candidate_expected_salary}</span>}
+
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>Joining Date</label></b>
+
+                                                                            <input type="date" name="candidate_expected_joining_date" value={formData.candidate_expected_joining_date} onChange={handleInputChange} class="form-control" />
+                                                                        </div>
+                                                                        {/* <div class="mb-3 col-md-6">
+                                                                            <input type="text" name="candidate_joining_immediate" value={formData.candidate_joining_immediate} onChange={handleInputChange} class="form-control" placeholder="Joining Immediate" />
+                                                                        </div> */}
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>Marrital Status</label></b>
+
+                                                                            <input type="text" name="candidate_marrital_status" value={formData.candidate_marrital_status} onChange={handleInputChange} class="form-control" placeholder="Marrital Status" />
+                                                                        </div>
+                                                                        {/* <div class="mb-3 col-md-6">
+                                                                            <input type="text" name="candidate_written_round" value={formData.candidate_written_round} onChange={handleInputChange} class="form-control" placeholder="Written Round" />
+                                                                        </div> */}
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>Machine Round</label></b>
+
+                                                                            <input type="text" name="candidate_machine_round" value={formData.candidate_machine_round} onChange={handleInputChange} class="form-control" placeholder="Machine Round" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>Technical_interview_round</label></b>
+
+                                                                            <input type="text" name="candidate_technical_interview_round" value={formData.candidate_technical_interview_round} onChange={handleInputChange} class="form-control" placeholder="Technical Interview Round" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>HR_interview_round</label></b>
+
+                                                                            <input type="text" name="candidate_hr_interview_round" value={formData.candidate_hr_interview_round} onChange={handleInputChange} class="form-control" placeholder="HR Interview Round" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>Selection Status</label></b>
+
+                                                                            <input type="text" name="candidate_selection_status" value={formData.candidate_selection_status} onChange={handleInputChange} class="form-control" placeholder="Selection Status" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>Feedback</label></b>
+
+                                                                            <input type="text" name="candidate_feedback" value={formData.candidate_feedback} onChange={handleInputChange} class="form-control" placeholder="Feedback" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>Source_of_candidate</label></b>
+
+                                                                            <input type="text" name="source_of_candidate" value={formData.source_of_candidate} onChange={handleInputChange} class="form-control" placeholder="From Consultancy" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>Address</label></b>
+
+                                                                            <input type="text" name="candidate_address" value={formData.candidate_address} onChange={handleInputChange} class="form-control" placeholder="Address" />
+                                                                        </div>
+
+                                                                        <div class="mb-3 col-md-6">
+                                                                           <b> <label>candidate_document_proof</label></b>
+                                                                            <input type="file" onChange={handleFileChange} class="form-control" placeholder='candidate resume' name="candidate_document_proof" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                                                                                                                 
+                                                                       <b><label>10 Percentage</label></b>
+
+                                                                            <input type="text" name="tenth_percentage" value={formData.tenth_percentage} onChange={handleInputChange} class="form-control" placeholder="tenth_percentage  " />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>12 Percentage</label></b>
+
+                                                                            <input type="text" name="twelfth_percentage" value={formData.twelfth_percentage} onChange={handleInputChange} class="form-control" placeholder="twelfth_percentage  " />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                        <b><label>collage CGPA</label></b>
+
+                                                                            <input type="text" name="graduationPercentage" value={formData.graduationPercentage} onChange={handleInputChange} class="form-control" placeholder="graduationPercentage" />
+                                                                        </div>
+                                                                        {/* <div class="mb-3 col-md-6">
+                                                                            <input type="text" name="candidate_info2" value={formData.candidate_info2} onChange={handleInputChange} class="form-control" placeholder="Additional Information 2" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <input type="text" name="candidate_info3" value={formData.candidate_info3} onChange={handleInputChange} class="form-control" placeholder="Additional Information 4" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <input type="text" name="candidate_info4" value={formData.candidate_info4} onChange={handleInputChange} class="form-control" placeholder="Additional Information 4" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <input type="text" name="candidate_info5" value={formData.candidate_info5} onChange={handleInputChange} class="form-control" placeholder="Additional Information 5" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <input type="text" name="candidate_info6" value={formData.candidate_info6} onChange={handleInputChange} class="form-control" placeholder="Additional Information 6" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <input type="text" name="candidate_info7" value={formData.candidate_info7} onChange={handleInputChange} class="form-control" placeholder="Additional Information 7" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <input type="text" name="candidate_info8" value={formData.candidate_info8} onChange={handleInputChange} class="form-control" placeholder="Additional Information 8" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <input type="text" name="candidate_info9" value={formData.candidate_info9} onChange={handleInputChange} class="form-control" placeholder="Additional Information 9" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <input type="text" name="candidate_info10" value={formData.candidate_info10} onChange={handleInputChange} class="form-control" placeholder="Additional Information 10" />
+                                                                        </div> */}
+                                                                        <span style={{ color: 'green' }}>{message && <p>{message}</p>}</span>
 
                                                                     </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_last_name" value={formData.candidate_last_name} onChange={handleInputChange} class="form-control" placeholder="Last Name" />
-                                                                        {errors.candidate_last_name && <span className="error" style={{color:'red'}}>{errors.candidate_last_name}</span>}
-
+                                                                    <div class="col-md-12">
+                                                                        <button type="submit">Signup Now</button>
                                                                     </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_mobile" value={formData.candidate_mobile} onChange={handleInputChange} class="form-control" placeholder="Mobile Number" />
-                                                                        {errors.candidate_mobile && <span className="error" style={{color:'red'}}>{errors.candidate_mobile}</span>}
-
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_alternate_mobile" value={formData.candidate_alternate_mobile} onChange={handleInputChange} class="form-control" placeholder="Alternate Mobile Number" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="email" name="candidate_email" value={formData.candidate_email} onChange={handleInputChange} class="form-control" placeholder="Email" />
-                                                                        {errors.candidate_email && <span className="error" style={{color:'red'}}>{errors.candidate_email}</span>}
-
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_skype" value={formData.candidate_skype} onChange={handleInputChange} class="form-control" placeholder="Skype ID" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_profile" value={formData.candidate_profile} onChange={handleInputChange} class="form-control" placeholder="Profile" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_skills" value={formData.candidate_skills} onChange={handleInputChange} class="form-control" placeholder="Skills" />
-                                                                        {errors.candidate_skills && <span className="error" style={{color:'red'}}>{errors.candidate_skills}</span>}
-
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        
-                                                                    <input type="text" name="candidate_experience" value={formData.candidate_experience} onChange={handleInputChange} class="form-control" placeholder="Experience" />
-                                                                    {errors.candidate_experience && <span className="error" style={{color:'red'}}>{errors.candidate_experience}</span>}
-
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_expected_salary" value={formData.candidate_expected_salary} onChange={handleInputChange} class="form-control" placeholder="Expected Salary" />
-                                                                        {errors.candidate_expected_salary && <span className="error" style={{color:'red'}}>{errors.candidate_expected_salary}</span>}
-
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="date" name="candidate_expected_joining_date" value={formData.candidate_expected_joining_date} onChange={handleInputChange} class="form-control" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_joining_immediate" value={formData.candidate_joining_immediate} onChange={handleInputChange} class="form-control" placeholder="Joining Immediate" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_marrital_status" value={formData.candidate_marrital_status} onChange={handleInputChange} class="form-control" placeholder="Marrital Status" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_written_round" value={formData.candidate_written_round} onChange={handleInputChange} class="form-control" placeholder="Written Round" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_machine_round" value={formData.candidate_machine_round} onChange={handleInputChange} class="form-control" placeholder="Machine Round" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_technical_interview_round" value={formData.candidate_technical_interview_round} onChange={handleInputChange} class="form-control" placeholder="Technical Interview Round" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_hr_interview_round" value={formData.candidate_hr_interview_round} onChange={handleInputChange} class="form-control" placeholder="HR Interview Round" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_selection_status" value={formData.candidate_selection_status} onChange={handleInputChange} class="form-control" placeholder="Selection Status" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_feedback" value={formData.candidate_feedback} onChange={handleInputChange} class="form-control" placeholder="Feedback" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_from_consultancy" value={formData.candidate_from_consultancy} onChange={handleInputChange} class="form-control" placeholder="From Consultancy" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_info1" value={formData.candidate_info1} onChange={handleInputChange} class="form-control" placeholder="Additional Information 1" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_info2" value={formData.candidate_info2} onChange={handleInputChange} class="form-control" placeholder="Additional Information 2" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_info3" value={formData.candidate_info3} onChange={handleInputChange} class="form-control" placeholder="Additional Information 4" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_info4" value={formData.candidate_info4} onChange={handleInputChange} class="form-control" placeholder="Additional Information 4" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_info5" value={formData.candidate_info5} onChange={handleInputChange} class="form-control" placeholder="Additional Information 5" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_info6" value={formData.candidate_info6} onChange={handleInputChange} class="form-control" placeholder="Additional Information 6" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_info7" value={formData.candidate_info7} onChange={handleInputChange} class="form-control" placeholder="Additional Information 7" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_info8" value={formData.candidate_info8} onChange={handleInputChange} class="form-control" placeholder="Additional Information 8" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_info9" value={formData.candidate_info9} onChange={handleInputChange} class="form-control" placeholder="Additional Information 9" />
-                                                                    </div>
-                                                                    <div class="mb-3 col-md-6">
-                                                                        <input type="text" name="candidate_info10" value={formData.candidate_info10} onChange={handleInputChange} class="form-control" placeholder="Additional Information 10" />
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-12">
-                                                                    <button type="submit">Signup Now</button>
-                                                                </div>
-                                                            </form>
-                                                            <span>{msg}</span>
-                                                            <p class="text-center mt-3 text-secondary">If you have account, Please <a href="#">Login Now</a></p>
+                                                                </form>
+                                                                <label className="formLabelAgain">If you want to login <u><Link to="/login" style={{ color: 'black' }}>Login</Link></u>,
+                                                                </label>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>       </div>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="table-responsive">
-                                <table className="table">
-                                    <thead className="thead-light">
-                                        <tr>
-                                            <th>
-                                                <label className="customcheckbox m-b-20">
-                                                    <input type="checkbox" id="mainCheckbox" />
-                                                    <span className="checkmark"></span>
-                                                </label>
-                                            </th>
-                                            <th scope="col">id</th>
-                                            <th scope="col">Name</th>
-                                            <th scope="col">Email</th>
-                                            <th scope="col"> moblil</th>
-                                            <th scope="col" >#ACTIONS</th>
+                                                </div>       </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div class="containerOnce">
+                                    <input
+                                        type="text"
+                                        value={query}
+                                        onChange={handleChange}
+                                        placeholder="Search "
+                                    />
+                                </div>
+                                <div className="table-responsive">
+                                    {/* <form >
+                                        <input
+                                            type="text"
+                                            value={query}
+                                            onChange={handleChange}
+                                            placeholder="Search by first name, last name, or both"
+                                        />
+                                    </form> */}
+                                    <table className="table">
+                                        <thead className="thead-light">
+                                            <tr>
+                                                <th scope="col" onClick={() => handleSort('candidate_first_name')}>Name {sortColumn === 'candidate_first_name' && (
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
+                                                )}</th>
+                                                <th scope="col" onClick={() => handleSort('candidate_email')}>Email {sortColumn === 'candidate_email' && (
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
+                                                )}</th>
+                                                <th scope="col" onClick={() => handleSort('candidate_document_proof')}>Document Proofs {sortColumn === 'candidate_document_proof' && (
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
+                                                )}</th>
+                                                <th scope="col" onClick={() => handleSort('candidate_mobile')}> Mobile {sortColumn === 'candidate_mobile' && (
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
+                                                )}</th>
+                                                <th scope="col"  >#ACTIONS</th>
 
-                                        </tr>
-                                    </thead>
-                                    <tbody className="customtable">
-                                        {tableData.map((data, index) => (
-                                            <tr key={index}>
-                                                <td>
-                                                    <label className="customcheckbox">
-                                                        <input type="checkbox" className="listCheckbox" />
-                                                        <span className="checkmark"></span>
-                                                    </label>
-                                                </td>
-                                                <td>{data._id}</td>
-                                                <td>{data.candidate_first_name}&nbsp;{data.candidate_last_name}</td>
-                                                <td>{data.candidate_email}</td>
-                                                <td>{data.candidate_mobile}</td>
-                                                {/* <button onClick={() => DeleteData(data._id)} style={{ backgroundColor: 'red' }}>DELETE</button>
-                                                <button onClick={() => { openModal(data._id) }} style={{ backgroundColor: 'green' }}> EDIT</button> */}
-                                                 <button className="editButton" onClick={() => DeleteData(data._id)} >  <FontAwesomeIcon icon={faTrash} /></button>
-                                                <button className="editButton" onClick={() => openModal(data._id)} >
-                                                    <FontAwesomeIcon icon={faEdit} />
-                                                </button> 
-                                                <ModalBox isOpen={modalIsOpen} candidateId={selectedCandidateId} onRequestClose={closeModal}>
-                                                    <h2>Modal Title</h2>
-                                                    <p>Modal Content</p>
-                                                </ModalBox>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                        </thead>
+                                        <tbody className="customtable">
 
+                                            {/* {tableData.map((data, index) => ( */}
+                                            {tableData.slice(offset, offset + itemsPerPage).map((data, index) => (
+                                                <tr key={index}>
+
+                                                    <td>{data.candidate_first_name}&nbsp;{data.candidate_last_name} </td>
+
+
+                                                    <td>{data.candidate_email}</td>
+                                                    <td>
+                                                        <a style={{ color: 'rgb(40, 118, 154)' }} href={`http://localhost:5000/${data.candidate_document_proof}`} target="_blank">{data.candidate_document_proof}</a>
+                                                    </td>
+                                                    <td>{data.candidate_mobile}</td>
+                                                    <td>
+                                                        <button className="editButton" onClick={() => DeleteData(data._id)} >  <FontAwesomeIcon icon={faTrash} /></button>
+                                                        <button className="editButton" onClick={() => openModal(data._id)} >
+
+                                                            <FontAwesomeIcon icon={faEdit} />
+                                                        </button>
+                                                    </td>
+                                                    <td>
+                                                        <label className="customcheckbox">
+                                                            <input type="checkbox" className="listCheckbox" onChange={(e) => handleCheckboxChange(e, data._id)} />
+                                                            <span className="checkmark"></span>
+                                                        </label>
+                                                    </td>
+                                                    <ModalBox isOpen={modalIsOpen} candidateId={selectedCandidateId} onRequestClose={closeModal}>
+                                                        <h2>Modal Title</h2>
+                                                        <p>Modal Content</p>
+                                                    </ModalBox>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <ReactPaginate
+                                    previousLabel={'Previous'}
+                                    nextLabel={'Next'}
+                                    breakLabel={'...'}
+                                    pageCount={pageCount}
+                                    marginPagesDisplayed={2}
+                                    pageRangeDisplayed={5}
+                                    onPageChange={handlePageChange}
+                                    containerClassName={'pagination'}
+                                    activeClassName={'active'}
+                                />
+
+
+                            </div>
                         </div>
                     </div>
+
                 </div>
 
+                <div>
+
+                </div>
+
+
             </div>
-
-            <div>
-
-            </div>
-
-
-        </div>
+            <Footer />
+        </>
     );
 }
 

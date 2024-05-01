@@ -1,152 +1,85 @@
 import React from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFacebookF, faTwitter, faGoogle, faInstagram, faLinkedin, faGithub } from '@fortawesome/free-brands-svg-icons';
+
 
 const Footer = () => {
     return (
-        <div>
-            <footer class="bg3 p-t-75 p-b-32">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-6 col-lg-3 p-b-50">
-                <h4 class="stext-301 cl0 p-b-30">
-                    Categories
-                </h4>
+        <div >
+            <footer className="text-center text-white" style={{ backgroundColor: 'rgb(40, 118, 154)' }}>
+                <div className="container">
+                    <section  >
+                        <div className="row text-center d-flex justify-content-center pt-4">
+                            <div className="col-md-2">
+                                <h6 className="text-uppercase font-weight-bold">
+                                    <a href="https://reinforcewebsol.com/about-us" className="text-white">About us</a>
+                                </h6>
+                            </div>
+                            <div className="col-md-2">
+                                <h6 className="text-uppercase font-weight-bold">
+                                    <a href="https://www.reinforcewebsol.com/services" className="text-white">Services</a>
+                                </h6>
+                            </div>
+                            <div className="col-md-2">
+                                <h6 className="text-uppercase font-weight-bold">
+                                    <a href="https://www.reinforcewebsol.com/blog/" className="text-white">Blog</a>
+                                </h6>
+                            </div>
+                            <div className="col-md-2">
+                                <h6 className="text-uppercase font-weight-bold">
+                                    <a href="https://www.reinforcewebsol.com/hire-us" className="text-white">HIRE</a>
+                                </h6>
+                            </div>
+                            <div className="col-md-2">
+                                <h6 className="text-uppercase font-weight-bold">
+                                    <a href="https://reinforcewebsol.com/contact-Us" className="text-white">Contact</a>
+                                </h6>
+                            </div>
+                        </div>
+                    </section>
+                    <hr className="my-2" />
+                    <section >
+                        <div className="row d-flex justify-content-center">
+                            <div className="col-lg-8">
+                                <div style={{fontSize:'20px'}}>Reinforce Software  Solutions Pvt. Ltd.</div>
+                                 <span><a href="http://reinforcewebsol.in/" className="text-white me-4">
+                                http://reinforcewebsol.in/
+                        </a></span>
+                                <p>313, Sai Ram Plaza, Near Rajiv Gandhi Circle, Indore-452001, India</p>
 
-                <ul>
-                    <li class="p-b-10">
-                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-                            Women
+                            </div>
+                        </div>
+                    </section>
+                    <section className="my-3">
+                        <a href="https://www.facebook.com/" className="text-white me-4">
+                            <FontAwesomeIcon icon={faFacebookF} />
                         </a>
-                    </li>
-
-                    <li class="p-b-10">
-                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-                            Men
+                        <a href="https://twitter.com" className="text-white me-4">
+                            <FontAwesomeIcon icon={faTwitter} />
                         </a>
-                    </li>
-
-                    <li class="p-b-10">
-                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-                            Shoes
+                        <a href="https://google.com" className="text-white me-4">
+                            <FontAwesomeIcon icon={faGoogle} />
                         </a>
-                    </li>
-
-                    <li class="p-b-10">
-                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-                            Watches
+                        <a href="https://instagram.com" className="text-white me-4">
+                            <FontAwesomeIcon icon={faInstagram} />
                         </a>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="col-sm-6 col-lg-3 p-b-50">
-                <h4 class="stext-301 cl0 p-b-30">
-                    Help
-                </h4>
-
-                <ul>
-                    <li class="p-b-10">
-                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-                            Track Order
+                        <a href="https://linkedin.com" className="text-white me-4">
+                            <FontAwesomeIcon icon={faLinkedin} />
                         </a>
-                    </li>
-
-                    <li class="p-b-10">
-                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-                            Returns 
+                        <a href="https://github.com" className="text-white me-4">
+                            <FontAwesomeIcon icon={faGithub} />
                         </a>
-                    </li>
+                    </section>
 
-                    <li class="p-b-10">
-                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-                            Shipping
-                        </a>
-                    </li>
-
-                    <li class="p-b-10">
-                        <a href="#" class="stext-107 cl7 hov-cl1 trans-04">
-                            FAQs
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="col-sm-6 col-lg-3 p-b-50">
-                <h4 class="stext-301 cl0 p-b-30">
-                    GET IN TOUCH
-                </h4>
-
-                <p class="stext-107 cl7 size-201">
-                    Any questions? Let us know in store at 8th floor, 379 Hudson St, New York, NY 10018 or call us on (+1) 96 716 6879
-                </p>
-
-                <div class="p-t-27">
-                    <a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
-                        <i class="fa fa-facebook"></i>
-                    </a>
-
-                    <a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
-                        <i class="fa fa-instagram"></i>
-                    </a>
-
-                    <a href="#" class="fs-18 cl7 hov-cl1 trans-04 m-r-16">
-                        <i class="fa fa-pinterest-p"></i>
-                    </a>
                 </div>
-            </div>
+                <div className="text-center p-3 " style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
+                    © 2020 Copyright:
+                    <a className="text-white" href="https://mdbootstrap.com/">MDBootstrap.com</a>
+                </div>
+                {/* ======= */}
 
-            <div class="col-sm-6 col-lg-3 p-b-50">
-                <h4 class="stext-301 cl0 p-b-30">
-                    Newsletter
-                </h4>
-
-                <form>
-                    <div class="wrap-input1 w-full p-b-4">
-                        {/* <input class="input1 bg-none plh1 stext-107 cl7" type="text" name="email" mailto:placeholder="email@example.com"/> */}
-                        <div class="focus-input1 trans-04"></div>
-                    </div>
-
-                    <div class="p-t-18">
-                        <button class="flex-c-m stext-101 cl0 size-103 bg1 bor1 hov-btn2 p-lr-15 trans-04">
-                            Subscribe
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="p-t-40">
-            <div class="flex-c-m flex-w p-b-18">
-                <a href="#" class="m-all-1">
-                    <img src="assets/images/icons/icon-pay-01.png" alt="ICON-PAY" />
-                </a>
-
-                <a href="#" class="m-all-1">
-                    <img src="assets/images/icons/icon-pay-02.png" alt="ICON-PAY" />
-                </a>
-
-                <a href="#" class="m-all-1">
-                    <img src="assets/images/icons/icon-pay-03.png" alt="ICON-PAY" />
-                </a>
-
-                <a href="#" class="m-all-1">
-                    <img src="assets/images/icons/icon-pay-04.png" alt="ICON-PAY"
-                    />
-                </a>
-
-                <a href="#" class="m-all-1">
-                    <img src="assets/images/icons/icon-pay-05.png" alt="ICON-PAY"/>
-                </a>
-                
-            </div>
-
-            <p class="stext-107 cl6 txt-center">
-            
-Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | Made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a> &amp; distributed by <a href="https://themewagon.com" target="_blank">ThemeWagon</a>
-
-            </p>
-        </div>
-    </div>
-</footer>
+                {/* =========== */}
+            </footer>
         </div>
     );
 }
