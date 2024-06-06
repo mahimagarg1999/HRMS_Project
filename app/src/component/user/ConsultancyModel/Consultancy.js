@@ -1,16 +1,16 @@
-    import React, { useState, useEffect } from 'react';
-    import './Consultancy.css'
-    import 'bootstrap/dist/css/bootstrap.min.css';
-    import axios from 'axios'; // For Axios
-    import ModalBox from './EditConsultancyModel.js';
-    import Nav from '../../navComponent/Nav';
-    import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-    import { faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
-    import { faTrash, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
-    import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
-    import ReactPaginate from 'react-paginate';
-    import { BASE_API_URL } from '../../../lib/constants.jsx';
-    import Footer from '../../FooterModule/Footer.js'
+import React, { useState, useEffect } from 'react';
+import './Consultancy.css'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios'; // For Axios
+import ModalBox from './EditConsultancyModel.js';
+import Nav from '../../navComponent/Nav';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
+import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import ReactPaginate from 'react-paginate';
+import { BASE_API_URL } from '../../../lib/constants.jsx';
+import Footer from '../../FooterModule/Footer.js'
 const ConsultancyModule = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [tableData, settableData] = useState([])
@@ -70,18 +70,18 @@ const ConsultancyModule = () => {
 
 
     const [formData, setFormData] = useState({
-        consultancy_name: '',
-        consultancy_email: '',
-        consultancy_website: '',
-        consultancy_mobile: '',
-        consultancy_alternate_mobile: '',
-        consultancy_city: '',
-        consultancy_state: '',
-        consultancy_address: '',
-        contract_agreement: '',
-        agreementPdfName: "pdf",
-        contract_person_name: '',
-        contract_linkedIn_Profile: '',
+        // consultancy_name: '',
+        // consultancy_email: '',
+        // consultancy_website: '',
+        // consultancy_mobile: '',
+        // consultancy_alternate_mobile: '',
+        // consultancy_city: '',
+        // consultancy_state: '',
+        // consultancy_address: '',
+        // contract_agreement: '',
+        // agreementPdfName: "pdf",
+        // contract_person_name: '',
+        // contract_linkedIn_Profile: '',
     });
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -120,11 +120,27 @@ const ConsultancyModule = () => {
 
     const openPopup = () => {
         setMessage('')
-        // setFormData('')
+        setFormData('')
+        let formDataNew = {
+            consultancy_name: '',
+            consultancy_email: '',
+            consultancy_website: '',
+            consultancy_mobile: '',
+            consultancy_alternate_mobile: '',
+            consultancy_city: '',
+            consultancy_state: '',
+            consultancy_address: '',
+            contract_agreement: '',
+            agreementPdfName: "pdf",
+            contract_person_name: '',
+            contract_linkedIn_Profile: '',
+        }
+        setFormData(formDataNew)
         setIsOpen(true);
     };
 
     const closePopup = () => {
+
         setIsOpen(false);
     };
     // const validateForm = () => {
@@ -294,7 +310,7 @@ const ConsultancyModule = () => {
                 console.error('Error:', error);
             }
         }
-        else {
+        else {          
             try {
                 const response = await axios.get(`${BASE_API_URL}consultancy/list`);
                 console.log(response.data.data); // Handle the response as needed
@@ -350,33 +366,33 @@ const ConsultancyModule = () => {
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>  Email*</b></label>
+                                                                            <label><b>  Email*</b></label>
                                                                             <input type="email" name="consultancy_email" value={formData.consultancy_email} onChange={handleInputChange} class="form-control" placeholder="Consultancy Email" />
                                                                             {errors.consultancy_email && <span className="error" style={{ color: 'red' }}>{errors.consultancy_email}</span>}
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>  Website</b></label>
+                                                                            <label><b>  Website</b></label>
                                                                             <input type="text" name="consultancy_website" value={formData.consultancy_website} onChange={handleInputChange} class="form-control" placeholder="Consultancy Website" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>  Mobile</b></label>
+                                                                            <label><b>  Mobile</b></label>
                                                                             <input type="text" name="consultancy_mobile" value={formData.consultancy_mobile} onChange={handleInputChange} class="form-control" placeholder="Consultancy Mobile" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>  Alternate Mobile</b></label>
+                                                                            <label><b>  Alternate Mobile</b></label>
                                                                             <input type="test" name="consultancy_alternate_mobile" value={formData.consultancy_alternate_mobile} onChange={handleInputChange} class="form-control" placeholder="Consultancy Alternate Mobile" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>  City</b></label>
+                                                                            <label><b>  City</b></label>
                                                                             <input type="text" name="consultancy_city" value={formData.consultancy_city} onChange={handleInputChange} class="form-control" placeholder="Consultancy City" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>  State</b></label>
+                                                                            <label><b>  State</b></label>
                                                                             <input type="text" name="consultancy_state" value={formData.consultancy_state} onChange={handleInputChange} class="form-control" placeholder="Consultancy State" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>  Address*</b></label>
+                                                                            <label><b>  Address*</b></label>
                                                                             <input type="text" name="consultancy_address" value={formData.consultancy_address} onChange={handleInputChange} class="form-control" placeholder="Address" />
                                                                             {errors.consultancy_address && <span className="error" style={{ color: 'red' }}>{errors.consultancy_address}</span>}
 
@@ -386,23 +402,23 @@ const ConsultancyModule = () => {
                                                                             <input type="file" onChange={handleFileChange} class="form-control" placeholder='contract agreement' name="contract_agreement" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Contract Person Name</b></label>
+                                                                            <label><b>Contract Person Name</b></label>
                                                                             <input type="text" name="contract_person_name" value={formData.contract_person_name} onChange={handleInputChange} class="form-control" placeholder="contract_person_name" />
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Contract LinkedIn Profile</b></label>
+                                                                            <label><b>Contract LinkedIn Profile</b></label>
                                                                             <input type="text" name="contract_linkedIn_Profile" value={formData.contract_linkedIn_Profile} onChange={handleInputChange} class="form-control" placeholder="contract_linkedIn_Profile" />
 
                                                                         </div>
-                                                                     </div>
+                                                                    </div>
                                                                     <div class="col-md-12">
                                                                         <button type="submit">Add Consultancy</button>
                                                                     </div>
-                                                                    <span style={{ color: 'green',textAlign: 'center' }}>{message && <p>{message}</p>}</span>
+                                                                    <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
 
                                                                 </form>
-                                                             </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>       </div>

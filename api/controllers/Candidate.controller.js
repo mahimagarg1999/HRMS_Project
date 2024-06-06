@@ -51,6 +51,7 @@ exports.create = async (req, res) => {
                 resumeFullPdfUrl = "candidate/documnet/" + resumeFinalname;
             }
             var obj = {
+                candidate_id: req.body.candidate_id,
                 candidate_first_name: capitalizeWords(req.body.candidate_first_name),
                 candidate_last_name: capitalizeWords(req.body.candidate_last_name),
                 candidate_mobile: req.body.candidate_mobile,
@@ -71,9 +72,9 @@ exports.create = async (req, res) => {
                 source_of_candidate: req.body.source_of_candidate,
                 candidate_address: req.body.candidate_address,
                 candidate_document_proof: resumeFullPdfUrl,
-                tenth_percentage:req.body.tenth_percentage,
-                twelfth_percentage:req.body.twelfth_percentage,
-                graduationPercentage:req.body.graduationPercentage
+                tenth_percentage: req.body.tenth_percentage,
+                twelfth_percentage: req.body.twelfth_percentage,
+                graduationPercentage: req.body.graduationPercentage
 
             }
             const newmanageCandidateModel = new manageCandidateModel(obj);
@@ -82,11 +83,14 @@ exports.create = async (req, res) => {
         }
     }
     catch (err) {
-        console.log("er",err)
+        console.log("er", err)
         if (err.code === 11000 && err.keyPattern && err.keyPattern.candidate_email) {
-            // If the error is due to a duplicate email (code 11000 is for duplicate key error)
             return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This email is already registered.' });
-        } else {
+        }
+        else if (err.code === 11000 && err.keyPattern && err.keyPattern.candidate_id) {
+            return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This Id is already registered.' });
+        }
+        else {
             // For other errors
             return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Adding Candidate failed.' });
         }
@@ -146,7 +150,9 @@ exports.edit = async (req, res) => {
             if (resumeFinalname != '') {
                 resumeFullPdfUrl = "candidate/documnet/" + resumeFinalname;
             }
+            console.log("resumeFullPdfUrl", resumeFullPdfUrl)
             var obj = {
+                candidate_id: req.body.candidate_id,
                 candidate_first_name: capitalizeWords(req.body.candidate_first_name),
                 candidate_last_name: capitalizeWords(req.body.candidate_last_name),
                 candidate_mobile: req.body.candidate_mobile,
@@ -167,9 +173,9 @@ exports.edit = async (req, res) => {
                 source_of_candidate: req.body.source_of_candidate,
                 candidate_address: req.body.candidate_address,
                 candidate_document_proof: resumeFullPdfUrl,
-                tenth_percentage:req.body.tenth_percentage,
-                twelfth_percentage:req.body.twelfth_percentage,
-                graduationPercentage:req.body.graduationPercentage
+                tenth_percentage: req.body.tenth_percentage,
+                twelfth_percentage: req.body.twelfth_percentage,
+                graduationPercentage: req.body.graduationPercentage
 
             }
             const updatedCandidate = await manageCandidateModel.findByIdAndUpdate(
@@ -177,22 +183,25 @@ exports.edit = async (req, res) => {
                 { $set: obj },
                 { new: true } // Return the updated document
             );
-            // Respond with success message and updated Consultancy data
+            // Respond with success message and updated Candidate data
             res.json({ success: true, msg: 'Candidate updated successfully.', candidate: updatedCandidate });
-       }
+        }
     }
     catch (err) {
-        console.log("er",err)
+        console.log("er", err)
         if (err.code === 11000 && err.keyPattern && err.keyPattern.candidate_email) {
-            // If the error is due to a duplicate email (code 11000 is for duplicate key error)
             return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This email is already registered.' });
-        } else {
+        }
+        else if (err.code === 11000 && err.keyPattern && err.keyPattern.candidate_id) {
+            return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This Id is already registered.' });
+        }
+        else {
             // For other errors
             return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Adding Candidate failed.' });
         }
     }
 }
- 
+
 exports.list = async (req, res) => {
     try {
         const data = await manageCandidateModel.find({}).lean().exec();
@@ -212,7 +221,7 @@ exports.sortOrder = async (req, res) => {
         let sortObject = {};
         sortObject[columnName] = sortOrder;
 
-         const result = await manageCandidateModel.aggregate([
+        const result = await manageCandidateModel.aggregate([
             {
                 $addFields: {
                     // Create a new field with the lowercase version of the column

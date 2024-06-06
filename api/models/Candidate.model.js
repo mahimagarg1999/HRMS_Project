@@ -2,7 +2,10 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const CandidateSchema = new Schema({
-
+    candidate_id:{
+        type: String,
+        unique: true
+    },
     candidate_first_name: {
         type: String,
         required: true

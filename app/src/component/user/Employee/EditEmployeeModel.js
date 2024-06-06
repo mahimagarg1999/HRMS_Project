@@ -50,6 +50,7 @@ const ModalBox = ({ isOpen, onRequestClose, employeeId }) => {
     useEffect(() => {
 
         if (isOpen) {
+            setSelectedFile('')
             console.log('model open', employeeId)
             // Fetch data for the given employeeId
             if (employeeId) {
@@ -82,18 +83,19 @@ const ModalBox = ({ isOpen, onRequestClose, employeeId }) => {
 
     const handleSubmit = async (e) => {
         const mydata = data;
-
-        if (selectedFile == '') {
-            console.log('hii')
-        }
-        else {
+        if (selectedFile !== '') {
             mydata.employee_resume = selectedFile
-
         }
-        mydata.employee_id_proof = idproof
-        mydata.employee_marksheet = marksheet
-        mydata.employee_pan_card = pancard
-        mydata.employee_experience_letter = e_letter
+        if (idproof !== '') {
+            mydata.employee_id_proof = idproof
+        } if (marksheet !== '') {
+            mydata.employee_marksheet = marksheet
+        } if (pancard !== '') {
+            mydata.employee_pan_card = pancard
+        } if (e_letter !== '') {
+            mydata.employee_experience_letter = e_letter
+        }
+
 
 
         const pdfdoc = {
@@ -125,20 +127,6 @@ const ModalBox = ({ isOpen, onRequestClose, employeeId }) => {
             isOpen={isOpen}
             onRequestClose={onRequestClose}
             ariaHideApp={false}
-        // style={{
-        //     overlay: {
-
-        //         backgroundColor: 'rgba(0, 0, 0, 0.5)'
-        //     },
-        //     content: {
-        //         width: '90%',
-        //         height: '90%',
-        //         margin: 'auto',
-        //         borderRadius: '8px',
-        //         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-        //         padding: '20px'
-        //     }
-        // }}
         >
             <button onClick={onRequestClose}>Close</button>
 

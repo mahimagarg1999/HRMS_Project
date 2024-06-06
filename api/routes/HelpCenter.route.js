@@ -8,6 +8,8 @@ router.route('/create')
     .post(helpCenterController.create)
 router.route('/edit')
     .put(helpCenterController.edit)
+    router.route('/edit-patch')
+    .patch(helpCenterController.editPatch)
 router.route('/delete')
     .delete(helpCenterController.delete);
 

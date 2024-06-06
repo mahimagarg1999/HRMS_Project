@@ -20,13 +20,11 @@ import Userdata from './component/Admin/UserDataModule/Userdata.js';
 import AboutHome from './component/Admin/AboutModule/AboutModule.js';
 import HelpCenterModoule from './component/Admin/AdminHelpCenterModule/AdminHelpCenter.js';
 
-
 function App() {
   return (
     <Router>
       <Routes>
-        {/* <Route path="/signup" element={<Signup />} /> */}
-        <Route path="/*" element={<Login />} />
+         <Route path="/*" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/admin" element={<AdminHome />} />

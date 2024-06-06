@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 const Nav = ( ) => {
   const navigate = useNavigate()
   const logout = () => {
+    const isConfirmed = window.confirm('Are you sure you want to log out');
+
     localStorage.clear()
     navigate('/login')
   }
@@ -41,9 +43,9 @@ const Nav = ( ) => {
             <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 js-show-modal-search">
               <i class="zmdi zmdi-search"></i>
             </div>
-            <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" >
+            {/* <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" > */}
               {/* <i className="zmdi zmdi-shopping-cart"></i> */}
-            </div>
+            {/* </div> */}
             {/* <a class="dis-block icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" data-notify="0">
             <i class="zmdi zmdi-favorite-outline"></i>
           </a> */}
@@ -71,18 +73,16 @@ const Nav = ( ) => {
                 <li ><Link to="/admin-about" className="nav-item">About</Link></li>
                 <li className="nav-item" onClick={logout}> Logout </li>
 
-
-
               </ul>
             </div>
-            <div class="wrap-icon-header flex-w flex-r-m">
+            {/* <div class="wrap-icon-header flex-w flex-r-m">
               <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 js-show-modal-search">
                 <i class="zmdi zmdi-search"></i>
               </div>
               <div class="icon-header-item cl2 hov-cl1 trans-04 p-l-22 p-r-11 icon-header-noti" >
                </div>
               
-            </div>
+            </div> */}
           </nav>
         </div>
       )}

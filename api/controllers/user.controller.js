@@ -10,7 +10,7 @@ function capitalizeWords(str) {
 }
 exports.login = async (req, res) => {
     console.log("testdugkhdfinvk,")
-    console.log("userResp",req.body)    
+    console.log("userResp", req.body)
 
     try {
         var email = req.body && req.body.email ? req.body.email : '';
@@ -20,19 +20,17 @@ exports.login = async (req, res) => {
         } else {
             userModel = Employee;
             var user = await Employee.findOne({ employee_email: email }).select("employee_first_name employee_last_name employee_email employee_password  employee_code").lean().exec();
-        }  
+        }
         if (!user) {
             res.json({ success: false, status: status.NOTFOUND, msg: 'Authentication failed. User not found.' });
         } else {
-            if(req.body.role=='HR')
-            {
-                var ifPasswordMatch = await manageUserModel.findOne({password: password }).lean().exec();
+            if (req.body.role == 'HR') {
+                var ifPasswordMatch = await manageUserModel.findOne({ password: password }).lean().exec();
             }
-            else
-            {
-                var ifPasswordMatch = await Employee.findOne({ employee_password: password}).lean().exec();
+            else {
+                var ifPasswordMatch = await Employee.findOne({ employee_password: password }).lean().exec();
             }
-          
+
             if (ifPasswordMatch) {
 
                 var userResp = user;
@@ -177,8 +175,14 @@ exports.signup = async (req, res) => {
     }
     catch (err) {
         console.log("error", err);
-        return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Save Users failed.' });
+        if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
+            return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This email is already registered.' });
+        }
 
+        else {
+            // For other errors
+            return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Adding User failed.' });
+        }
     }
 }
 //get all users 
@@ -226,8 +230,14 @@ exports.updateUser = async (req, res) => {
     }
     catch (err) {
         // return res.json({ success: false, status: status.INVALIDSYNTAX, err: err, msg: 'Update User failed.' });
-        return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Update User failed.' });
+        if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
+            return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This email is already registered.' });
+        }
 
+        else {
+            // For other errors
+            return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Update User failed.' });
+        }
     }
 }
 

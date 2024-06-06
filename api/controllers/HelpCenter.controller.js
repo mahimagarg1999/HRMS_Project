@@ -81,6 +81,48 @@ exports.edit = async (req, res) => {
 
     }
 }
+// ==================
+// tets
+
+exports.editPatch = async (req, res) => {
+    var id = req.body._id;
+    if (id === undefined) {
+        return res.json({ success: false, status: status.NOTFOUND, msg: 'Id Parameter Not Available' });
+    }
+    delete req.query.id;
+    try {
+        let result = await manageHelpCenterModel.findOneAndUpdate(
+            { _id: id },
+            {
+                $set: {
+                    helpcenter_employee_id: req.body.helpcenter_employee_id,
+                    helpcenter_employee_code: req.body.helpcenter_employee_code,
+                    helpcenter_ticket_description: req.body.helpcenter_ticket_description,
+                    helpcenter_ticket_priority: req.body.helpcenter_ticket_priority,
+                    helpcenter_ticket_department: req.body.helpcenter_ticket_department,
+                    helpcenter_ticket_created_date: req.body.helpcenter_ticket_created_date,
+                    helpcenter_ticket_status: req.body.helpcenter_ticket_status,
+                    helpcenter_ticket_solved_date: req.body.helpcenter_ticket_solved_date,
+                    helpcenter_ticket_solved_by: capitalizeWords(req.body.helpcenter_ticket_solved_by),
+                    helpcenter_ticket_managed_by: capitalizeWords(req.body.helpcenter_ticket_managed_by),
+                    // helpcenter_ticket_id: 'emp' + req.body.helpcenter_employee_id,
+
+                }
+            },
+        ).lean().exec();        
+
+        if (result) {
+            res.json({ success: true, status: status.OK, msg: 'HelpCenter is updated successfully.' });
+        }
+        else {
+            return res.json({ success: false, status: status.NOTFOUND, msg: 'HelpCenter Id not found' });
+        }
+    }
+    catch (err) {
+        return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Update HelpCenter failed.' });
+
+    }
+}
 
 //get all users 
 exports.list = async (req, res) => {

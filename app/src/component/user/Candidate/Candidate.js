@@ -67,30 +67,7 @@ const CandidateModule = () => {
     };
 
     const [formData, setFormData] = useState({
-        candidate_first_name: '',
-        candidate_last_name: '',
-        candidate_mobile: '',
-        candidate_alternate_mobile: '',
-        candidate_email: '',
-        candidate_skype: '',
-        candidate_linkedIn_profile: '',
-        candidate_skills: '',
-        candidate_experience: '',
-        candidate_expected_salary: '',
-        candidate_expected_joining_date: '',
-        candidate_marrital_status: '',
-        candidate_machine_round: '',
-        candidate_technical_interview_round: '',
-        candidate_hr_interview_round: '',
-        candidate_selection_status: '',
-        candidate_feedback: '',
-        source_of_candidate: '',
-        candidate_address: '',
-        candidate_document_proof: '',
-        resumePdfName: "pdf",
-        tenth_percentage: '',
-        twelfth_percentage: '',
-        graduationPercentage: ''
+
     });
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -113,6 +90,7 @@ const CandidateModule = () => {
         }
     };
     const [errors, setErrors] = useState({
+        candidate_id: "",
         candidate_first_name: "",
         candidate_last_name: "",
         candidate_mobile: '',
@@ -143,9 +121,37 @@ const CandidateModule = () => {
 
     const openPopup = () => {
         setMessage('')
-        // setFormData('')
+        setFormData('')
+        let formDataNew = {
+            candidate_id: '',
+            candidate_first_name: '',
+            candidate_last_name: '',
+            candidate_mobile: '',
+            candidate_alternate_mobile: '',
+            candidate_email: '',
+            candidate_skype: '',
+            candidate_linkedIn_profile: '',
+            candidate_skills: '',
+            candidate_experience: '',
+            candidate_expected_salary: '',
+            candidate_expected_joining_date: '',
+            candidate_marrital_status: '',
+            candidate_machine_round: '',
+            candidate_technical_interview_round: '',
+            candidate_hr_interview_round: '',
+            candidate_selection_status: '',
+            candidate_feedback: '',
+            source_of_candidate: '',
+            candidate_address: '',
+            candidate_document_proof: '',
+            resumePdfName: "pdf",
+            tenth_percentage: '',
+            twelfth_percentage: '',
+            graduationPercentage: ''
+        }
+        setFormData(formDataNew)
         setIsOpen(true);
- 
+
     };
 
     const closePopup = () => {
@@ -163,11 +169,15 @@ const CandidateModule = () => {
         });
     };
 
-   
+
     const validateForm = () => {
         let isValid = true;
         const newErrors = {};
 
+        if (!formData.candidate_id.trim()) {
+            newErrors.candidate_id = "candidate_id is required";
+            isValid = false;
+        }
         if (!formData.candidate_first_name.trim()) {
             newErrors.candidate_first_name = "candidate_last_name is required";
             isValid = false;
@@ -336,95 +346,101 @@ const CandidateModule = () => {
 
                                                                     <div class="row">
                                                                         <div class="mb-3 col-md-6">
+                                                                            <label><b>Candidate ID*</b></label>
+                                                                            <input type="text" name="candidate_id" value={formData.candidate_id} onChange={handleInputChange} class="form-control" placeholder="Candidate" />
+                                                                            {errors.candidate_id && <span className="error" style={{ color: 'red' }}>{errors.candidate_id}</span>}
+
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
                                                                             <label><b>First Name*</b></label>
                                                                             <input type="text" name="candidate_first_name" value={formData.candidate_first_name} onChange={handleInputChange} class="form-control" placeholder="First Name" />
                                                                             {errors.candidate_first_name && <span className="error" style={{ color: 'red' }}>{errors.candidate_first_name}</span>}
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Last Name*</b></label>
+                                                                            <label><b>Last Name*</b></label>
                                                                             <input type="text" name="candidate_last_name" value={formData.candidate_last_name} onChange={handleInputChange} class="form-control" placeholder="Last Name" />
                                                                             {errors.candidate_last_name && <span className="error" style={{ color: 'red' }}>{errors.candidate_last_name}</span>}
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Mobile No*</b></label>
+                                                                            <label><b>Mobile No*</b></label>
                                                                             <input type="text" name="candidate_mobile" value={formData.candidate_mobile} onChange={handleInputChange} class="form-control" placeholder="Mobile Number" />
                                                                             {errors.candidate_mobile && <span className="error" style={{ color: 'red' }}>{errors.candidate_mobile}</span>}
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Alternate Mobile No</b></label>
+                                                                            <label><b>Alternate Mobile No</b></label>
                                                                             <input type="text" name="candidate_alternate_mobile" value={formData.candidate_alternate_mobile} onChange={handleInputChange} class="form-control" placeholder="Alternate Mobile Number" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Email*</b></label>
+                                                                            <label><b>Email*</b></label>
                                                                             <input type="email" name="candidate_email" value={formData.candidate_email} onChange={handleInputChange} class="form-control" placeholder="Email" />
                                                                             {errors.candidate_email && <span className="error" style={{ color: 'red' }}>{errors.candidate_email}</span>}
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Skype Id</b></label>
+                                                                            <label><b>Skype Id</b></label>
                                                                             <input type="text" name="candidate_skype" value={formData.candidate_skype} onChange={handleInputChange} class="form-control" placeholder="Skype ID" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>LinkedIn Profile</b></label>
+                                                                            <label><b>LinkedIn Profile</b></label>
                                                                             <input type="text" name="candidate_linkedIn_profile" value={formData.candidate_linkedIn_profile} onChange={handleInputChange} class="form-control" placeholder="LinkedIn Profile" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Skills*</b></label>
+                                                                            <label><b>Skills*</b></label>
                                                                             <input type="text" name="candidate_skills" value={formData.candidate_skills} onChange={handleInputChange} class="form-control" placeholder="Skills" />
                                                                             {errors.candidate_skills && <span className="error" style={{ color: 'red' }}>{errors.candidate_skills}</span>}
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Experience*</b></label>
+                                                                            <label><b>Experience*</b></label>
                                                                             <input type="text" name="candidate_experience" value={formData.candidate_experience} onChange={handleInputChange} class="form-control" placeholder="Experience" />
                                                                             {errors.candidate_experience && <span className="error" style={{ color: 'red' }}>{errors.candidate_experience}</span>}
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Expected Salary*</b></label>
+                                                                            <label><b>Expected Salary*</b></label>
                                                                             <input type="text" name="candidate_expected_salary" value={formData.candidate_expected_salary} onChange={handleInputChange} class="form-control" placeholder="Expected Salary" />
                                                                             {errors.candidate_expected_salary && <span className="error" style={{ color: 'red' }}>{errors.candidate_expected_salary}</span>}
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Joining Date</b></label>
+                                                                            <label><b>Joining Date</b></label>
                                                                             <input type="date" name="candidate_expected_joining_date" value={formData.candidate_expected_joining_date} onChange={handleInputChange} class="form-control" />
                                                                         </div>
-                                                                         
+
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Marrital Status</b></label>
+                                                                            <label><b>Marrital Status</b></label>
                                                                             <input type="text" name="candidate_marrital_status" value={formData.candidate_marrital_status} onChange={handleInputChange} class="form-control" placeholder="Marrital Status" />
                                                                         </div>
-                                                                        
+
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Machine Round</b></label>
+                                                                            <label><b>Machine Round</b></label>
                                                                             <input type="text" name="candidate_machine_round" value={formData.candidate_machine_round} onChange={handleInputChange} class="form-control" placeholder="Machine Round" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Technical Round</b></label>
+                                                                            <label><b>Technical Round</b></label>
                                                                             <input type="text" name="candidate_technical_interview_round" value={formData.candidate_technical_interview_round} onChange={handleInputChange} class="form-control" placeholder="Technical Interview Round" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Interview Round</b></label>
+                                                                            <label><b>Interview Round</b></label>
                                                                             <input type="text" name="candidate_hr_interview_round" value={formData.candidate_hr_interview_round} onChange={handleInputChange} class="form-control" placeholder="HR Interview Round" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Selection Status</b></label>
+                                                                            <label><b>Selection Status</b></label>
                                                                             <input type="text" name="candidate_selection_status" value={formData.candidate_selection_status} onChange={handleInputChange} class="form-control" placeholder="Selection Status" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Feedback</b></label>
+                                                                            <label><b>Feedback</b></label>
                                                                             <input type="text" name="candidate_feedback" value={formData.candidate_feedback} onChange={handleInputChange} class="form-control" placeholder="Feedback" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Source of candidate</b></label>
+                                                                            <label><b>Source of candidate</b></label>
                                                                             <input type="text" name="source_of_candidate" value={formData.source_of_candidate} onChange={handleInputChange} class="form-control" placeholder="From Consultancy" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Candidate Address</b></label>
+                                                                            <label><b>Candidate Address</b></label>
                                                                             <input type="text" name="candidate_address" value={formData.candidate_address} onChange={handleInputChange} class="form-control" placeholder="Address" />
                                                                         </div>
 
@@ -433,27 +449,27 @@ const CandidateModule = () => {
                                                                             <input type="file" onChange={handleFileChange} class="form-control" placeholder='candidate document proof' name="candidate_document_proof" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>10th  Percentage</b></label>
+                                                                            <label><b>10th  Percentage</b></label>
                                                                             <input type="number" name="tenth_percentage" value={formData.tenth_percentage} onChange={handleInputChange} class="form-control" placeholder="Tenth Percentage" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>12th  Percentage</b></label>
+                                                                            <label><b>12th  Percentage</b></label>
                                                                             <input type="number" name="twelfth_percentage" value={formData.twelfth_percentage} onChange={handleInputChange} class="form-control" placeholder="Twelfth Percentage" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                        <label><b>Graduation  Percentage</b></label>
+                                                                            <label><b>Graduation  Percentage</b></label>
                                                                             <input type="number" name="graduationPercentage" value={formData.graduationPercentage} onChange={handleInputChange} class="form-control" placeholder="Graduation Percentage" />
                                                                         </div>
-                                                    
- 
+
+
                                                                     </div>
                                                                     <div class="col-md-12">
                                                                         <button type="submit">Add Candidate</button>
                                                                     </div>
-                                                                    <span style={{ color: 'green',textAlign: 'center' }}>{message && <p>{message}</p>}</span>
+                                                                    <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
 
                                                                 </form>
-                                                                
+
                                                             </div>
                                                         </div>
                                                     </div>
@@ -482,6 +498,10 @@ const CandidateModule = () => {
                                         <thead className="thead-light">
                                             <tr>
                                                 {/* <th scope="col" >Id  </th> */}
+                                                
+                                                <th scope="col" onClick={() => handleSort('candidate_id')}>ID {sortColumn === 'candidate_id' && (
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
+                                                )}</th>
                                                 <th scope="col" onClick={() => handleSort('candidate_first_name')}>Name {sortColumn === 'candidate_first_name' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
@@ -505,6 +525,8 @@ const CandidateModule = () => {
                                                 <tr key={index}>
 
                                                     {/* <td>{data._id}</td> */}
+                                                    <td>{data.candidate_id}</td>
+
                                                     <td>{data.candidate_first_name}&nbsp;{data.candidate_last_name} </td>
 
 

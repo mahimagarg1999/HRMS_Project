@@ -155,41 +155,7 @@ const EmployeeModule = () => {
 
     });
 
-    const [formData, setFormData] = useState({
-        employee_code: '',
-        employee_first_name: '',
-        employee_last_name: '',
-        employee_mobile: '',
-        employee_alternate_mobile: '',
-        employee_email: '',
-        employee_password: '',
-        employee_address: '',
-        employee_city: '',
-        employee_state: '',
-        employee_other_info: '',
-        employee_dob: '',
-        employee_doj: '',
-        employee_skills: '',
-        employee_experience: '',
-        employee_resume: '',
-        employee_id_proof: '',
-        employee_permanant_address_proof: '',
-
-        employee_local_address_proof: '',
-        employee_reference_one_name: '',
-        employee_reference_one_mobile: '',
-        employee_reference_two_name: '',
-        employee_reference_two_mobile: '',
-
-        employee_pan_card: '',
-        employee_marksheet: '',
-        employee_experience_letter: '',
-        resumePdfName: "pdf",
-        proofPdfName: "pdf",
-        panPdfName: "pdf",
-        marksheetPdfName: "pdf",
-        experiencePdfName: "pdf"
-    });
+    const [formData, setFormData] = useState({});
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file instanceof Blob) {
@@ -238,7 +204,43 @@ const EmployeeModule = () => {
 
     const openPopup = () => {
         setMessage('');
-        // setFormData('')
+        setFormData('');
+        let formDataNew = {
+            employee_code: '',
+            employee_first_name: '',
+            employee_last_name: '',
+            employee_mobile: '',
+            employee_alternate_mobile: '',
+            employee_email: '',
+            employee_password: '',
+            employee_address: '',
+            employee_city: '',
+            employee_state: '',
+            employee_other_info: '',
+            employee_dob: '',
+            employee_doj: '',
+            employee_skills: '',
+            employee_experience: '',
+            employee_resume: '',
+            employee_id_proof: '',
+            employee_permanant_address_proof: '',
+
+            employee_local_address_proof: '',
+            employee_reference_one_name: '',
+            employee_reference_one_mobile: '',
+            employee_reference_two_name: '',
+            employee_reference_two_mobile: '',
+
+            employee_pan_card: '',
+            employee_marksheet: '',
+            employee_experience_letter: '',
+            resumePdfName: "pdf",
+            proofPdfName: "pdf",
+            panPdfName: "pdf",
+            marksheetPdfName: "pdf",
+            experiencePdfName: "pdf"
+        }
+        setFormData(formDataNew);
         setIsOpen(true);
     };
 
@@ -485,12 +487,12 @@ const EmployeeModule = () => {
                                                                             <input type="text" name="employee_reference_two_mobile" value={formData.employee_reference_two_mobile} onChange={handleInputChange} class="form-control" placeholder="Reference Two Mobile" />
                                                                         </div>
 
- 
+
                                                                     </div>
                                                                     <div class="col-md-12">
                                                                         <button type="submit">Add Employee</button>
                                                                     </div>
-                                                                    <span style={{ color: 'green',textAlign: 'center' }}>{message && <p>{message}</p>}</span>
+                                                                    <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
 
                                                                 </form>
                                                             </div>

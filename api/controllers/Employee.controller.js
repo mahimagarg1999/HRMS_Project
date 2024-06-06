@@ -237,7 +237,17 @@ exports.create = async (req, res) => {
 
     } catch (err) {
         console.log("error", err);
-        return res.json({ success: false, status: status.INVALIDSYNTAX, err: err, msg: 'Save employee failed.' });
+        if (err.code === 11000 && err.keyPattern && err.keyPattern.employee_code) {
+            return res.json({ success: false, status: status.BAD_REQUEST, msg: 'Employee Code is already registered.' });
+        }
+        else if (err.code === 11000 && err.keyPattern && err.keyPattern.employee_email) {
+            return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This Email is already registered.' });
+        }
+        else {
+            // For other errors
+            return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Adding Employee failed.' });
+        
+    }
     }
 }
 
@@ -590,8 +600,17 @@ exports.edit = async (req, res) => {
     } catch (err) {
         // If any error occurs during the process, handle it
         console.log("error", err);
-        return res.status(500).json({ success: false, msg: 'Failed to update employee.', error: err });
-    }
+        if (err.code === 11000 && err.keyPattern && err.keyPattern.employee_code) {
+            return res.json({ success: false, status: status.BAD_REQUEST, msg: 'Employee Code is already registered.' });
+        }
+        else if (err.code === 11000 && err.keyPattern && err.keyPattern.employee_email) {
+            return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This Email is already registered.' });
+        }
+        else {
+            // For other errors
+            return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Update Employee failed.' });
+        
+    }    }
 }
 
 exports.sortOrder = async (req, res) => {
@@ -655,7 +674,7 @@ exports.search = async (req, res) => {
     }
 }
 
-// exports.search = async (req, res) => {
+// exports.search = async (r    eq, res) => {
 //     try {
 //         const query = req.query.search;
 //         if (!query) {

@@ -22,7 +22,6 @@ const ModalBox = ({ isOpen, onRequestClose, candidateId }) => {
                     console.log('hii')
                     setResume(reader.result);
                 }
-
                 console.log('idproof', resume)
 
             };
@@ -32,9 +31,9 @@ const ModalBox = ({ isOpen, onRequestClose, candidateId }) => {
         }
     };
     useEffect(() => {
-
         if (isOpen) {
             setMessage('')
+            setResume('')
             console.log('model open', candidateId)
             // Fetch data for the given candidateId
             if (candidateId) {
@@ -42,8 +41,6 @@ const ModalBox = ({ isOpen, onRequestClose, candidateId }) => {
                     try {
 
                         const response = await axios.get(`${BASE_API_URL}candidate/get?candidateid=${candidateId}`);
-
-
                         setData(response.data.data)
                         console.log('data', data)
 
@@ -70,7 +67,9 @@ const ModalBox = ({ isOpen, onRequestClose, candidateId }) => {
 
     const handleSubmit = async (e) => {
         const mydata = data;
-        mydata.candidate_resume = resume
+        if (resume !== '') {
+            mydata.candidate_document_proof = resume
+        }
 
         console.log("data", data)
 
@@ -124,7 +123,12 @@ const ModalBox = ({ isOpen, onRequestClose, candidateId }) => {
                                 <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Edit {data.candidate_first_name} profile</h4>
 
                             </div>
-                             <div class="row">
+                            <div class="row">
+                                <div class="mb-3 col-md-6">
+                                    <label><b>Candidate ID*</b></label>
+                                    <input type="text" name="candidate_id" value={data.candidate_id} onChange={handleInputChange} class="form-control" placeholder="Candidate" />
+ 
+                                </div>
                                 <div class="mb-3 col-md-6">
                                     <label><b>First Name</b></label>
                                     <input type="text" name="candidate_first_name" value={data.candidate_first_name} onChange={handleInputChange} class="form-control" placeholder="Full Name" />
@@ -206,8 +210,8 @@ const ModalBox = ({ isOpen, onRequestClose, candidateId }) => {
 
                                 <div class="mb-3 col-md-6">
                                     <label>Document Proof </label>
-                                    <input type="file" name="candidate_document_proof" onChange={handleFileChange} accept=".pdf" />
-                                    <a style={{ color: 'red' }} href={`http://localhost:5000/${data.candidate_document_proof}`} target="_blank">{data.candidate_document_proof==''?'':'Show Document proof'}</a>
+                                    <input type="file" name="resume" onChange={handleFileChange} accept=".pdf" />
+                                    <a style={{ color: 'red' }} href={`http://localhost:5000/${data.candidate_document_proof}`} target="_blank">{data.candidate_document_proof == '' ? '' : 'Show Document proof'}</a>
 
                                 </div>
                                 <div class="mb-3 col-md-6">
@@ -223,11 +227,11 @@ const ModalBox = ({ isOpen, onRequestClose, candidateId }) => {
                                     <input type="number" name="graduationPercentage" value={data.graduationPercentage} onChange={handleInputChange} class="form-control" placeholder="Graduation Percentage" />
                                 </div>
                             </div>
- 
+
                             <div class="col-md-12">
                                 <button type="submit">Edit here</button>
                             </div>
-                            <span style={{ color: 'green',textAlign: 'center' }}>{message && <p>{message}</p>}</span>
+                            <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
 
                         </form>
 

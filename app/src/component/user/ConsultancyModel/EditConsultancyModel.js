@@ -34,6 +34,7 @@ const ModalBox = ({ isOpen, onRequestClose, consultancyId }) => {
 
         if (isOpen) {
             setMessage('')
+            setAgreement('')
             console.log('model open', consultancyId)
             // Fetch data for the given consultancyId
             if (consultancyId) {
@@ -69,7 +70,9 @@ const ModalBox = ({ isOpen, onRequestClose, consultancyId }) => {
 
     const handleSubmit = async (e) => {
         const mydata = data;
-        mydata.contract_agreement = agreement
+        if (agreement !== '') {
+            mydata.contract_agreement = agreement
+        }
 
         console.log("data", data)
 

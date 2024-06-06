@@ -26,9 +26,6 @@ const HelpCenterModule = () => {
 
     const [query, setQuery] = useState('');
 
-
-
-
     const handlePageChange = ({ selected }) => {
         setCurrentPage(selected); // Update the current page when pagination changes
     };
@@ -96,15 +93,15 @@ const HelpCenterModule = () => {
 
     const [formData, setFormData] = useState({
         
-        helpcenter_ticket_id: '',
-        helpcenter_employee_id:localStorage.getItem("_id"),
-         helpcenter_ticket_description: '',
-        helpcenter_ticket_priority: '',
-        helpcenter_ticket_department: '',
-        helpcenter_ticket_status: 'Active',
-        helpcenter_ticket_solved_by: 'hr',
-        helpcenter_ticket_managed_by: 'hr',
-        helpcenter_employee_code:empCode,
+        // helpcenter_ticket_id: '',
+        // helpcenter_employee_id:localStorage.getItem("_id"),
+        //  helpcenter_ticket_description: '',
+        // helpcenter_ticket_priority: '',
+        // helpcenter_ticket_department: '',
+        // helpcenter_ticket_status: 'Active',
+        // helpcenter_ticket_solved_by: 'hr',
+        // helpcenter_ticket_managed_by: 'hr',
+        // helpcenter_employee_code:empCode,
         
 
     });
@@ -126,6 +123,19 @@ const HelpCenterModule = () => {
     const openPopup = () => {
         setMessage('');
         setFormData('');
+        let formDataNew ={
+            helpcenter_ticket_id: '',
+            helpcenter_employee_id:localStorage.getItem("_id"),
+             helpcenter_ticket_description: '',
+            helpcenter_ticket_priority: '',
+            helpcenter_ticket_department: '',
+            helpcenter_ticket_status: 'Active',
+            helpcenter_ticket_solved_by: 'hr',
+            helpcenter_ticket_managed_by: 'hr',
+            helpcenter_employee_code:empCode,
+        }    
+                setFormData(formDataNew);
+
         setIsOpen(true);
     };
 
@@ -202,9 +212,6 @@ const HelpCenterModule = () => {
             newErrors.helpcenter_ticket_description = "helpcenter_ticket_description is required";
             isValid = false;
         }
-
-         
-
 
         setErrors(newErrors);
         return isValid;

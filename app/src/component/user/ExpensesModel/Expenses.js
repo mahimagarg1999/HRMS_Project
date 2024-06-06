@@ -83,14 +83,6 @@ const ExpensesModule = () => {
     //     return tableData; // Return original data if no sorting column is selected
     // };
     const [formData, setFormData] = useState({
-        expenses_purpose: '',
-        expenses_bill: '',
-        expenses_amount: '',
-        expenses_voucher: '',
-        expenses_remark: '',
-        expenses_by_cash: '',
-        expenses_by_cheque: '',
-        expenses_cash_recieved_by: '',
 
     });
     useEffect(() => {
@@ -109,7 +101,20 @@ const ExpensesModule = () => {
 
     const openPopup = () => {
         setMessage('');
-        // setFormData('');
+        setFormData('');
+        let formDataNew = {
+            expenses_purpose: '',
+            expenses_bill: '',
+            expenses_amount: '',
+            expenses_voucher: '',
+            expenses_remark: '',
+            expenses_by_cash: '',
+            expenses_by_cheque: '',
+            expenses_cash_recieved_by: '',
+
+        }
+        setFormData(formDataNew);
+
         setIsOpen(true);
     };
 
@@ -310,25 +315,51 @@ const ExpensesModule = () => {
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
                                                                             <label><b>Expenses By Cash</b></label>
-                                                                            <input type="text" name="expenses_by_cash" value={formData.expenses_by_cash} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cash" />
+                                                                            {/* <input type="text" name="expenses_by_cash" value={formData.expenses_by_cash} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cash" /> */}
+                                                                            <select 
+        name="expenses_by_cash" 
+        value={formData.expenses_by_cash} 
+        onChange={handleInputChange} 
+        className="form-control"
+    >
+        <option value="">Select Expenses Cash</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+    </select>
+
+
+
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
                                                                             <label><b>Expenses By Cheque</b></label>
-                                                                            <input type="text" name="expenses_by_cheque" value={formData.expenses_by_cheque} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cheque" />
+                                                                            {/* <input type="text" name="expenses_by_cheque" value={formData.expenses_by_cheque} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cheque" /> */}
+                                                                            <select 
+        name="expenses_by_cheque" 
+        value={formData.expenses_by_cheque} 
+        onChange={handleInputChange} 
+        className="form-control"
+    >
+        <option value="">Select Expenses Cheque</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+    </select>
+
+                                                                    
+                                                                    
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
                                                                             <label><b>Expenses Cash Recieved By </b></label>
                                                                             <input type="text" name="expenses_cash_recieved_by" value={formData.expenses_cash_recieved_by} onChange={handleInputChange} class="form-control" placeholder="Expenses Cash Recieved By" />
                                                                         </div>
- 
+
                                                                     </div>
                                                                     <div class="col-md-12">
                                                                         <button type="submit">Add Expenses</button>
                                                                     </div>
-                                                                    <span style={{ color: 'green',textAlign: 'center' }}>{message && <p>{message}</p>}</span>
+                                                                    <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
 
                                                                 </form>
-                                                             </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>       </div>
@@ -366,7 +397,7 @@ const ExpensesModule = () => {
                                                 <th scope="col" onClick={() => handleSort('expenses_amount')}>Expenses Amount {sortColumn === 'expenses_amount' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
-                                                 <th scope="col" onClick={() => handleSort('expenses_bill')}>Expenses Bill {sortColumn === 'expenses_bill' && (
+                                                <th scope="col" onClick={() => handleSort('expenses_bill')}>Expenses Bill {sortColumn === 'expenses_bill' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
                                                 <th scope="col" onClick={() => handleSort('expenses_voucher')}>Expenses Voucher {sortColumn === 'expenses_voucher' && (

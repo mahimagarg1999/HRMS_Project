@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const HelpcenterSchema = new Schema({
     helpcenter_ticket_id: {
         type: String,
-       
+
     },
     helpcenter_employee_id: {
         type: String,

@@ -50,6 +50,7 @@ const ModalBox = ({ isOpen, onRequestClose, expensesId }) => {
     const handleSubmit =async (e) => {
         console.log("data", data)
         e.preventDefault();
+        
         // Handle form submission here
         try {
             const response =await axios.put(`${BASE_API_URL}expenses/edit`, data);
