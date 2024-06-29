@@ -8,7 +8,7 @@ const ExpensesSchema = new Schema({
         required: true,
     },
     expenses_bill: {
-        type: String,
+        type: Number,
         required: true
     },
     expenses_amount: {

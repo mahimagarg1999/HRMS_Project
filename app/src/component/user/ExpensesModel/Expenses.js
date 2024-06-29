@@ -262,11 +262,7 @@ const ExpensesModule = () => {
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-body text-center">
-                                    {/* <h5 className="card-title m-b-0">
-                                    <button style={{ backgroundColor: '#cfa68e', fontSize: '20px', border: 'none', marginBottom: '20px' }} onClick={openPopup}>
-                                        Add Expenses +
-                                    </button>
-                                </h5> */}
+
 
                                     <div>
                                         <button className="backButton" onClick={openPopup}>
@@ -280,7 +276,7 @@ const ExpensesModule = () => {
                                         <div>
                                             <div>
                                                 <div>
-                                                    <div class="row">
+                                                    {/* <div class="row">
                                                         <div class="col-md-6 offset-md-3">
                                                             <div class="signup-form">
                                                                 <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
@@ -315,37 +311,35 @@ const ExpensesModule = () => {
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
                                                                             <label><b>Expenses By Cash</b></label>
-                                                                            {/* <input type="text" name="expenses_by_cash" value={formData.expenses_by_cash} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cash" /> */}
-                                                                            <select 
-        name="expenses_by_cash" 
-        value={formData.expenses_by_cash} 
-        onChange={handleInputChange} 
-        className="form-control"
-    >
-        <option value="">Select Expenses Cash</option>
-        <option value="Yes">Yes</option>
-        <option value="No">No</option>
-    </select>
+                                                                             <select
+                                                                                name="expenses_by_cash"
+                                                                                value={formData.expenses_by_cash}
+                                                                                onChange={handleInputChange}
+                                                                                className="form-control"
+                                                                            >
+                                                                                <option value="">Select Expenses Cash</option>
+                                                                                <option value="Yes">Yes</option>
+                                                                                <option value="No">No</option>
+                                                                            </select>
 
 
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
                                                                             <label><b>Expenses By Cheque</b></label>
-                                                                            {/* <input type="text" name="expenses_by_cheque" value={formData.expenses_by_cheque} onChange={handleInputChange} class="form-control" placeholder="Expenses By Cheque" /> */}
-                                                                            <select 
-        name="expenses_by_cheque" 
-        value={formData.expenses_by_cheque} 
-        onChange={handleInputChange} 
-        className="form-control"
-    >
-        <option value="">Select Expenses Cheque</option>
-        <option value="Yes">Yes</option>
-        <option value="No">No</option>
-    </select>
+                                                                             <select
+                                                                                name="expenses_by_cheque"
+                                                                                value={formData.expenses_by_cheque}
+                                                                                onChange={handleInputChange}
+                                                                                className="form-control"
+                                                                            >
+                                                                                <option value="">Select Expenses Cheque</option>
+                                                                                <option value="Yes">Yes</option>
+                                                                                <option value="No">No</option>
+                                                                            </select>
 
-                                                                    
-                                                                    
+
+
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
                                                                             <label><b>Expenses Cash Recieved By </b></label>
@@ -361,8 +355,86 @@ const ExpensesModule = () => {
                                                                 </form>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </div>       </div>
+                                                    </div> */}
+
+<div className="container-fluid">
+    <div className="row">
+        <div className="col-12">
+            <div className="signup-form">
+                <form onSubmit={handleSubmit} className="mt-5 border p-4 bg-light shadow form-custom-style">
+                    <div style={{ textAlign: 'center' }}>
+                        <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary"><b>Add Expenses</b></h4>
+                        <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
+                    </div>
+                    <div className="form-group table-scroll">
+                        <table className="table  ">
+                            <thead>
+                                <tr>
+                                    <th><b>Expenses Purpose*</b></th>
+                                    <th><b>Expenses Bill*</b></th>
+                                    <th><b>Expenses Amount</b></th>
+                                    <th><b>Expenses Voucher</b></th>
+                                    <th><b>Expenses Remark</b></th>
+                                    <th><b>Expenses By Cash</b></th>
+                                    <th><b>Expenses By Cheque</b></th>
+                                    <th><b>Expenses Cash Received By</b></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <input type="text" name="expenses_purpose" value={formData.expenses_purpose} onChange={handleInputChange} className="form-control" placeholder="Expenses purpose" style={{width:'170px' }}/>
+                                        {errors.expenses_purpose && <span className="error" style={{ color: 'red' }}>{errors.expenses_purpose}</span>}
+                                    </td>
+                                    <td>
+                                        <input type="number" name="expenses_bill" value={formData.expenses_bill} onChange={handleInputChange} className="form-control" placeholder="Expenses Bill" />
+                                        {errors.expenses_bill && <span className="error" style={{ color: 'red' }}>{errors.expenses_bill}</span>}
+                                    </td>
+                                    <td>
+                                        <input type="number" name="expenses_amount" value={formData.expenses_amount} onChange={handleInputChange} className="form-control" placeholder="Expenses Amount" />
+                                    </td>
+                                    <td>
+                                        <input type="text" name="expenses_voucher" value={formData.expenses_voucher} onChange={handleInputChange} className="form-control" placeholder="Expenses Voucher" />
+                                    </td>
+                                    <td>
+                                        <input type="text" name="expenses_remark" value={formData.expenses_remark} onChange={handleInputChange} className="form-control" placeholder="Expenses Remark" />
+                                    </td>
+                                    <td>
+                                        <select name="expenses_by_cash" value={formData.expenses_by_cash} onChange={handleInputChange} className="form-control">
+                                            <option value="">Select Expenses Cash</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select name="expenses_by_cheque" value={formData.expenses_by_cheque} onChange={handleInputChange} className="form-control">
+                                            <option value="">Select Expenses Cheque</option>
+                                            <option value="Yes">Yes</option>
+                                            <option value="No">No</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="expenses_cash_recieved_by" value={formData.expenses_cash_recieved_by} onChange={handleInputChange} className="form-control" placeholder="Expenses Cash Received By" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div className="col-md-12">
+                        <button type="submit">Add Expenses</button>
+                    </div>
+                    <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>

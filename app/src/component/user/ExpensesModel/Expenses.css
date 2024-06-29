@@ -157,3 +157,15 @@ th {
    top: 65%;
    transform: translateY(-50%);
  }
+
+ .form-custom-style {
+   max-width: 100%;
+   margin: 157px auto;
+   padding: 20px;
+   border: 1px solid #ccc;
+   border-radius: 5px;
+   background-color: #f9f9f9;
+}
+.table-scroll {
+   overflow-x: auto;
+}
