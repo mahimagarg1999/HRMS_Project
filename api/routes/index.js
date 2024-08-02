@@ -4,9 +4,11 @@ const candidateRoute = require("../routes/Candidate.route")
 const helpcenterRoute = require("../routes/HelpCenter.route")
 const expensesRoute = require("../routes/Expenses.route")
 const consultancyRoute = require("../routes/Consultancy.route")
-const adminRoute = require("../routes/Admin.route")
 const userRoute = require("../routes/user.route")
-const expensesOneRoute = require("../routes/Expenses_one.route")
+const recruitmentRoute = require("../routes/Recruitment.route")
+const emphelpcenter = require("../routes/EMPHelpCenter.route")
+const skills = require("../routes/Skills.route")
+
 
 const router = express.Router();
 router.use('/employee', employeeRoute);
@@ -14,9 +16,11 @@ router.use('/candidate', candidateRoute);
 router.use('/helpcenter', helpcenterRoute);
 router.use('/expenses', expensesRoute);
 router.use('/consultancy', consultancyRoute);
-router.use('/admin', adminRoute);
 router.use('/user', userRoute);
-router.use('/expensesone', expensesOneRoute);
+router.use('/recruitment', recruitmentRoute);
+
+router.use('/emphelpcenter', emphelpcenter);
+router.use('/skills', skills);
 
 
 module.exports = router;

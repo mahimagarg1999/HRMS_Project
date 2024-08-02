@@ -1,0 +1,7 @@
+_id,expenses_purpose,expenses_bill,expenses_amount,expenses_voucher,expenses_remark,expenses_by_cash,expenses_by_cheque,date_of_expenses,transaction_id,__v
+668bc26e208c1595f7f3dc47,Office Supplies,123,500,Voucher123,For office supplies purchase,true,false,2024-07-09T00:00:00.000Z,E2-08072024-161150,0
+668bc2c6208c1595f7f3dc4b,Client Meeting Lunch,30000,170,pre-approved financial voucher,unusual expenses,Yes,No,2024-07-08T10:43:18.311Z,E3-08072024-161318,0
+668d211b85c6ec6dcb4faebb,Client Meeting Lunch1,10000,350,pre-approved financial voucher,unusual expenses,Yes,No,2024-07-09T11:38:03.068Z,E1-09072024,0
+669f4bd3b5fb71476194b0cc,Test,30000,250,pre-approved financial voucher,unusual expenses,No,Yes,2024-07-23T06:21:08.011Z,E1-23072024,0
+669f4c24b5fb71476194b0cf,Test Secong,50000,150,not-approved financial voucher,unusual expenses,Yes,No,2024-07-23T06:22:28.682Z,E2-23072024,0
+669f4c45b5fb71476194b0d2,Client Meeting Lunch1,400000,500,pre-approved financial voucher,unusual expenses,Yes,No,2024-07-23T06:23:01.492Z,E3-23072024,0

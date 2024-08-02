@@ -7,5 +7,4 @@ const status= {
     "NOTMODIFIED": 304,
     DUPLICATE_ENTRY: 'DUPLICATE_ENTRY',
 }
-
 module.exports = status;

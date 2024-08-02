@@ -5,7 +5,7 @@ import './ChangePassword.css'
 import { useNavigate } from 'react-router-dom';
 import Footer from '../../FooterModule/Footer';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
-
+import CloseButton from 'react-bootstrap/CloseButton';
 const ChangePassword = () => {
     const [employee_email, setEmail] = useState(localStorage.getItem("email"));
     const [currentPassword, setCurrentPassword] = useState('');
@@ -26,7 +26,6 @@ const ChangePassword = () => {
             setMessage('New password and confirm password do not match.');
             return;
         }
-
         try {
             const response = await axios.put(`${BASE_API_URL}employee/changepassword`, {
                 employee_email,
@@ -50,68 +49,68 @@ const ChangePassword = () => {
         navigate('/admin')
     };
     return (
-<>
+        <>
 
-        <div>
-            <Nav />
-            {/* {showOverlay && (
-                <div className="overlay"> */}
-            <div style={{ backgroundColor: '#28769a' }}>
-                <h1 className='headerUser'>ChangePassword</h1>
-            </div>
-            <div >
-                <div class="row">
-                    <div class="col-md-6 offset-md-3">
-                        <div class="signup-form">
-                            <form onSubmit={handleSubmit}>
-                                <div>
-                                    <button onClick={handleClose} className="closeButton1">x</button>
+            <div>
+                <Nav />
 
-                                    <label>Email:</label>
-                                    <input
-                                        type="email"
-                                        value={employee_email}
-                                        onChange={(e) => setCurrentPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label>Current Password:</label>
-                                    <input
-                                        type="password"
-                                        value={currentPassword}
-                                        onChange={(e) => setCurrentPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label>New Password:</label>
-                                    <input
-                                        type="password"
-                                        value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label>Confirm New Password:</label>
-                                    <input
-                                        type="password"
-                                        value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <button type="submit">Change Password</button>
-                                <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
+                <div style={{ backgroundColor: '#28769a' }}>
+                    <h1 className='headerUser'>ChangePassword</h1>
+                </div>
+                <div >
+                    <div class="row">
+                        <div class="col-md-6 offset-md-3">
+                            <div class="signup-form">
+                                <form onSubmit={handleSubmit}>
+                                    <div>
+                                        {/* <button onClick={handleClose} className="closeButton1">x</button> */}
+                                        <p style={{ display: "flex"}}>
+                                            <b><label>Email:</label></b>
+                                            <CloseButton style={{ marginLeft: "85%"}} onClick={handleClose} /></p>
+                                        <input
+                                            type="email"
+                                            value={employee_email}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <b>  <label>Current Password*</label></b>
+                                        <input
+                                            type="password"
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <b> <label>New Password*</label></b>
+                                        <input
+                                            type="password"
+                                            value={newPassword}
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <b> <label>Confirm New Password*</label></b>
+                                        <input
+                                            type="password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <button type="submit">Change Password</button>
+                                    <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
 
-                            </form>
-                        </div></div></div>
-            </div>
-            {/* </div>
+                                </form>
+                            </div></div></div>
+                </div>
+                {/* </div>
             )} */}
-        </div>
-        <Footer />
+            </div>
+            <Footer />
         </>
     );
 }

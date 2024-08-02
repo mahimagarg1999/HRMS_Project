@@ -13,13 +13,11 @@ router.route('/delete')
 
 router.route('/multi-delete')
     .delete(consultancyController.multidelete)
-
-
-
+ 
 router.route('/get')
     .get(consultancyController.getConsultancyById)
-// router.route('/export')
-//     .delete(employeeController.export)
-// router.route('/import')
-//     .delete(employeeController.import)
+
+    router.route('/search').get(consultancyController.search)
+    router.route('/sortorder').get(consultancyController.sortOrder)
+ 
 module.exports = router;                                                                                             

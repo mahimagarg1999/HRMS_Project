@@ -32,7 +32,109 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
+}
+
+.show_more {
+  border: none;
+  background: white !important;
+  font-size: 13px !important;
+  color:rgb(40, 118, 154) !important
+}
+.description-cell {
+  width: 300px; /* Adjust the width as needed */
+}
+
+.marginShiftData{
+  width: 20%
+}
+.canmarginShiftData{
+  width: 25%
+}
+.empmarginShiftData{
+  width: 30%
+}
+
+.description-cell-1{
+  width: 600px;
+}
+/* 22jul */
+.button_design{
+  background-color: rgb(40, 118, 154);
+  color: white;
+  border: blue;
+  padding: 3px 6px;
+}
+.button_design_view{
+  background-color: rgb(40, 118, 154);
+  color: white;
+  border: blue;
+  margin-right:5px;
+  padding: 3px 6px;
+}
+.export_design{
+background-color: rgb(40, 118, 154);
+border: rgb(40, 118, 154);
+}
+.icon_manage{
+  text-align: right;
+  margin-bottom: 20px;
+  /* margin-left: 75%; */
+}
+.icon_manage_file{
+  text-align: right;
+  margin-top:6px
+}
+/* ============================= search*/
+ /* /============== */
+ /* .containerOnce {
+   position: relative;
+   margin-left: 83%;
+   margin-bottom: 10px;
+ } */
+ .containerOnce {
+  position: absolute;
+  margin-top: 25px;
+   margin-left: 20px;
+}
+  /* margin-left: 83%; */
+  /* margin-bottom: 10px; */
+
+.containerOnce input[type="text"] {
+  /* width: calc(15% - 30px); Adjust width to leave space for the icon */
+  padding-left: 30px; /* Space for the icon */
+  /* border: 2px solid black; */
+  border: 2px solid rgb(40, 118, 154);
+  
+}
+
+.containerOnce::before {
+  content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="rgb(40, 118, 154)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'); /* Inline SVG as background image */
+  position: absolute;
+  left: 5px; /* Adjust the icon position */
+  top: 65%;
+  transform: translateY(-50%);
+}
+
+.form-custom-style {
+  max-width: 100%;
+  margin: 157px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+.containerSearching {
+  position: relative;
+  margin-top: 25px;
+   margin-left: 20px;
+}
+.editColor{
+  color: red;
 }

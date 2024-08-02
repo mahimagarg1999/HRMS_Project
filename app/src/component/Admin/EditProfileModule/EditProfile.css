@@ -146,7 +146,7 @@
     /* Make inputs fill their container */
     padding: 8px;
     /* Add some padding inside the inputs */
-    margin: 5px 0 20px 0;
+    margin: 0px 0 0.5rem 0;
     /* Add some margin for spacing */
     display: inline-block;
     /* Ensure inputs are line elements */

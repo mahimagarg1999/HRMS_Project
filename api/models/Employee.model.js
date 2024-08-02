@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const EmployeeSchema = new Schema({
-    // employee_id: {
-    //     type: String,
-    //     required: true
-    // },
+    employee_code: {
+        type: String,
+        required: true,
+        unique: true
+
+    },
     employee_first_name: {
         type: String,
         required: true
@@ -15,12 +17,13 @@ const EmployeeSchema = new Schema({
     },
     employee_mobile: {
         type: String,
-        required: true
+        required: true,
+
     },
     employee_alternate_mobile: {
         type: String,
-     },
-     employee_email: {
+    },
+    employee_email: {
         type: String,
         required: true,
         unique: true
@@ -31,16 +34,16 @@ const EmployeeSchema = new Schema({
     },
     employee_address: {
         type: String,
-     },
+    },
     employee_city: {
         type: String,
-     },
+    },
     employee_state: {
         type: String,
-     },
+    },
     employee_other_info: {
         type: String,
-     },
+    },
     employee_dob: {
         type: Date,
         default: Date.now
@@ -50,71 +53,49 @@ const EmployeeSchema = new Schema({
         default: Date.now
     },
     employee_skills: {
-        type: String,
-     },
+        type: Array,
+        required: true
+    },
     employee_experience: {
         type: String,
         required: true
     },
     employee_resume: {
         type: String,
-     },
+    },
     employee_id_proof: {
         type: String,
-     },
+    },
+    employee_pan_card: {
+        type: String,
+    },
+    employee_marksheet: {
+        type: String,
+    },
+    employee_experience_letter: {
+        type: String,
+    },
     employee_permanant_address_proof: {
         type: String,
-     },
+    },
     employee_local_address_proof: {
         type: String,
-     },
+    },
     employee_reference_one_name: {
         type: String,
-     },
+    },
     employee_reference_one_mobile: {
         type: String,
-     },
+    },
     employee_reference_two_name: {
         type: String,
-     },
+    },
     employee_reference_two_mobile: {
         type: String,
-     },
-    employee_info1: {
+    },
+    image: {
         type: String,
-     },
-    employee_info2: {
-        type: String,
-     },
-    employee_info3: {
-        type: String,
-     },
-    employee_info4: {
-        type: String,
-     },
-    employee_info5: {
-        type: String,
-     },
-    employee_info6: {
-        type: String,
-     },
-    employee_info7: {
-        type: String,
-     },
-    employee_info8: {
-        type: String,
-     },
-    employee_info9: {
-        type: String,
-     },
-    employee_info10: {
-        type: String,
-     },
-    //  role: {
-    //     type: String,
-    //     default: 'employee'
-
-    // },
+    },
 },
     {
         timestamps: { createdAt: "created_at", updatedAt: "updated_at" }
@@ -122,3 +103,10 @@ const EmployeeSchema = new Schema({
 const Employee = mongoose.model('employee', EmployeeSchema);
 
 module.exports = Employee;
+
+
+
+
+
+
+

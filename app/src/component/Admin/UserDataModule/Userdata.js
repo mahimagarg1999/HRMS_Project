@@ -6,11 +6,9 @@ import './Userdata.css';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
 
 const Userdata = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [tableData, settableData] = useState([])
+     const [tableData, settableData] = useState([])
     const [togle, settogle] = useState([true])
-    // const [data, setData] = useState(formData);
-
+ 
     useEffect(() => {
         const fetchData = async () => {
             try {

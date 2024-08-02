@@ -2,32 +2,35 @@
 const manageUserModel = require("../models/user.model");
 const status = require("../config/status");
 const Employee = require('../models/Employee.model');
+const nodemailer = require('nodemailer');
 
+function capitalizeWords(str) {
+    if (typeof str !== 'string') return str; // Return the input if it's not a string
+    return str.replace(/\b\w/g, char => char.toUpperCase()); // Capitalize the first letter of each word
+}
 exports.login = async (req, res) => {
     console.log("testdugkhdfinvk,")
-    console.log("userResp",req.body)    
+    console.log("userResp", req.body)
 
     try {
         var email = req.body && req.body.email ? req.body.email : '';
         var password = req.body && req.body.password ? req.body.password : '';
         if (req.body && req.body.role && req.body.role === 'HR') {
-            var user = await manageUserModel.findOne({ email: email }).select(" email fname lname role password").lean().exec();
+            var user = await manageUserModel.findOne({ email: email }).select(" email fname lname role password ").lean().exec();
         } else {
             userModel = Employee;
-            var user = await Employee.findOne({ employee_email: email }).select("employee_first_name employee_last_name employee_email employee_password ").lean().exec();
-        }  
+            var user = await Employee.findOne({ employee_email: email }).select("employee_first_name employee_last_name employee_email employee_password  employee_code").lean().exec();
+        }
         if (!user) {
             res.json({ success: false, status: status.NOTFOUND, msg: 'Authentication failed. User not found.' });
         } else {
-            if(req.body.role=='HR')
-            {
-                var ifPasswordMatch = await manageUserModel.findOne({password: password }).lean().exec();
+            if (req.body.role == 'HR') {
+                var ifPasswordMatch = await manageUserModel.findOne({ password: password }).lean().exec();
             }
-            else
-            {
-                var ifPasswordMatch = await Employee.findOne({ employee_password: password}).lean().exec();
+            else {
+                var ifPasswordMatch = await Employee.findOne({ employee_password: password }).lean().exec();
             }
-          
+
             if (ifPasswordMatch) {
 
                 var userResp = user;
@@ -153,16 +156,16 @@ exports.signup = async (req, res) => {
         }
 
         var obj = {
-            fname: req.body.fname,
-            lname: req.body.lname,
+            fname: capitalizeWords(req.body.fname),
+            lname: capitalizeWords(req.body.lname),
             email: req.body.email,
             password: req.body.password,
             dob: req.body.dob,
             gender: req.body.gender,
             standard: req.body.standard,
             address: req.body.address,
-            city: req.body.city,
-            state: req.body.state,
+            city: capitalizeWords(req.body.city),
+            state: capitalizeWords(req.body.state),
             role: req.body.role,
         }
         const newmanageUserModel = new manageUserModel(obj);
@@ -172,8 +175,14 @@ exports.signup = async (req, res) => {
     }
     catch (err) {
         console.log("error", err);
-        return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Save Users failed.' });
+        if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
+            return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This email is already registered.' });
+        }
 
+        else {
+            // For other errors
+            return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Adding User failed.' });
+        }
     }
 }
 //get all users 
@@ -221,8 +230,14 @@ exports.updateUser = async (req, res) => {
     }
     catch (err) {
         // return res.json({ success: false, status: status.INVALIDSYNTAX, err: err, msg: 'Update User failed.' });
-        return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Update User failed.' });
+        if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
+            return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This email is already registered.' });
+        }
 
+        else {
+            // For other errors
+            return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Update User failed.' });
+        }
     }
 }
 
@@ -290,5 +305,144 @@ exports.delete = async (req, res) => {
     }
 }
 
+exports.search = async (req, res) => {
+    try {
+        const query = req.query.search;
 
+        if (!query) {
+            return res.status(400).json({ error: 'No search query provided' });
+        }
+        const searchQuery = {
+            $or: [
+                { fname: { $regex: new RegExp(query, "i") } },
+                { lname: { $regex: new RegExp(query, "i") } }
+            ]
+        };
+        // Check if the query contains both first and last names
+        if (query.includes(' ')) {
+            const [firstName, lastName] = query.split(' ');
+
+            // Update search query to match both first and last names together
+            searchQuery.$or.push({
+                $and: [
+                    { fname: { $regex: new RegExp(firstName, "i") } },
+                    { lname: { $regex: new RegExp(lastName, "i") } }
+                ]
+            });
+        }
+        // Perform search using Mongoose's find method
+        const results = await manageUserModel.find(searchQuery);
+
+        res.json(results);
+    } catch (err) {
+        console.error("Error:", err);
+        return res.status(500).json({ success: false, status: 500, msg: 'Internal Server Error' });
+    }
+}
+exports.sortOrder = async (req, res) => {
+    const sortOrder = req.query.order === 'desc' ? -1 : 1;
+    const columnName = req.query.coloum;
+
+    try {
+        let sortObject = {};
+        sortObject[columnName] = sortOrder;
+        // Custom pipeline stage for case-insensitive sorting
+        const result = await manageUserModel.aggregate([
+            {
+                $addFields: {
+                    // Create a new field with the lowercase version of the column
+                    lowercaseColumn: { $toLower: `$${columnName}` }
+                }
+            },
+            { $sort: { lowercaseColumn: sortOrder } }, // Sort based on the lowercase field
+            { $project: { lowercaseColumn: 0 } } // Exclude the lowercase field from the result
+        ]);
+
+        res.json(result);
+    } catch (err) {
+        console.error('Error fetching data:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+ exports.sendEmail = async (req, res) => {
+  try {
+    const emails = req.body && req.body.emails ? req.body.emails : [];
+
+    if (!Array.isArray(emails) || emails.length === 0) {
+      return res.json({ success: false, status: status.INVALIDSYNTAX, msg: 'Invalid email list.' });
+    }
+
+    // Create the transporter object
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'mahimagarg1602@gmail.com',
+        pass: 'uixv laul bjpd tqcc'
+      }
+    });
+
+    const sendMailPromises = emails.map(async (email) => {
+        const user = await manageUserModel.findOne({ email: new RegExp(`^${email}$`, 'i') }).lean().exec();
+
+      if (!user) {
+        console.log(`Authentication failed. User not found: ${email}`);
+        return Promise.resolve(`User not found: ${email}`);
+      } else {
+        const mailOptions = {
+          from: 'mailto:mahimagarg1602@gmail.com',
+          to: email,
+          subject: 'Requirement..Hiring',
+          text: 'Hello world?',
+          html: `
+            <h2>About the Role:</h2>
+            <p>We are seeking a skilled and passionate Laravel Developer to join our dynamic team. The ideal candidate will have 2-3 years of experience in developing robust and scalable web applications using the Laravel framework.</p>
+            <h2>Key Responsibilities:</h2>
+            <ol>
+                <li>Develop, test, and maintain web applications using Laravel.</li>
+                <li>Collaborate with cross-functional teams to define, design, and ship new features.</li>
+                <li>Troubleshoot, test, and maintain the core product software and databases to ensure strong optimization and functionality.</li>
+            </ol>
+            <h2>Required Skills:</h2>
+            <ul>
+                <li>2-3 years of experience in Laravel development.</li>
+                <li>Strong knowledge of PHP Framework.</li>
+                <li>Experience with front-end technologies such as JavaScript, HTML, and CSS.</li>
+                <li>Familiarity with version control tools (e.g., Git).</li>
+                <li>Knowledge of database design and querying using MySQL.</li>
+            </ul>
+            <h2>Why Join Us:</h2>
+            <ul>
+                <li>Opportunity to work on exciting projects with a talented team.</li>
+                <li>Competitive salary and benefits package.</li>
+                <li>Continuous learning and professional development opportunities.</li>
+                <li>Positive and inclusive work environment.</li>
+            </ul>
+            <p>Thank you</p>
+          `,
+        };
+
+        return transporter.sendMail(mailOptions)
+          .then(info => {
+            console.log(`Message sent to ${email}: %s`, info.messageId);
+            console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+            return `Message sent to ${email}`;
+          })
+          .catch(error => {
+            console.error(`Error sending mail to ${email}:`, error);
+            return `Error sending mail to ${email}: ${error.message}`;
+          });
+      }
+    });
+
+    const results = await Promise.all(sendMailPromises);
+
+    res.json({ success: true, status: status.OK, msg: 'Emails sent to the provided email addresses.', results });
+
+  } catch (e) {
+    console.log("e", e);
+    return res.json({ success: false, status: status.INVALIDSYNTAX, err: e, msg: 'Error in sending emails.' });
+  }
+}
 

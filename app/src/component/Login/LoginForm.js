@@ -2,6 +2,10 @@ import { useState } from "react";
 import "./login.css";
 import { Link, useNavigate } from 'react-router-dom';
 import { BASE_API_URL } from '../../lib/constants.jsx';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+
+
 const LoginForm = () => {
     // const [errors, setmsg] = useState('');
 
@@ -16,6 +20,8 @@ const LoginForm = () => {
     });
     const [msg, setmsg] = useState('');
     const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false); // State to manage password visibility
+
 
 
     const onUpdateField = e => {
@@ -117,12 +123,13 @@ const LoginForm = () => {
                     body: JSON.stringify(form),
                 });
                 const data = await response.json();
-                console.log("main data", data.msg)
+                console.log("main data", data)
                 setmsg(data.msg)
                 if (response.ok) {
-                    if (data.user.role == 'user') {
+                    if (data.user.role === 'user') {
                         const name = data.user.fname + "" + data.user.lname
                         localStorage.setItem("_id", data.user._id)
+                        localStorage.setItem("employee_code", data.user.employee_code)
                         localStorage.setItem("name", name)
                         localStorage.setItem("email", data.user.email)
                         localStorage.setItem("password", data.user.password)
@@ -132,6 +139,8 @@ const LoginForm = () => {
                     else {
                         const name = data.user.employee_first_name + "" + data.user.employee_last_name
                         localStorage.setItem("_id", data.user._id)
+                        localStorage.setItem("employee_code", data.user.employee_code)
+
                         localStorage.setItem("name", name)
                         localStorage.setItem("email", data.user.employee_email)
                         localStorage.setItem("password", data.user.employee_password)
@@ -146,6 +155,9 @@ const LoginForm = () => {
                 console.error('Error occurred:', error);
             }
         }
+    };
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
     };
 
 
@@ -164,23 +176,29 @@ const LoginForm = () => {
                             value={form.email}
                             onChange={onUpdateField}
                         />
-                        {errors.email && <span className="error" style={{ color: 'red' }}>{errors.email}</span>}
+                        {errors.email && <span className="error" style={{ color: 'red', fontSize: "13px" }}>{errors.email}</span>}
 
                     </div>
-                    <div className="formGroup">
+                   
+                    <div className="formGroup password-input-container">
                         <input
                             className="formField"
-                            type="password"
+                            type={showPassword ? "text" : "password"} // Toggle between "text" and "password" based on showPassword state
                             aria-label="Password field"
                             name="password"
                             placeholder="Enter your password"
                             value={form.password}
                             onChange={onUpdateField}
                         />
-                        {errors.password && <span className="error" style={{ color: 'red' }}>{errors.password}</span>}
-
+                        <FontAwesomeIcon
+                            icon={showPassword ? faEyeSlash : faEye}
+                            className="password-toggle-icon"
+                            onClick={togglePasswordVisibility}
+                            style={{ height: "18px" }}
+                        />
+                        {errors.password && <span className="error" style={{ color: 'red', fontSize: "13px" }}>{errors.password}</span>}
                     </div>
-                    <div class="formGroup">
+                    <div class="formGroup ">
                         <select
                             class="formField"
                             name="role"
