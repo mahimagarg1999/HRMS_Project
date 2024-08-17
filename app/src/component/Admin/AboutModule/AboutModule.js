@@ -5,7 +5,6 @@ import Footer from '../../FooterModule/Footer';
 const AboutHome = () => {
     return (
         <>
-
             <div>
                 <Nav />
                 <div style={{ backgroundColor: '#28769a' }}>

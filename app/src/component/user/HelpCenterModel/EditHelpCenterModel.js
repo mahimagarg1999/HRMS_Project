@@ -5,6 +5,8 @@ import axios from 'axios'; // For Axios
 import 'reactjs-popup/dist/index.css';
 import Modal from 'react-modal';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
+import CloseButton from 'react-bootstrap/CloseButton';
+
 const ModalBox = ({ isOpen, onRequestClose, helpCenterId }) => {
 
     const [data, setData] = useState([])
@@ -68,43 +70,47 @@ const ModalBox = ({ isOpen, onRequestClose, helpCenterId }) => {
             ariaHideApp={false}
             style={{
                 overlay: {
-
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                    // display: 'flex',
+                    // justifyContent: 'center',
+                    // alignItems: 'center',
                 },
                 content: {
-                    width: '90%',
-                    height: '90%',
+                    width: '100%',
+                    height: '100%',
                     margin: 'auto',
                     borderRadius: '8px',
                     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                    padding: '20px'
+                    padding: '20px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                    border: 'none',
+
                 }
             }}
         >
-            <button onClick={onRequestClose}>Close</button>
+            {/* <button onClick={onRequestClose}>Close</button> */}
 
             <div class="row">
                 <div class="col-md-6 offset-md-3">
                     <div class="signup-form">
                         <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
+                        <CloseButton onClick={onRequestClose} />
                             <div style={{ textAlign: 'center' }}>
+                               
                                 <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Edit Help Center</h4>
 
                             </div>
                             <div class="row">
                                 <div class="mb-3 col-md-6">
                                     <label><b>Ticket Id</b></label>
-                                    <input type="text" name="helpcenter_ticket_id" value={data.helpcenter_ticket_id} onChange={handleInputChange} class="form-control" placeholder="Ticket Id" />
+                                    <input type="text" name="helpcenter_ticket_id" value={data.helpcenter_ticket_id} disabled onChange={handleInputChange} class="form-control"     placeholder="Ticket Id" />
                                 </div>
                                 <div class="mb-3 col-md-6">
                                     <label><b>Employee Id</b></label>
-                                    <input type="text" name="helpcenter_employee_id" value={data.helpcenter_employee_id} onChange={handleInputChange} class="form-control" placeholder="Employee Id" />
+                                    <input type="text" name="helpcenter_employee_id" value={data.helpcenter_employee_id} disabled onChange={handleInputChange} class="form-control" placeholder="Employee Id" />
                                 </div>
 
-                                {/* <div class="mb-3 col-md-6">
-                                    <label><b>Ticket Priority</b></label>
-                                    <input type="text" name="helpcenter_ticket_priority" value={data.helpcenter_ticket_priority} onChange={handleInputChange} class="form-control" placeholder="Ticket Priority" />
-                                </div> */}
+                              
                                 <div class="mb-3 col-md-6">
                                     <label><b>Ticket Priority</b></label>
                                     <select
@@ -112,6 +118,7 @@ const ModalBox = ({ isOpen, onRequestClose, helpCenterId }) => {
                                         value={data.helpcenter_ticket_priority}
                                         onChange={handleInputChange}
                                         className="form-control"
+                                        disabled
                                     >
                                         <option value="">Select Ticket Priority</option>
                                         <option value="low">low</option>
@@ -132,20 +139,15 @@ const ModalBox = ({ isOpen, onRequestClose, helpCenterId }) => {
                                         value={data.helpcenter_ticket_department}
                                         onChange={handleInputChange}
                                         className="form-control"
+                                        disabled
+
                                     >
                                         <option value="">Select Ticket Department</option>
                                         <option value="Administer">Administer</option>
                                         <option value="HR">HR</option>
                                     </select>
                                 </div>
-                                {/* <div class="mb-3 col-md-6">
-                                    <label><b>Ticket Created Date</b></label>
-                                    <input type="date" name="helpcenter_ticket_created_date" value={data.helpcenter_ticket_created_date} onChange={handleInputChange} class="form-control" />
-                                </div>
-                                <div class="mb-3 col-md-6">
-                                    <label><b>Ticket Solved Date</b></label>
-                                    <input type="date" name="helpcenter_ticket_solved_date" value={data.helpcenter_ticket_solved_date} onChange={handleInputChange} class="form-control" />
-                                </div> */}
+                                
                                 <div class="mb-3 col-md-6">
                                     <label><b>Ticket Status</b></label>
                                     <input type="text" name="helpcenter_ticket_status" value={data.helpcenter_ticket_status} onChange={handleInputChange} class="form-control" placeholder="Ticket Status" />
@@ -159,7 +161,10 @@ const ModalBox = ({ isOpen, onRequestClose, helpCenterId }) => {
                                     <label><b>Ticket Managed By</b></label>
                                     <input type="text" name="helpcenter_ticket_managed_by" value={data.helpcenter_ticket_managed_by} onChange={handleInputChange} class="form-control" placeholder="Ticket Managed By" />
                                 </div>
-
+                                <div class="mb-3 col-md-6">
+                                    <label><b>Solve Duration</b></label>
+                                    <input type="text" name="helpcenter_solve_duration" value={data.helpcenter_solve_duration} onChange={handleInputChange} class="form-control" placeholder="Solved Duration" />
+                                </div>
                                 <div class="mb-3 col-md-6">
 
                                     <label><b>Ticket Description</b></label>

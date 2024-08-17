@@ -179,19 +179,7 @@ const LoginForm = () => {
                         {errors.email && <span className="error" style={{ color: 'red', fontSize: "13px" }}>{errors.email}</span>}
 
                     </div>
-                    {/* <div className="formGroup">
-                        <input
-                            className="formField"
-                            type="password"
-                            aria-label="Password field"
-                            name="password"
-                            placeholder="Enter your password"
-                            value={form.password}
-                            onChange={onUpdateField}
-                        />
-                        {errors.password && <span className="error" style={{ color: 'red' }}>{errors.password}</span>}
-
-                    </div> */}
+                   
                     <div className="formGroup password-input-container">
                         <input
                             className="formField"

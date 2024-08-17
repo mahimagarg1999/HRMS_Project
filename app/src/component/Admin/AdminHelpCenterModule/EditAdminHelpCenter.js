@@ -21,14 +21,13 @@ const HelpCenterModule = ({ isOpen, onRequestClose, helpCenterId }) => {
                 const fetchData = async () => {
                     try {
                         const helpCenterId = localStorage.getItem("_id")
-                        const response = await axios.get(`${BASE_API_URL}helpcenter/get_emp_id?helpcenterempid=${helpCenterId}`);
+                        const response = await axios.get(`${BASE_API_URL}emphelpcenter/emp_helpcenter_get_emp_id?helpcenterempid=${helpCenterId}`);
 
                         setData(response.data.data)
                         // console.log('data', data)
 
                     } catch (error) {
                         console.log('model open error')
-
                         console.error('Error fetching employee data:', error);
                     }
 
@@ -46,7 +45,7 @@ const HelpCenterModule = ({ isOpen, onRequestClose, helpCenterId }) => {
         e.preventDefault();
         // Handle form submission here
         try {
-            const response = await axios.put(`${BASE_API_URL}helpcenter/edit`, data);
+            const response = await axios.put(`${BASE_API_URL}emphelpcenter/emp_helpcenter_edit`, data);
             console.log(response.data); // Handle the response as needed
             setMessage(response.data.msg)
  
@@ -121,7 +120,7 @@ const HelpCenterModule = ({ isOpen, onRequestClose, helpCenterId }) => {
                                         <h6 style={{ color: "#28769a" }}>Ticket Department</h6>
                                         <input type="text" name="helpcenter_ticket_department" value={data.helpcenter_ticket_department} onChange={handleInputChange} class="form-control" placeholder="helpcenter_ticket_department" />
                                     </div>
-                                    <div class="mb-3 col-md-6">
+                                    {/* <div class="mb-3 col-md-6">
                                         <h6 style={{ color: "#28769a" }}>Ticket Status</h6>
                                         <input type="text" name="helpcenter_ticket_status" value={data.helpcenter_ticket_status} onChange={handleInputChange} class="form-control" placeholder="helpcenter_ticket_status" />
                                     </div>
@@ -129,9 +128,9 @@ const HelpCenterModule = ({ isOpen, onRequestClose, helpCenterId }) => {
                                         <h6 style={{ color: "#28769a" }}>Created Date</h6>
 
                                         <input type="date" name="helpcenter_ticket_created_date" value={data.helpcenter_ticket_created_date} onChange={handleInputChange} class="form-control" placeholder="helpcenter_ticket_created_date" />
-                                    </div>
+                                    </div> */}
 
-                                    <div class="mb-3 col-md-6">
+                                    {/* <div class="mb-3 col-md-6">
                                         <h6 style={{ color: "#28769a" }}>Solved Date</h6>
                                         <input type="date" name="helpcenter_ticket_solved_date" value={data.helpcenter_ticket_solved_date} onChange={handleInputChange} class="form-control" placeholder="helpcenter_ticket_solved_date" />
                                     </div>
@@ -142,7 +141,7 @@ const HelpCenterModule = ({ isOpen, onRequestClose, helpCenterId }) => {
                                     <div class="mb-3 col-md-6">
                                         <h6 style={{ color: "#28769a" }}>Managed by</h6>
                                         <input type="text" name="helpcenter_ticket_managed_by" value={data.helpcenter_ticket_managed_by} onChange={handleInputChange} class="form-control" placeholder="helpcenter_ticket_managed_by" />
-                                    </div>
+                                    </div> */}
 
                                 </div>
                                 <div class="col-md-12">

@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-// var connection = require('../config/mongo-connection');
-
 const UserSchema = mongoose.Schema({
     fname: {
         type: String,
@@ -36,7 +34,6 @@ const UserSchema = mongoose.Schema({
     role: {
         type: String,
         default: 'user'
-
     },
 
 },
@@ -44,7 +41,6 @@ const UserSchema = mongoose.Schema({
         timestamps: { createdAt: "created_at", updatedAt: "updated_at" }
     });
 const UserData = mongoose.model('user', UserSchema);
-
 module.exports = UserData;
 
 

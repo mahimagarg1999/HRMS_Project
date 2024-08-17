@@ -137,29 +137,6 @@ th {
    color: white;
    text-align: center
 }
-.backButton{
-   position: absolute; /* or 'fixed' if you want it to stay in place on scroll */
-  right: 0; /* Align to the right */
-  top: 0; /* Adjust as necessary */
-  border: 1px solid;
-  padding: 4px;
-  background-color: rgb(40, 118, 154);
-  color: white !important;
-  margin-top:5px;
-  margin-right:3px
-}
-.multiDeleteButton{
-   position: relative;
-   right: 0;
-   top: -13px;
-   border: 1px solid rgb(40, 118, 154);
-   padding: 3px 6px;
-   background-color: rgb(40, 118, 154);
-   color: white !important;
-   margin-top: 0px;
-   /* margin-right: -63px; */
-   margin-left: 85%;
-}
 /* pagination css */
 .pagination {
    display: flex;

@@ -5,12 +5,14 @@ import axios from 'axios'; // For Axios
 import ModalBox from './EditExpensesModel.js';
 import Nav from '../../navComponent/Nav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrashAlt, faEye } from '@fortawesome/free-solid-svg-icons';
 import { faTrash, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import ReactPaginate from 'react-paginate';
 import Footer from '../../FooterModule/Footer.js';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
+let downloadCount = 0;
+
 const ExpensesModule = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [tableData, settableData] = useState([])
@@ -22,27 +24,22 @@ const ExpensesModule = () => {
     const [sortColumn, setSortColumn] = useState(null);
     const [sortDirection, setSortDirection] = useState('ascending');
     const [query, setQuery] = useState('');
-
-
-
-    const [ids, setId] = useState([]);
+    const [expensesRows, setExpensesRows] = useState([]);
+    const [ids, setIds] = useState([]);
 
     const handlePageChange = ({ selected }) => {
         setCurrentPage(selected); // Update the current page when pagination changes
     };
 
-    const itemsPerPage = 5; // Number of items to display per page
+    const itemsPerPage = 10; // Number of items to display per page
     const offset = currentPage * itemsPerPage;
     const pageCount = Math.ceil(tableData.length / itemsPerPage);
     const currentItems = tableData.slice(offset, offset + itemsPerPage);
-    // const [data, setData] = useState(formData);
     const openModal = (expensesId) => {
         console.log('expensesId', expensesId)
         setModalIsOpen(true);
         setSelectedExpensesId(expensesId);
-
     };
-
     const closeModal = () => {
         settogle(!togle)
         setModalIsOpen(false);
@@ -50,13 +47,13 @@ const ExpensesModule = () => {
     const handleSort = async (column) => {
         console.log("checking sorting", sortColumn, column)
         if (column === sortColumn) {
-            // If the same column is clicked again, reverse the sorting direction
             setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
             try {
                 const response = await axios.get(`${BASE_API_URL}expenses/sortorder?order=${sortDirection}&coloum=${sortColumn}`);
                 settableData(response.data)
             } catch (error) {
                 console.error('Error:', error);
+
             }
             console.log("direction", sortDirection)
         } else {
@@ -65,39 +62,21 @@ const ExpensesModule = () => {
             setSortDirection('asc');
         }
     };
-    // const sortedData = () => {
-    //     if (sortColumn) {
-    //         const sorted = [...tableData].sort((a, b) => {
-    //             const valueA = a[sortColumn];
-    //             const valueB = b[sortColumn];
-    //             if (typeof valueA === 'string' && typeof valueB === 'string') {
-    //                 // Case-insensitive string comparison
-    //                 return sortDirection === 'ascending' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
-    //             } else {
-    //                 // Numerical or other comparison
-    //                 return sortDirection === 'ascending' ? valueA - valueB : valueB - valueA;
-    //             }
-    //         });
-    //         return sortDirection === 'ascending' ? sorted : sorted.reverse();
-    //     }
-    //     return tableData; // Return original data if no sorting column is selected
-    // };
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState({});
+    const fetchData = async () => {
+        try {
+            const response = await axios.get(`${BASE_API_URL}expenses/list`);
+            console.log(response.data.data); // Handle the response as needed
+            settableData(response.data.data)
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
 
-    });
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get(`${BASE_API_URL}expenses/list`);
-                console.log(response.data.data); // Handle the response as needed
-                settableData(response.data.data)
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        };
-
         fetchData();
     }, [togle]);
+
 
     const openPopup = () => {
         setMessage('');
@@ -114,14 +93,12 @@ const ExpensesModule = () => {
 
         }
         setFormData(formDataNew);
-
         setIsOpen(true);
     };
 
     const closePopup = () => {
         setIsOpen(false);
     };
-
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -135,10 +112,7 @@ const ExpensesModule = () => {
     };
     const [errors, setErrors] = useState({
         expenses_purpose: "",
-
         expenses_bill: "",
-
-
     });
 
     const validateForm = () => {
@@ -162,15 +136,19 @@ const ExpensesModule = () => {
 
     // Function to handle form submission
     const handleSubmit = async (e) => {
+        const message = `<h1>expenses_purpose: ${formData.expenses_purpose}</h1>\nexpenses_bill: ${formData.expenses_bill}\nexpenses_amount: ${formData.expenses_amount}\nexpenses_voucher: ${formData.expenses_voucher}\nexpenses_remark: ${formData.expenses_remark}\nexpenses_by_cash: ${formData.expenses_by_cash}\nexpenses_by_cheque:  ${formData.expenses_by_cheque}\nexpenses_cash_recieved_by: ${formData.expenses_cash_recieved_by}\n`;
+        const isConfirmed = window.confirm(message);
         e.preventDefault();
         // Handle form submission here, for example, send data to backend or perform validation
         console.log('', formData);
-        if (validateForm()) {
+        if (validateForm() && isConfirmed) {
             try {
                 const response = await axios.post(`${BASE_API_URL}expenses/create`, formData);
                 settogle(!togle)
                 console.log(response.data); // Handle the response as needed
                 setMessage(response.data.msg)
+
+
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -181,13 +159,13 @@ const ExpensesModule = () => {
 
         // Check if the user confirmed
         if (isConfirmed) {
-            // Delete logic here
             try {
                 console.log('id', id)
                 const response = await axios.delete(`${BASE_API_URL}expenses/delete?id=${id}`)
 
                 console.log(response.data); // Handle the response as needed
                 settogle(!togle)
+
 
             } catch (error) {
                 console.error('Error:', error);
@@ -200,14 +178,13 @@ const ExpensesModule = () => {
     }
 
     const handleCheckboxChange = (e, id) => {
-        // If the checkbox is checked, add the ID to the list of selected IDs
         if (e.target.checked) {
-            setId(prevIds => [...prevIds, id]);
+            setIds(prevIds => [...prevIds, id]);
         } else {
-            // If the checkbox is unchecked, remove the ID from the list of selected IDs
-            setId(prevIds => prevIds.filter(prevId => prevId !== id));
+            setIds(prevIds => prevIds.filter(prevId => prevId !== id));
         }
     };
+
     const DEletemulti = async () => {
         const data = {
             "ids": ids
@@ -220,6 +197,7 @@ const ExpensesModule = () => {
             });
             console.log(response.data); // Response ke saath kuch karne ke liye
             settogle(!togle);
+            setIds([]);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -247,6 +225,92 @@ const ExpensesModule = () => {
             }
         }
     };
+    const toggleRow = (id) => {
+        setExpensesRows(prevRows =>
+            prevRows.includes(id) ? prevRows.filter(rowId => rowId !== id) : [...prevRows, id]
+        );
+    };
+    // code of export the data
+    const convertToCSV = (data) => {
+        if (data.length === 0) {
+            return '';
+        }
+
+        // Get headers
+        const header = Object.keys(data[0]).join(',');
+
+        // Convert rows
+        const rows = data.map(row => {
+            return Object.values(row).map(value => {
+                if (Array.isArray(value)) {
+                    return `"${value.join(', ')}"`; // Join array elements into a single string with commas
+                }
+                return value;
+            }).join(',');
+        }).join('\n');
+
+        return `${header}\n${rows}`;
+    };
+
+    const downloadCSV = (csv, filename) => {
+        fetch(`${BASE_API_URL}expenses/export-data`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ csvData: csv, filename: filename }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.path) {
+                    // Construct the full URL for the download
+                    if (window.confirm('Data exported successfully. Do you want to download the file now?')) {
+                        const blob = new Blob([csv], { type: 'text/csv' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url); // Clean up the URL.createObjectURL resource
+                        alert('Data exported successfully');
+                    }
+                } else {
+                    console.error('Failed to download CSV');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    };
+
+    const openView = () => {
+        const csv = convertToCSV(tableData);
+        downloadCount += 1; // Increment the download count
+        const filename = `exp_data${downloadCount}.csv`; // Dynamic filename
+        downloadCSV(csv, filename);
+    };
+    // Import the data
+    const handleFileUpload = async (event) => {
+        const file = event.target.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await axios.post(`${BASE_API_URL}expenses/import-data`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            console.log('Data imported successfully', response.data);
+            if (window.confirm('Data imported successfully. Do you want to fetch the data now?')) {
+                // Call function to fetch data here
+                fetchData();
+            }
+        } catch (error) {
+            console.error('Error importing data:', error);
+        }
+    };
+
 
     return (
         <>
@@ -264,171 +328,96 @@ const ExpensesModule = () => {
                                 <div class="card-body text-center">
 
 
-                                    <div>
-                                        <button className="backButton" onClick={openPopup}>
+                                    <div className='icon_manage'>
+
+                                        <button onClick={openView} title="View Data" className='button_design_view'>
+                                            Export&nbsp; <FontAwesomeIcon icon={faEye} />
+                                        </button>
+                                        <button className="button_design" onClick={openPopup}>
                                             Add &nbsp;<FontAwesomeIcon icon={faPlusCircle} />
                                         </button>
+                                        <span> <button className="button_design" onClick={() => { DEletemulti() }}    >
+                                            MultiDel&nbsp;<FontAwesomeIcon icon={faTrashAlt} />
+                                        </button></span>
+
                                     </div>
-                                    <div> <span> <button className="multiDeleteButton" onClick={() => { DEletemulti() }}    >
-                                        <FontAwesomeIcon icon={faTrashAlt} />
-                                    </button></span></div>
+
                                     {isOpen && (
                                         <div>
                                             <div>
                                                 <div>
-                                                    {/* <div class="row">
-                                                        <div class="col-md-6 offset-md-3">
-                                                            <div class="signup-form">
-                                                                <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
-                                                                    <div style={{ textAlign: 'center' }}>
-                                                                        <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Add Expenses</h4>
-                                                                        <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
-                                                                    </div>
-                                                                    <div class="row">
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Expenses Purpose*</b></label>
-                                                                            <input type="text" name="expenses_purpose" value={formData.expenses_purpose} onChange={handleInputChange} class="form-control" placeholder="Expenses purpose" />
-                                                                            {errors.expenses_purpose && <span className="error" style={{ color: 'red' }}>{errors.expenses_purpose}</span>}
-
+                                                    <div className="container-fluid">
+                                                        <div className="row">
+                                                            <div className="col-12">
+                                                                <div className="signup-form">
+                                                                    <form onSubmit={handleSubmit} className="mt-5 border p-4 bg-light shadow form-custom-style">
+                                                                        <div style={{ textAlign: 'center' }}>
+                                                                            <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary"><b>Add Expenses</b></h4>
+                                                                            <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Expenses Bill</b></label>
-                                                                            <input type="text" name="expenses_bill" value={formData.expenses_bill} onChange={handleInputChange} class="form-control" placeholder="Expenses Bill" />
-                                                                            {errors.expenses_bill && <span className="error" style={{ color: 'red' }}>{errors.expenses_bill}</span>}
-
+                                                                        <div className="form-group table-scroll">
+                                                                            <table className="table  ">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th><b>Expenses Purpose*</b></th>
+                                                                                        <th><b>Expenses Bill*</b></th>
+                                                                                        <th><b>Expenses Amount</b></th>
+                                                                                        <th><b>Expenses Voucher</b></th>
+                                                                                        <th><b>Expenses Remark</b></th>
+                                                                                        <th><b>Expenses By Cash</b></th>
+                                                                                        <th><b>Expenses By Cheque</b></th>
+                                                                                        <th><b>Expenses Cash Received By</b></th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    <tr>
+                                                                                        <td>
+                                                                                            <input type="text" name="expenses_purpose" value={formData.expenses_purpose} onChange={handleInputChange} className="form-control" placeholder="Expenses purpose" style={{ width: '170px' }} />
+                                                                                            {errors.expenses_purpose && <span className="error" style={{ color: 'red' }}>{errors.expenses_purpose}</span>}
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <input type="number" name="expenses_bill" value={formData.expenses_bill} onChange={handleInputChange} className="form-control" placeholder="Expenses Bill" />
+                                                                                            {errors.expenses_bill && <span className="error" style={{ color: 'red' }}>{errors.expenses_bill}</span>}
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <input type="number" name="expenses_amount" value={formData.expenses_amount} onChange={handleInputChange} className="form-control" placeholder="Expenses Amount" />
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <input type="text" name="expenses_voucher" value={formData.expenses_voucher} onChange={handleInputChange} className="form-control" placeholder="Expenses Voucher" />
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <input type="text" name="expenses_remark" value={formData.expenses_remark} onChange={handleInputChange} className="form-control" placeholder="Expenses Remark" />
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <select name="expenses_by_cash" value={formData.expenses_by_cash} onChange={handleInputChange} className="form-control">
+                                                                                                <option value="">Select Expenses Cash</option>
+                                                                                                <option value="Yes">Yes</option>
+                                                                                                <option value="No">No</option>
+                                                                                            </select>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <select name="expenses_by_cheque" value={formData.expenses_by_cheque} onChange={handleInputChange} className="form-control">
+                                                                                                <option value="">Select Expenses Cheque</option>
+                                                                                                <option value="Yes">Yes</option>
+                                                                                                <option value="No">No</option>
+                                                                                            </select>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <input type="text" name="expenses_cash_recieved_by" value={formData.expenses_cash_recieved_by} onChange={handleInputChange} className="form-control" placeholder="Expenses Cash Received By" />
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Expenses Amount</b></label>
-                                                                            <input type="number" name="expenses_amount" value={formData.expenses_amount} onChange={handleInputChange} class="form-control" placeholder="Expenses Amount" />
+                                                                        <div className="col-md-12">
+                                                                            <button type="submit">Add Expenses</button>
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Expenses Voucher</b></label>
-                                                                            <input type="text" name="expenses_voucher" value={formData.expenses_voucher} onChange={handleInputChange} class="form-control" placeholder="Expenses Voucher" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Expenses Remark</b></label>
-                                                                            <input type="text" name="expenses_remark" value={formData.expenses_remark} onChange={handleInputChange} class="form-control" placeholder="Expenses Remark" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Expenses By Cash</b></label>
-                                                                             <select
-                                                                                name="expenses_by_cash"
-                                                                                value={formData.expenses_by_cash}
-                                                                                onChange={handleInputChange}
-                                                                                className="form-control"
-                                                                            >
-                                                                                <option value="">Select Expenses Cash</option>
-                                                                                <option value="Yes">Yes</option>
-                                                                                <option value="No">No</option>
-                                                                            </select>
-
-
-
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Expenses By Cheque</b></label>
-                                                                             <select
-                                                                                name="expenses_by_cheque"
-                                                                                value={formData.expenses_by_cheque}
-                                                                                onChange={handleInputChange}
-                                                                                className="form-control"
-                                                                            >
-                                                                                <option value="">Select Expenses Cheque</option>
-                                                                                <option value="Yes">Yes</option>
-                                                                                <option value="No">No</option>
-                                                                            </select>
-
-
-
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Expenses Cash Recieved By </b></label>
-                                                                            <input type="text" name="expenses_cash_recieved_by" value={formData.expenses_cash_recieved_by} onChange={handleInputChange} class="form-control" placeholder="Expenses Cash Recieved By" />
-                                                                        </div>
-
-                                                                    </div>
-                                                                    <div class="col-md-12">
-                                                                        <button type="submit">Add Expenses</button>
-                                                                    </div>
-                                                                    <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
-
-                                                                </form>
+                                                                        <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
+                                                                    </form>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div> */}
-
-<div className="container-fluid">
-    <div className="row">
-        <div className="col-12">
-            <div className="signup-form">
-                <form onSubmit={handleSubmit} className="mt-5 border p-4 bg-light shadow form-custom-style">
-                    <div style={{ textAlign: 'center' }}>
-                        <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary"><b>Add Expenses</b></h4>
-                        <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
-                    </div>
-                    <div className="form-group table-scroll">
-                        <table className="table  ">
-                            <thead>
-                                <tr>
-                                    <th><b>Expenses Purpose*</b></th>
-                                    <th><b>Expenses Bill*</b></th>
-                                    <th><b>Expenses Amount</b></th>
-                                    <th><b>Expenses Voucher</b></th>
-                                    <th><b>Expenses Remark</b></th>
-                                    <th><b>Expenses By Cash</b></th>
-                                    <th><b>Expenses By Cheque</b></th>
-                                    <th><b>Expenses Cash Received By</b></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <input type="text" name="expenses_purpose" value={formData.expenses_purpose} onChange={handleInputChange} className="form-control" placeholder="Expenses purpose" style={{width:'170px' }}/>
-                                        {errors.expenses_purpose && <span className="error" style={{ color: 'red' }}>{errors.expenses_purpose}</span>}
-                                    </td>
-                                    <td>
-                                        <input type="number" name="expenses_bill" value={formData.expenses_bill} onChange={handleInputChange} className="form-control" placeholder="Expenses Bill" />
-                                        {errors.expenses_bill && <span className="error" style={{ color: 'red' }}>{errors.expenses_bill}</span>}
-                                    </td>
-                                    <td>
-                                        <input type="number" name="expenses_amount" value={formData.expenses_amount} onChange={handleInputChange} className="form-control" placeholder="Expenses Amount" />
-                                    </td>
-                                    <td>
-                                        <input type="text" name="expenses_voucher" value={formData.expenses_voucher} onChange={handleInputChange} className="form-control" placeholder="Expenses Voucher" />
-                                    </td>
-                                    <td>
-                                        <input type="text" name="expenses_remark" value={formData.expenses_remark} onChange={handleInputChange} className="form-control" placeholder="Expenses Remark" />
-                                    </td>
-                                    <td>
-                                        <select name="expenses_by_cash" value={formData.expenses_by_cash} onChange={handleInputChange} className="form-control">
-                                            <option value="">Select Expenses Cash</option>
-                                            <option value="Yes">Yes</option>
-                                            <option value="No">No</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select name="expenses_by_cheque" value={formData.expenses_by_cheque} onChange={handleInputChange} className="form-control">
-                                            <option value="">Select Expenses Cheque</option>
-                                            <option value="Yes">Yes</option>
-                                            <option value="No">No</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <input type="text" name="expenses_cash_recieved_by" value={formData.expenses_cash_recieved_by} onChange={handleInputChange} className="form-control" placeholder="Expenses Cash Received By" />
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="col-md-12">
-                        <button type="submit">Add Expenses</button>
-                    </div>
-                    <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+                                                    </div>
 
 
 
@@ -438,44 +427,42 @@ const ExpensesModule = () => {
                                         </div>
                                     )}
                                 </div>
-
-
                                 <div class="containerOnce">
                                     <input
                                         type="text"
                                         value={query}
                                         onChange={handleChange}
                                         placeholder="Search"
+                                    />&nbsp;
+                                    <input
+                                        type="file"
+                                        accept=".csv"
+                                        onChange={handleFileUpload}
                                     />
                                 </div>
                                 <div className="table-responsive">
-                                    {/* <form > */}
-                                    {/* <input
-                                            type="text"
-                                            value={query}
-                                            onChange={handleChange}
-                                            placeholder="Search by first name, last name, or both"
-                                        /> */}
-                                    {/* </form> */}
+
                                     <table className="table">
                                         <thead className="thead-light">
                                             <tr>
 
-                                                {/* <th scope="col"  >Id   </th> */}
-                                                <th scope="col" onClick={() => handleSort('expenses_purpose')}>Expenses Purpose{sortColumn === 'expenses_purpose' && (
+                                                <th scope="col" onClick={() => handleSort('expenses_purpose')}><b>Expenses Purpose</b>{sortColumn === 'expenses_purpose' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
 
-                                                <th scope="col" onClick={() => handleSort('expenses_amount')}>Expenses Amount {sortColumn === 'expenses_amount' && (
+                                                <th scope="col" onClick={() => handleSort('expenses_amount')}><b>Expenses Amount </b>{sortColumn === 'expenses_amount' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
-                                                <th scope="col" onClick={() => handleSort('expenses_bill')}>Expenses Bill {sortColumn === 'expenses_bill' && (
+                                                <th scope="col" onClick={() => handleSort('expenses_bill')}><b>Expenses Bill</b> {sortColumn === 'expenses_bill' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
-                                                <th scope="col" onClick={() => handleSort('expenses_voucher')}>Expenses Voucher {sortColumn === 'expenses_voucher' && (
+                                                <th scope="col" onClick={() => handleSort('expenses_voucher')}><b>Expenses Voucher </b>{sortColumn === 'expenses_voucher' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
-                                                <th scope="col"  >Actions</th>
+                                                <th scope="col" onClick={() => handleSort('transation_id')}><b>Transation  Id </b>{sortColumn === 'transation_id' && (
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
+                                                )}</th>
+                                                <th scope="col"  ><b>Actions</b></th>
 
                                             </tr>
                                         </thead>
@@ -484,11 +471,11 @@ const ExpensesModule = () => {
 
                                                 <tr key={index}>
 
-                                                    {/* <td>{data._id}</td> */}
                                                     <td>{data.expenses_purpose} </td>
                                                     <td>{data.expenses_amount}</td>
                                                     <td>{data.expenses_bill}</td>
                                                     <td>{data.expenses_voucher}</td>
+                                                    <td>{data.transaction_id}</td>
                                                     <td>
                                                         <button className="editButton" onClick={() => DeleteData(data._id)} >  <FontAwesomeIcon icon={faTrash} /></button>
                                                         <button className="editButton" onClick={() => openModal(data._id)} >
@@ -497,7 +484,13 @@ const ExpensesModule = () => {
                                                     </td>
                                                     <td>
                                                         <label className="customcheckbox">
-                                                            <input type="checkbox" className="listCheckbox" onChange={(e) => handleCheckboxChange(e, data._id)} />
+                                                            {/* <input type="checkbox" className="listCheckbox" onChange={(e) => handleCheckboxChange(e, data._id)} /> */}
+                                                            <input
+                                                                type="checkbox"
+                                                                className="listCheckbox"
+                                                                checked={ids.includes(data._id)}
+                                                                onChange={(e) => handleCheckboxChange(e, data._id)}
+                                                            />
                                                             <span className="checkmark"></span>
                                                         </label>
                                                     </td>
@@ -511,17 +504,17 @@ const ExpensesModule = () => {
                                         </tbody>
                                     </table>
                                 </div>
-                                <ReactPaginate
-                                    previousLabel={'Previous'}
-                                    nextLabel={'Next'}
-                                    breakLabel={'...'}
-                                    pageCount={pageCount}
-                                    marginPagesDisplayed={2}
-                                    pageRangeDisplayed={5}
-                                    onPageChange={handlePageChange}
-                                    containerClassName={'pagination'}
-                                    activeClassName={'active'}
-                                />
+                                
+                                {tableData.length > itemsPerPage && (
+                                    <div className="pagination-container">
+                                        <ReactPaginate
+                                            pageCount={pageCount}
+                                            onPageChange={handlePageChange}
+                                            containerClassName={'pagination'}
+                                            activeClassName={'active'}
+                                        />
+                                    </div>
+                                )}
 
                             </div>
                         </div>

@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-
 const CandidateSchema = new Schema({
-    candidate_id:{
+    candidate_id: {
         type: String,
-        unique: true
+        unique: true,
+        required: true
     },
     candidate_first_name: {
         type: String,
@@ -33,7 +33,7 @@ const CandidateSchema = new Schema({
         type: String,
     },
     candidate_skills: {
-        type: String,
+        type: Array,
         required: true
     },
     candidate_experience: {
@@ -48,32 +48,24 @@ const CandidateSchema = new Schema({
         type: Date,
         default: Date.now
     },
-
-
     candidate_marrital_status: {
         type: String,
     },
-
-    candidate_machine_round: {
+    
+    interview_rounds : {
         type: String,
     },
-    candidate_technical_interview_round: {
-        type: String,
-    },
-    candidate_hr_interview_round: {
-        type: String,
-    },
+    
     candidate_selection_status: {
         type: String,
     },
     candidate_feedback: {
         type: String,
     },
- 
     source_of_candidate: {
         type: String,
     },
-     candidate_address: {
+    candidate_address: {
         type: String,
     },
     candidate_document_proof: {
@@ -87,12 +79,17 @@ const CandidateSchema = new Schema({
     },
     graduationPercentage: {
         type: Number
-    }
-
+    },
+    postGraduationPercentage: {
+        type: Number
+    },
+    profile: {
+        type: String,
+        required: true
+    },
 },
     {
         timestamps: { createdAt: "created_at", updatedAt: "updated_at" }
     });
 const Candidate = mongoose.model('candidate', CandidateSchema);
-
 module.exports = Candidate;

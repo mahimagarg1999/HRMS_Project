@@ -14,6 +14,7 @@ router.route('/changepassword')
     .delete(userController.delete)
 router.route('/search').get(userController.search)
 router.route('/sortorder').get(userController.sortOrder)
+router.route('/send-mail').post(userController.sendEmail);
 
 module.exports = router;
 

@@ -1,6 +1,7 @@
 const manageConsultancyModel = require("../models/Consultancy.model")
 const status = require("../config/status");
 const fs = require('fs'); // Importing fs with promises
+const nodemailer = require('nodemailer');
 
 function capitalizeWords(str) {
     if (typeof str !== 'string') return str; // Return the input if it's not a string
@@ -50,7 +51,7 @@ exports.create = async (req, res) => {
             var obj = {
                 consultancy_name: capitalizeWords(req.body.consultancy_name),
                 consultancy_email: req.body.consultancy_email,
-                consultancy_website: req.body.consultancy_website,
+                consultancy_website_url: req.body.consultancy_website_url,
                 consultancy_mobile: req.body.consultancy_mobile,
                 consultancy_alternate_mobile: req.body.consultancy_alternate_mobile,
                 consultancy_city: capitalizeWords(req.body.consultancy_city),
@@ -77,36 +78,6 @@ exports.create = async (req, res) => {
         }
     }
 }
-
-
-// exports.create = async (req, res) => {
-//     console.log("expenses test")
-//     try {
-//         var obj = {
-//              consultancy_name: req.body.consultancy_name,
-//             consultancy_email: req.body.consultancy_email,
-//             consultancy_website: req.body.consultancy_website,
-//             consultancy_mobile: req.body.consultancy_mobile,
-//             consultancy_alternate_mobile: req.body.consultancy_alternate_mobile,
-//             consultancy_city: req.body.consultancy_city,
-//             consultancy_state: req.body.consultancy_state,
-//             consultancy_address: req.body.consultancy_address,
-//             contract_agreement: req.body.contract_agreement,
-//         }
-//         const newmanageConsultancyModel = new manageConsultancyModel(obj);
-//         let result = await newmanageConsultancyModel.save();
-//         res.json({ success: true, status: status.OK, msg: 'Adding Consultancy is successfully.' });
-
-//     }
-//     catch (err) {
-//         if (err.code === 11000 && err.keyPattern && err.keyPattern.consultancy_email) {
-//              return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This email is already registered.' });
-//         } else {
-//              return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Adding Consultancy failed.' });
-//         }
-//     }
-// }
-
 
 //update by id
 exports.edit = async (req, res) => {
@@ -155,13 +126,16 @@ exports.edit = async (req, res) => {
         if (agreementPromise.status == 'true') {
             let agreementFinalname = agreementPromise.finalname;
             var agreementFullPdfUrl = '';
-            if (agreementFinalname != '') {
+            if (agreementFinalname) {
                 agreementFullPdfUrl = "consultancy/agreement/" + agreementFinalname;
+            }
+            else{
+                agreementFullPdfUrl=undefined
             }
             var obj = {
                 consultancy_name: capitalizeWords(req.body.consultancy_name),
                 consultancy_email: req.body.consultancy_email,
-                consultancy_website: req.body.consultancy_website,
+                consultancy_website_url: req.body.consultancy_website_url,
                 consultancy_mobile: req.body.consultancy_mobile,
                 consultancy_alternate_mobile: req.body.consultancy_alternate_mobile,
                 consultancy_city: capitalizeWords(req.body.consultancy_city),
@@ -308,17 +282,7 @@ exports.search = async (req, res) => {
 
             ]
         };
-        // Check if the query contains both first and last names
-        // if (query.includes(' ')) {
-        //     const [name, email] = query.split(' ');
-
-        //     // Update search query to match both first and last names together
-        //     searchQuery.$or.push({
-        //         $and: [
-        //             { consultancy_name: { $regex: new RegExp(name, "i") } },
-        //          ]
-        //     });
-        // }
+         
         // Perform search using Mongoose's find method
         const results = await manageConsultancyModel.find(searchQuery);
 
@@ -328,3 +292,65 @@ exports.search = async (req, res) => {
         return res.status(500).json({ success: false, status: 500, msg: 'Internal Server Error' });
     }
 }
+exports.sendEmail = async (req, res) => {
+    try {
+        const emails = req.body && req.body.emails ? req.body.emails : [];
+
+        if (!Array.isArray(emails) || emails.length === 0) {
+            return res.json({ success: false, status: 'INVALIDSYNTAX', msg: 'Invalid email list.' });
+        }
+
+        // Create the transporter object
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'mahimagarg1602@gmail.com',
+                pass: 'uixv laul bjpd tqcc'
+            }
+        });
+
+        const sendMailPromises = emails.map(async (email) => {
+            const user = await manageConsultancyModel.findOne({ consultancy_email: new RegExp(`^${email}$`, 'i') }).lean().exec();
+
+            if (!user) {
+                console.log(`User not found in database: ${email}`);
+            }
+
+            const mailOptions = {
+                from: 'Reinforce Software Solution Pvt. Ltd.:mahimagarg1602@gmail.com',
+                to: email,
+                subject: '**Explore New Opportunities with Reinforce Software Solution**',
+                text: `Let's Collaborate and Achieve Success Together!`,
+                html: `
+                <h2 style="color: black;"><i><b>Let's Collaborate and Achieve Success Together!</b></i></h2>
+                <h3 style="color: black;"><i><b>Dear Consultancy Partner,</b></i></h3>
+                <h3 style="color: black;"><i><b>
+                We hope this message finds you well. We are reaching out to explore potential collaborations and opportunities to work together.</b></i></h3>
+                <h3 style="color: black;"><i><b>
+                At Reinforce Software Solution, we believe in the power of partnerships and are keen to discuss how we can mutually benefit from working together.</b></i></h3>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnxTrgYo0-ESOlt1UKZHXcBpBsejELeKC-Ug&s" alt="Reinforce Software Solution" style="display: block; margin: 20px auto; max-width: 100%; height: auto;">
+                `
+                ,
+            };
+
+            return transporter.sendMail(mailOptions)
+                .then(info => {
+                    console.log(`Message sent to ${email}: %s`, info.messageId);
+                    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+                    return `Message sent to ${email}`;
+                })
+                .catch(error => {
+                    console.error(`Error sending mail to ${email}:`, error);
+                    return `Error sending mail to ${email}: ${error.message}`;
+                });
+        });
+
+        const results = await Promise.all(sendMailPromises);
+
+        res.json({ success: true, status: 'OK', msg: 'Emails sent to the provided email addresses.', results });
+
+    } catch (e) {
+        console.log("Error:", e);
+        return res.json({ success: false, status: 'INVALIDSYNTAX', err: e, msg: 'Error in sending emails.' });
+    }
+};

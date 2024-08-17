@@ -6,7 +6,7 @@ import ModalBox from './EditConsultancyModel.js';
 import Nav from '../../navComponent/Nav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
-import { faTrash, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faSortUp, faSortDown, faEnvelope,faFilePdf } from '@fortawesome/free-solid-svg-icons';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import ReactPaginate from 'react-paginate';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
@@ -21,20 +21,18 @@ const ConsultancyModule = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [sortColumn, setSortColumn] = useState(null);
     const [sortDirection, setSortDirection] = useState('ascending');
-    const [ids, setId] = useState([]);
+    const [ids, setIds] = useState([]);
     const [agreement, setAgreement] = useState('');
     const [selectedFile, setSelectedFile] = useState('');
     const [query, setQuery] = useState('');
-
-
-
-
+    const [selectedEmails, setSelectedEmails] = useState([]);
+    const [selectAll, setSelectAll] = useState(false);
 
     const handlePageChange = ({ selected }) => {
         setCurrentPage(selected); // Update the current page when pagination changes
     };
 
-    const itemsPerPage = 5; // Number of items to display per page
+    const itemsPerPage = 10; // Number of items to display per page
     const offset = currentPage * itemsPerPage;
     const pageCount = Math.ceil(tableData.length / itemsPerPage);
     // const currentItems = tableData.slice(offset, offset + itemsPerPage);
@@ -72,7 +70,7 @@ const ConsultancyModule = () => {
     const [formData, setFormData] = useState({
         // consultancy_name: '',
         // consultancy_email: '',
-        // consultancy_website: '',
+        // consultancy_website_url: '',
         // consultancy_mobile: '',
         // consultancy_alternate_mobile: '',
         // consultancy_city: '',
@@ -124,7 +122,7 @@ const ConsultancyModule = () => {
         let formDataNew = {
             consultancy_name: '',
             consultancy_email: '',
-            consultancy_website: '',
+            consultancy_website_url: '',
             consultancy_mobile: '',
             consultancy_alternate_mobile: '',
             consultancy_city: '',
@@ -225,15 +223,13 @@ const ConsultancyModule = () => {
     }
     // multidelete
     const handleCheckboxChange = (e, id) => {
-        // If the checkbox is checked, add the ID to the list of selected IDs
         if (e.target.checked) {
-            setId(prevIds => [...prevIds, id]);
+            setIds(prevIds => [...prevIds, id]);
         } else {
-            // If the checkbox is unchecked, remove the ID from the list of selected IDs
-            setId(prevIds => prevIds.filter(prevId => prevId !== id));
+            setIds(prevIds => prevIds.filter(prevId => prevId !== id));
         }
     };
-    const DEletemulti = async () => {
+    const Deletemulti = async () => {
         const data = {
             "ids": ids
         };
@@ -245,6 +241,7 @@ const ConsultancyModule = () => {
             });
             console.log(response.data); // Response ke saath kuch karne ke liye
             settogle(!togle);
+            setIds([]);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -310,7 +307,7 @@ const ConsultancyModule = () => {
                 console.error('Error:', error);
             }
         }
-        else {          
+        else {
             try {
                 const response = await axios.get(`${BASE_API_URL}consultancy/list`);
                 console.log(response.data.data); // Handle the response as needed
@@ -318,6 +315,34 @@ const ConsultancyModule = () => {
             } catch (error) {
                 console.error('Error:', error);
             }
+        }
+    };
+    const handleCheckboxChangeEmail = (email) => {
+        setSelectedEmails(prevSelectedEmails =>
+            prevSelectedEmails.includes(email)
+                ? prevSelectedEmails.filter(e => e !== email)
+                : [...prevSelectedEmails, email]
+        );
+    };
+ 
+
+    const sendEmails = async () => {
+        if (selectedEmails.length === 0) {
+            setMessage('Please select at least one email to send.');
+            return;
+        }
+        setMessage('Sending emails...');
+        try {
+            const response = await axios.post(`${BASE_API_URL}consultancy/send-mail`, { emails: selectedEmails });
+            console.log('Response:', response.data);
+            setMessage(response.data.msg);
+            setTimeout(() => setMessage(''), 2000);
+            // Reset selected emails and checkboxes after sending emails
+            setSelectedEmails([]);
+            setSelectAll(false);
+        } catch (error) {
+            console.error('Error sending emails:', error);
+            setMessage('Error sending emails.');
         }
     };
     return (
@@ -337,15 +362,19 @@ const ConsultancyModule = () => {
                                         Add Consultancy +
                                     </button>
                                 </h5> */}
-                                    <div>
-                                        <button className="backButton" onClick={openPopup}>
+                                    <div className='icon_manage'>
+                                        <button className="button_design" onClick={openPopup}>
                                             Add &nbsp;<FontAwesomeIcon icon={faPlusCircle} />
                                         </button>
 
-                                    </div>
-                                    <div> <span> <button className="multiDeleteButton" onClick={() => { DEletemulti() }}    >
-                                        <FontAwesomeIcon icon={faTrashAlt} />
-                                    </button></span></div>
+                                        <span> <button onClick={() => { Deletemulti() }} className='button_design'  >
+                                            MultiDel&nbsp;  <FontAwesomeIcon icon={faTrashAlt} />
+                                        </button></span>
+                                        <span>   <button onClick={sendEmails} className='button_design'>Send Emails &nbsp; <FontAwesomeIcon icon={faEnvelope} /></button>
+                                        </span>
+                                        </div>
+                                        {message && <div className="mt-3 alert alert-success">{message}</div>}
+
                                     {isOpen && (
                                         <div>
                                             <div>
@@ -373,7 +402,7 @@ const ConsultancyModule = () => {
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
                                                                             <label><b>  Website</b></label>
-                                                                            <input type="text" name="consultancy_website" value={formData.consultancy_website} onChange={handleInputChange} class="form-control" placeholder="Consultancy Website" />
+                                                                            <input type="text" name="consultancy_website_url" value={formData.consultancy_website_url} onChange={handleInputChange} class="form-control" placeholder="Consultancy Website" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
                                                                             <label><b>  Mobile</b></label>
@@ -440,25 +469,36 @@ const ConsultancyModule = () => {
                                             <tr>
 
                                                 {/* <th scope="col" >ID    </th> */}
-                                                <th scope="col" onClick={() => handleSort('consultancy_name')}> Name  {sortColumn === 'consultancy_name' && (
+                                                <th scope="col" onClick={() => handleSort('consultancy_name')}> <b>Name  </b>{sortColumn === 'consultancy_name' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
-                                                <th scope="col" onClick={() => handleSort('consultancy_email')}>Email {sortColumn === 'consultancy_email' && (
+                                                <th scope="col" onClick={() => handleSort('consultancy_email')}><b>Email </b>{sortColumn === 'consultancy_email' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
-                                                <th scope="col" onClick={() => handleSort('contract_agreement')}>Agreement {sortColumn === 'contract_agreement' && (
-                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
-                                                )}</th>
-                                                <th scope="col" onClick={() => handleSort('consultancy_mobile')}> mobile
+                                                <th scope="col" onClick={() => handleSort('consultancy_mobile')}><b> mobile</b>
                                                     {sortColumn === 'consultancy_mobile' && (
                                                         <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                     )}</th>
-                                                <th scope="col" >ACTIONS </th>
+                                                <th scope="col" onClick={() => handleSort('contract_agreement')}><b>Agreement</b> {sortColumn === 'contract_agreement' && (
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
+                                                )}</th>
+
+                                                <th scope="col" onClick={() => handleSort('consultancy_website_url')}><b> Website URL</b>
+                                                    {sortColumn === 'consultancy_website_url' && (
+                                                        <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
+                                                    )}</th>
+                                                <th scope="col" ><b>ACTIONS </b></th>
                                                 <th>
                                                     <label className="customcheckbox m-b-20">
                                                         <input type="checkbox" id="mainCheckbox" />
                                                         {/* <span className="checkmark"></span> */}
                                                     </label>
+                                                </th>
+                                                <th>
+                                                    <button style={{
+                                                        border: 'none',
+                                                        backgroundColor: 'white'
+                                                    }} title="Send Mail"><FontAwesomeIcon icon={faEnvelope} /></button>
                                                 </th>
 
                                             </tr>
@@ -470,10 +510,25 @@ const ConsultancyModule = () => {
                                                     {/* <td>{data._id}</td> */}
                                                     <td>{data.consultancy_name} </td>
                                                     <td>{data.consultancy_email}</td>
-                                                    <td>
-                                                        <a style={{ color: 'rgb(40, 118, 154)' }} href={`http://localhost:5000/${data.contract_agreement}`} target="_blank">{data.contract_agreement}</a>
-                                                    </td>
                                                     <td>{data.consultancy_mobile}</td>
+
+                                                    <td>
+                                                        {/* <a style={{ color: 'rgb(40, 118, 154)' }} href={`http://localhost:5000/${data.contract_agreement}`} target="_blank">{data.contract_agreement}</a> */}
+                                                        <button
+                                                            className="editButton"
+                                                            onClick={() => window.open(`http://localhost:5000/${data.contract_agreement}`, '_blank')}
+                                                            style={{ color: 'rgb(40, 118, 154)', background: 'none', border: 'none', cursor: 'pointer' }} title="Show Pdf"
+                                                        >
+                                                            <FontAwesomeIcon icon={faFilePdf} />
+
+                                                        </button>
+                                                    </td>
+
+                                                    <td>
+                                                        <a style={{ color: 'rgb(40, 118, 154)' }} href={`${data.consultancy_website_url}`} target="_blank">{data.consultancy_website_url}</a>
+
+                                                    </td>
+
                                                     <td>
                                                         <button className="editButton" onClick={() => DeleteData(data._id)} >  <FontAwesomeIcon icon={faTrash} /></button>
                                                         <button className="editButton" onClick={() => openModal(data._id)} >
@@ -482,9 +537,22 @@ const ConsultancyModule = () => {
                                                     </td>
                                                     <td>
                                                         <label className="customcheckbox">
-                                                            <input type="checkbox" className="listCheckbox" onChange={(e) => handleCheckboxChange(e, data._id)} />
+                                                            {/* <input type="checkbox" className="listCheckbox" onChange={(e) => handleCheckboxChange(e, data._id)} /> */}
+                                                            <input
+                                                                type="checkbox"
+                                                                className="listCheckbox"
+                                                                checked={ids.includes(data._id)}
+                                                                onChange={(e) => handleCheckboxChange(e, data._id)}
+                                                            />
                                                             <span className="checkmark"></span>
                                                         </label>
+                                                    </td>
+                                                    <td>
+                                                        <input style={{ marginLeft: "18px" }}
+                                                            type="checkbox"
+                                                            checked={selectedEmails.includes(data.consultancy_email)}
+                                                            onChange={() => handleCheckboxChangeEmail(data.consultancy_email)}
+                                                        />
                                                     </td>
 
                                                     <ModalBox isOpen={modalIsOpen} consultancyId={selectedConsultancyId} onRequestClose={closeModal}>
@@ -505,7 +573,7 @@ const ConsultancyModule = () => {
                                     </table>
                                 </div>
                                 {/* Pagination component */}
-                                <ReactPaginate
+                                {/* <ReactPaginate
                                     previousLabel={'Previous'}
                                     nextLabel={'Next'}
                                     breakLabel={'...'}
@@ -515,8 +583,17 @@ const ConsultancyModule = () => {
                                     onPageChange={handlePageChange}
                                     containerClassName={'pagination'}
                                     activeClassName={'active'}
-                                />
-
+                                /> */}
+                                {tableData.length > itemsPerPage && (
+                                    <div className="pagination-container">
+                                        <ReactPaginate
+                                            pageCount={pageCount}
+                                            onPageChange={handlePageChange}
+                                            containerClassName={'pagination'}
+                                            activeClassName={'active'}
+                                        />
+                                    </div>
+                                )}
 
                             </div>
                         </div>

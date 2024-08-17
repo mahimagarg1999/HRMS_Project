@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const ConsultancySchema = new Schema({
-
     consultancy_name: {
         type: String,
         required: true,
@@ -11,9 +10,10 @@ const ConsultancySchema = new Schema({
         required: true,
         unique: true
     },
-    consultancy_website: {
+    consultancy_website_url: {
         type: String,
     },
+
     consultancy_mobile: {
         type: String,
     },
@@ -39,11 +39,6 @@ const ConsultancySchema = new Schema({
     contract_linkedIn_Profile: {
         type: String,
     }
-
 });
-
-
 const Consultancy = mongoose.model("consultancy", ConsultancySchema);
-
-
 module.exports = Consultancy;

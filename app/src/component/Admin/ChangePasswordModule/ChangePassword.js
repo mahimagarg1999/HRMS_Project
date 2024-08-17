@@ -5,7 +5,7 @@ import './ChangePassword.css'
 import { useNavigate } from 'react-router-dom';
 import Footer from '../../FooterModule/Footer';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
-
+import CloseButton from 'react-bootstrap/CloseButton';
 const ChangePassword = () => {
     const [employee_email, setEmail] = useState(localStorage.getItem("email"));
     const [currentPassword, setCurrentPassword] = useState('');
@@ -26,7 +26,6 @@ const ChangePassword = () => {
             setMessage('New password and confirm password do not match.');
             return;
         }
-
         try {
             const response = await axios.put(`${BASE_API_URL}employee/changepassword`, {
                 employee_email,
@@ -54,7 +53,7 @@ const ChangePassword = () => {
 
             <div>
                 <Nav />
-                 
+
                 <div style={{ backgroundColor: '#28769a' }}>
                     <h1 className='headerUser'>ChangePassword</h1>
                 </div>
@@ -64,9 +63,10 @@ const ChangePassword = () => {
                             <div class="signup-form">
                                 <form onSubmit={handleSubmit}>
                                     <div>
-                                        <button onClick={handleClose} className="closeButton1">x</button>
-
-                                        <b><label>Email:</label></b>
+                                        {/* <button onClick={handleClose} className="closeButton1">x</button> */}
+                                        <p style={{ display: "flex"}}>
+                                            <b><label>Email:</label></b>
+                                            <CloseButton style={{ marginLeft: "85%"}} onClick={handleClose} /></p>
                                         <input
                                             type="email"
                                             value={employee_email}

@@ -5,6 +5,8 @@ import axios from 'axios'; // For Axios
 import 'reactjs-popup/dist/index.css';
 import Modal from 'react-modal';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
+import CloseButton from 'react-bootstrap/CloseButton';
+
 
 const ModalBox = ({ isOpen, onRequestClose, expensesId }) => {
 
@@ -68,26 +70,36 @@ const ModalBox = ({ isOpen, onRequestClose, expensesId }) => {
             ariaHideApp={false}
             style={{
                 overlay: {
-
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
                 },
                 content: {
-                    width: '90%',
-                    height: '90%',
+                    width: '100%',
+                    height: '100%',
                     margin: 'auto',
                     borderRadius: '8px',
                     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                    padding: '20px'
+                    padding: '20px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                    border: 'none',
+ 
                 }
             }}
         >
-            <button onClick={onRequestClose}>Close</button>
+            {/* <button onClick={onRequestClose}>Close</button> */}
+            {/* <CloseButton onClick={onRequestClose} /> */}
+
 
             <div class="row">
                 <div class="col-md-6 offset-md-3">
                     <div class="signup-form">
                         <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
+                        <CloseButton onClick={onRequestClose} />
+
                             <div style={{ textAlign: 'center' }}>
+
                                 <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Edit Expenses Data</h4>
 
                             </div>

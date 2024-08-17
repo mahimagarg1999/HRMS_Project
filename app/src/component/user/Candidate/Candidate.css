@@ -1,15 +1,16 @@
 @import url(http://fonts.googleapis.com/css?family=Calibri:400,300,700);
 
 body {
-    /* background-color: #673AB7; */
-    font-family: 'Calibri', sans-serif !important
+   /* background-color: #673AB7; */
+   font-family: 'Calibri', sans-serif !important
 }
 
-.container{
-   margin-top:100px;
+.container {
+   margin-top: 100px;
 }
+
 .card {
-      position: relative;
+   position: relative;
    display: -webkit-box;
    display: -ms-flexbox;
    display: flex;
@@ -51,7 +52,8 @@ body {
    outline: none;
 }
 
-.table th, .table thead th {
+.table th,
+.table thead th {
    font-weight: 500;
 }
 
@@ -69,7 +71,8 @@ body {
 }
 
 
-.table th, .table thead th {
+.table th,
+.table thead th {
    font-weight: 500;
 }
 
@@ -116,7 +119,7 @@ th {
 }
 
 
-.customcheckbox input:checked ~ .checkmark {
+.customcheckbox input:checked~.checkmark {
    background-color: #2196BB;
 }
 
@@ -132,7 +135,15 @@ th {
    -ms-transform: rotate(45deg);
    transform: rotate(45deg);
 }
-.headerUser{
+
+.headerUser {
    color: white;
    text-align: center
+}
+/* for modal */
+ 
+.modal-body-custom {
+   max-height: 400px; /* Adjust height as per your requirement */
+   overflow-y: auto;
+   padding: 10px;
 }

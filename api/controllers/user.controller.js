@@ -2,7 +2,7 @@
 const manageUserModel = require("../models/user.model");
 const status = require("../config/status");
 const Employee = require('../models/Employee.model');
-
+const nodemailer = require('nodemailer');
 
 function capitalizeWords(str) {
     if (typeof str !== 'string') return str; // Return the input if it's not a string
@@ -346,7 +346,6 @@ exports.sortOrder = async (req, res) => {
     try {
         let sortObject = {};
         sortObject[columnName] = sortOrder;
-
         // Custom pipeline stage for case-insensitive sorting
         const result = await manageUserModel.aggregate([
             {
@@ -366,4 +365,84 @@ exports.sortOrder = async (req, res) => {
     }
 };
 
+
+ exports.sendEmail = async (req, res) => {
+  try {
+    const emails = req.body && req.body.emails ? req.body.emails : [];
+
+    if (!Array.isArray(emails) || emails.length === 0) {
+      return res.json({ success: false, status: status.INVALIDSYNTAX, msg: 'Invalid email list.' });
+    }
+
+    // Create the transporter object
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'mahimagarg1602@gmail.com',
+        pass: 'uixv laul bjpd tqcc'
+      }
+    });
+
+    const sendMailPromises = emails.map(async (email) => {
+        const user = await manageUserModel.findOne({ email: new RegExp(`^${email}$`, 'i') }).lean().exec();
+
+      if (!user) {
+        console.log(`Authentication failed. User not found: ${email}`);
+        return Promise.resolve(`User not found: ${email}`);
+      } else {
+        const mailOptions = {
+          from: 'mailto:mahimagarg1602@gmail.com',
+          to: email,
+          subject: 'Requirement..Hiring',
+          text: 'Hello world?',
+          html: `
+            <h2>About the Role:</h2>
+            <p>We are seeking a skilled and passionate Laravel Developer to join our dynamic team. The ideal candidate will have 2-3 years of experience in developing robust and scalable web applications using the Laravel framework.</p>
+            <h2>Key Responsibilities:</h2>
+            <ol>
+                <li>Develop, test, and maintain web applications using Laravel.</li>
+                <li>Collaborate with cross-functional teams to define, design, and ship new features.</li>
+                <li>Troubleshoot, test, and maintain the core product software and databases to ensure strong optimization and functionality.</li>
+            </ol>
+            <h2>Required Skills:</h2>
+            <ul>
+                <li>2-3 years of experience in Laravel development.</li>
+                <li>Strong knowledge of PHP Framework.</li>
+                <li>Experience with front-end technologies such as JavaScript, HTML, and CSS.</li>
+                <li>Familiarity with version control tools (e.g., Git).</li>
+                <li>Knowledge of database design and querying using MySQL.</li>
+            </ul>
+            <h2>Why Join Us:</h2>
+            <ul>
+                <li>Opportunity to work on exciting projects with a talented team.</li>
+                <li>Competitive salary and benefits package.</li>
+                <li>Continuous learning and professional development opportunities.</li>
+                <li>Positive and inclusive work environment.</li>
+            </ul>
+            <p>Thank you</p>
+          `,
+        };
+
+        return transporter.sendMail(mailOptions)
+          .then(info => {
+            console.log(`Message sent to ${email}: %s`, info.messageId);
+            console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+            return `Message sent to ${email}`;
+          })
+          .catch(error => {
+            console.error(`Error sending mail to ${email}:`, error);
+            return `Error sending mail to ${email}: ${error.message}`;
+          });
+      }
+    });
+
+    const results = await Promise.all(sendMailPromises);
+
+    res.json({ success: true, status: status.OK, msg: 'Emails sent to the provided email addresses.', results });
+
+  } catch (e) {
+    console.log("e", e);
+    return res.json({ success: false, status: status.INVALIDSYNTAX, err: e, msg: 'Error in sending emails.' });
+  }
+}
 

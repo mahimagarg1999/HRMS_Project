@@ -5,8 +5,9 @@ import axios from 'axios'; // For Axios
 import ModalBox from './EditHelpCenterModel.js';
 import Nav from '../../navComponent/Nav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrashAlt, faTrash, faSortUp, faSortDown, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrashAlt, faEye, faSortUp, faSortDown, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import ReactPaginate from 'react-paginate';
+import ModalComponent from './ModelComponent.js'; // Adjust the import path as needed
 
 import Footer from '../../FooterModule/Footer.js';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
@@ -20,15 +21,18 @@ const HelpCenterModule = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [sortColumn, setSortColumn] = useState(null);
     const [sortDirection, setSortDirection] = useState('ascending');
-    const [ids, setId] = useState([]);
+    const [ids, setIds] = useState([]);
     const id = localStorage.getItem("_id")
     const [query, setQuery] = useState('');
+    const empCode = localStorage.getItem("employee_code")
+    const [modalIsOpen1, setModalIsOpen1] = useState(false);
+    const [modalData, setModalData] = useState(null);
 
     const handlePageChange = ({ selected }) => {
         setCurrentPage(selected); // Update the current page when pagination changes
     };
 
-    const itemsPerPage = 5; // Number of items to display per page
+    const itemsPerPage = 10; // Number of items to display per page
     const offset = currentPage * itemsPerPage;
     const pageCount = Math.ceil(tableData.length / itemsPerPage);
 
@@ -50,12 +54,10 @@ const HelpCenterModule = () => {
     };
 
     const handleCheckboxChange = (e, id) => {
-        // If the checkbox is checked, add the ID to the list of selected IDs
         if (e.target.checked) {
-            setId(prevIds => [...prevIds, id]);
+            setIds(prevIds => [...prevIds, id]);
         } else {
-            // If the checkbox is unchecked, remove the ID from the list of selected IDs
-            setId(prevIds => prevIds.filter(prevId => prevId !== id));
+            setIds(prevIds => prevIds.filter(prevId => prevId !== id));
         }
     };
     const Deletemulti = async () => {
@@ -70,6 +72,7 @@ const HelpCenterModule = () => {
             });
             console.log(response.data); // Response ke saath kuch karne ke liye
             settogle(!togle);
+            setIds([]);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -101,17 +104,9 @@ const HelpCenterModule = () => {
         helpcenter_ticket_solved_date: '',
         helpcenter_ticket_solved_by: '',
         helpcenter_ticket_managed_by: '',
+        helpcenter_solve_duration: '',
 
-        // helpcenter_ticket1: '',
-        // helpcenter_ticket2: '',
-        // helpcenter_ticket3: '',
-        // helpcenter_ticket4: '',
-        // helpcenter_ticket5: '',
-        // helpcenter_ticket6: '',
-        // helpcenter_ticket7: '',
-        // helpcenter_ticket8: '',
-        // helpcenter_ticket9: '',
-        // helpcenter_ticket10: '',
+        
 
     });
     useEffect(() => {
@@ -128,11 +123,27 @@ const HelpCenterModule = () => {
 
         fetchData();
     }, [togle]);
-
+ 
     const openPopup = () => {
-        setMessage('')
+        setMessage('');
+        setFormData('');
+        let formDataNew = {
+            helpcenter_ticket_id: '',
+            helpcenter_employee_id: localStorage.getItem("_id"),
+            helpcenter_ticket_description: '',
+            helpcenter_ticket_priority: '',
+            helpcenter_ticket_department: '',
+            helpcenter_ticket_status: 'Active',
+            helpcenter_ticket_solved_by: 'hr',
+            helpcenter_ticket_managed_by: 'hr',
+            helpcenter_employee_code: localStorage.getItem("_id"),
+            helpcenter_solve_duration: ''
+        }
+        setFormData(formDataNew);
+
         setIsOpen(true);
     };
+
 
     const closePopup = () => {
         setIsOpen(false);
@@ -198,18 +209,7 @@ const HelpCenterModule = () => {
         let isValid = true;
         const newErrors = {};
 
-        if (!formData.helpcenter_ticket_id.trim()) {
-            newErrors.helpcenter_ticket_id = "helpcenter_ticket_id is required";
-            isValid = false;
-        }
-
-        if (!formData.helpcenter_employee_id.trim()) {
-            newErrors.helpcenter_employee_id = "helpcenter_employee_id is required";
-            isValid = false;
-        }
-
-
-
+          
         setErrors(newErrors);
         return isValid;
     };
@@ -237,6 +237,35 @@ const HelpCenterModule = () => {
         }
     };
 
+    const openModal1 = (recruitmentId) => {
+        setModalIsOpen1(prevState => ({
+            ...prevState,
+            [recruitmentId]: true // Set modal open for this recruitment ID
+        }));
+        fetchHelpCenterData(recruitmentId);
+    };
+
+    // Function to close modal for a specific recruitment ID
+    const closeModal1 = (recruitmentId) => {
+        setModalIsOpen1(prevState => ({
+            ...prevState,
+            [recruitmentId]: false // Set modal closed for this recruitment ID
+        }));
+    };
+
+    const fetchHelpCenterData = async (id) => {
+        try {
+            const response = await axios.get(`${BASE_API_URL}helpcenter/get?helpcenterid=${id}`);
+            setModalData(response.data); // Ensure response.data contains the correct data structure
+            setModalIsOpen1(prevState => ({
+                ...prevState,
+                [id]: true // Set modal open for this recruitment ID
+            }));
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+
     return (
         <>
             <div >
@@ -250,12 +279,13 @@ const HelpCenterModule = () => {
                             <div class="card">
                                 <div class="card-body text-center">
 
-                                    <div>
-
-                                    </div>
-                                    <div> <span> <button className="multiDeleteButton" onClick={() => { Deletemulti() }}    >
-                                        <FontAwesomeIcon icon={faTrashAlt} />
-                                    </button></span></div>
+                                    <div className='icon_manage'>
+                                        <button className="button_design" onClick={openPopup}>
+                                            Add &nbsp;<FontAwesomeIcon icon={faPlusCircle} />
+                                        </button>
+                                        <span> <button className="button_design" onClick={() => { Deletemulti() }}    >
+                                            MultiDel&nbsp;<FontAwesomeIcon icon={faTrashAlt} />
+                                        </button></span></div>
                                     {isOpen && (
                                         <div>
                                             <div>
@@ -264,6 +294,108 @@ const HelpCenterModule = () => {
                                                         <div class="col-md-6 offset-md-3">
                                                             <div class="signup-form">
                                                                 <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
+                                                                    <div style={{ textAlign: 'center' }}>
+                                                                        <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Add Helpcenter Data</h4>
+                                                                        <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
+                                                                    </div>
+                                                                    <div class="row">
+
+                                                                        {/* <div class="mb-3 col-md-6">
+                                                                            <label><b>Employee Code</b></label>
+                                                                            <input type="text" name="helpcenter_ticket_id" value={formData.helpcenter_ticket_id} readOnly class="form-control" placeholder="Employee Code" />
+
+                                                                        </div> */}
+                                                                        {/* <div class="mb-3 col-md-6">
+                                                                            <label><b>Employee Code</b></label>
+                                                                            <input type="text" name="helpcenter_employee_id" value={empCode} readOnly class="form-control" placeholder="Employee Code" />
+
+                                                                        </div> */}
+
+
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <label><b>Ticket Priority</b></label>
+                                                                            <select
+                                                                                name="helpcenter_ticket_priority"
+                                                                                value={formData.helpcenter_ticket_priority}
+                                                                                onChange={handleInputChange}
+                                                                                className="form-control"
+                                                                                disabled
+                                                                            >
+                                                                                <option value="">Select Ticket Priority</option>
+                                                                                <option value="low">low</option>
+                                                                                <option value="medium">medium</option>
+                                                                                <option value="high">high</option>
+
+
+                                                                            </select>
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <lable><b>Ticket Department</b></lable>
+                                                                            <select
+                                                                                name="helpcenter_ticket_department"
+                                                                                value={formData.helpcenter_ticket_department}
+                                                                                onChange={handleInputChange}
+                                                                                className="form-control"
+                                                                                
+                                                                            >
+                                                                                <option value="">Select Ticket Department</option>
+                                                                                <option value="Administer">Administer</option>
+                                                                                <option value="HR">HR</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <lable><b>Ticket Status</b></lable>
+
+                                                                            <input type="text" name="helpcenter_ticket_status" value="Active" class="form-control" placeholder="Ticket Status" />
+                                                                        </div>
+
+
+
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <lable><b>Ticket Solved By</b></lable>
+                                                                            <input type="text" name="helpcenter_ticket_solved_by" value='hr' class="form-control" placeholder="Ticket Solved By" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <lable><b>Ticket Managed By</b></lable>
+
+                                                                            <input type="text" name="helpcenter_ticket_managed_by" value='hr' class="form-control" placeholder="Ticket Managed By" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <label><b>Ticket Description*</b></label>
+                                                                            <textarea
+                                                                                name="helpcenter_ticket_description"
+                                                                                value={formData.helpcenter_ticket_description}
+                                                                                onChange={handleInputChange}
+                                                                                class="form-control"
+                                                                                placeholder="Ticket Description"
+                                                                            >
+                                                                            </textarea>
+                                                                            {errors.helpcenter_ticket_description && <span className="error" style={{ color: 'red' }}>{errors.helpcenter_ticket_description}</span>}
+
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <label><b>helpcenter_solve_duration*</b></label>
+                                                                            <textarea
+                                                                                name="helpcenter_solve_duration"
+                                                                                value={formData.helpcenter_solve_duration}
+                                                                                onChange={handleInputChange}
+                                                                                class="form-control"
+                                                                                placeholder="Solve Duration"
+                                                                            >
+                                                                            </textarea>
+                                                                            {errors.helpcenter_solve_duration && <span className="error" style={{ color: 'red' }}>{errors.helpcenter_solve_duration}</span>}
+
+                                                                        </div>
+
+
+                                                                        <span style={{ color: 'green' }}>{message && <p>{message}</p>}</span>
+
+                                                                    </div>
+                                                                    <div class="col-md-12">
+                                                                        <button type="submit">ADD HELPCENTER</button>
+                                                                    </div>
+                                                                </form>
+                                                                {/* <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
                                                                     <div style={{ textAlign: 'center' }}>
                                                                         <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Create Your Account</h4>
                                                                         <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
@@ -316,7 +448,7 @@ const HelpCenterModule = () => {
                                                                     </div>
                                                                     <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
 
-                                                                </form>
+                                                                </form> */}
                                                                 <p class="text-center mt-3 text-secondary">If you have account, Please <a href="#">Login Now</a></p>
                                                             </div>
                                                         </div>
@@ -339,28 +471,28 @@ const HelpCenterModule = () => {
                                         <thead className="thead-light">
                                             <tr>
 
-                                                {/* <th scope="col"  >ID  </th>
-                                                <th scope="col" onClick={() => handleSort('helpcenter_employee_id')}> Emp Id{sortColumn === 'helpcenter_employee_id' && (
-                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
-                                                )}</th> */}
-                                                <th scope="col" onClick={() => handleSort('helpcenter_employee_code')}> Emp Code{sortColumn === 'helpcenter_employee_code' && (
+
+                                                <th scope="col" onClick={() => handleSort('helpcenter_employee_code')}><b> Emp Code</b>{sortColumn === 'helpcenter_employee_code' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
-                                                <th scope="col" onClick={() => handleSort('helpcenter_ticket_status')}> Ticket Status{sortColumn === 'helpcenter_ticket_status' && (
+                                                <th scope="col" onClick={() => handleSort('helpcenter_ticket_status')}> <b>Ticket Status</b>{sortColumn === 'helpcenter_ticket_status' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
 
 
-                                                <th scope="col" onClick={() => handleSort('helpcenter_ticket_solved_by')}> Ticket Solved By {sortColumn === 'helpcenter_ticket_solved_by' && (
+                                                <th scope="col" onClick={() => handleSort('helpcenter_ticket_solved_by')}> <b>Ticket Solved By </b>{sortColumn === 'helpcenter_ticket_solved_by' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
-                                                <th scope="col" onClick={() => handleSort('helpcenter_ticket_managed_by')}> Ticket Managed By {sortColumn === 'helpcenter_ticket_managed_by' && (
+                                                <th scope="col" onClick={() => handleSort('helpcenter_ticket_managed_by')}> <b>Ticket Managed By </b>{sortColumn === 'helpcenter_ticket_managed_by' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
-                                                <th scope="col" onClick={() => handleSort('helpcenter_ticket_description')}> Ticket Description {sortColumn === 'helpcenter_ticket_description' && (
+                                                <th scope="col" onClick={() => handleSort('helpcenter_solve_duration')}> <b>Solve Duration</b>{sortColumn === 'helpcenter_solve_duration' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
-                                                <th scope="col" >Actions</th>
+                                                <th scope="col" onClick={() => handleSort('helpcenter_ticket_description')}> <b>Ticket Description</b> {sortColumn === 'helpcenter_ticket_description' && (
+                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
+                                                )}</th>
+                                                <th scope="col" ><b>Actions</b></th>
                                                 <th>
                                                     <label className="customcheckbox m-b-20">
                                                         <input type="checkbox" id="mainCheckbox" />
@@ -374,11 +506,13 @@ const HelpCenterModule = () => {
                                                 <tr key={index}>
 
                                                     {/* <td>{data._id}</td>
-                                                    <td>{data.helpcenter_employee_id}</td> */}
-                                                    <td>{data.helpcenter_employee_code}</td>
+                                                    // <td>{data.helpcenter_employee_id}</td> */}
+                                                    <td>{data.helpcenter_ticket_id}</td>
                                                     <td>{data.helpcenter_ticket_status}</td>
                                                     <td>{data.helpcenter_ticket_solved_by}</td>
                                                     <td>{data.helpcenter_ticket_managed_by}</td>
+
+                                                    <td>{data.helpcenter_solve_duration}</td>
 
                                                     <td>{data.helpcenter_ticket_description}</td>
                                                     <td>
@@ -386,10 +520,22 @@ const HelpCenterModule = () => {
                                                         <button className="editButton" onClick={() => openModal(data._id)} >
                                                             <FontAwesomeIcon icon={faEdit} />
                                                         </button>
+                                                        <button
+                                                            className="editButton"
+                                                            onClick={() => openModal1(data._id)}
+                                                        >
+                                                            <FontAwesomeIcon icon={faEye} />
+                                                        </button>
                                                     </td>
                                                     <td>
                                                         <label className="customcheckbox">
-                                                            <input type="checkbox" className="listCheckbox" onChange={(e) => handleCheckboxChange(e, data._id)} />
+                                                            {/* <input type="checkbox" className="listCheckbox" onChange={(e) => handleCheckboxChange(e, data._id)} /> */}
+                                                            <input
+                                                                type="checkbox"
+                                                                className="listCheckbox"
+                                                                checked={ids.includes(data._id)}
+                                                                onChange={(e) => handleCheckboxChange(e, data._id)}
+                                                            />
                                                             <span className="checkmark"></span>
                                                         </label>
                                                     </td>
@@ -397,12 +543,15 @@ const HelpCenterModule = () => {
                                                         <h2>Modal Title</h2>
                                                         <p>Modal Content</p>
                                                     </ModalBox>
+                                                    {modalIsOpen1[data._id] && (
+                                                        <ModalComponent isOpen1={modalIsOpen1[data._id]} onRequestClose={() => closeModal1(data._id)} data={modalData} />
+                                                    )}
                                                 </tr>
                                             ))}
                                         </tbody>
                                     </table>
                                 </div>
-                                <ReactPaginate
+                                {/* <ReactPaginate
                                     previousLabel={'Previous'}
                                     nextLabel={'Next'}
                                     breakLabel={'...'}
@@ -412,7 +561,17 @@ const HelpCenterModule = () => {
                                     onPageChange={handlePageChange}
                                     containerClassName={'pagination'}
                                     activeClassName={'active'}
-                                />
+                                /> */}
+                                {tableData.length > itemsPerPage && (
+                                    <div className="pagination-container">
+                                        <ReactPaginate
+                                            pageCount={pageCount}
+                                            onPageChange={handlePageChange}
+                                            containerClassName={'pagination'}
+                                            activeClassName={'active'}
+                                        />
+                                    </div>
+                                )}
 
                             </div>
                         </div>

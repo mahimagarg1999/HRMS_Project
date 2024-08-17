@@ -13,6 +13,7 @@ exports.create = async (req, res) => {
             helpcenter_ticket_id: 'emp' + req.body.helpcenter_employee_id,
             helpcenter_employee_id: req.body.helpcenter_employee_id,
             helpcenter_employee_code: req.body.helpcenter_employee_code,
+            helpcenter_solve_duration: req.body.helpcenter_solve_duration,
             helpcenter_ticket_description: req.body.helpcenter_ticket_description,
             helpcenter_ticket_priority: req.body.helpcenter_ticket_priority,
             helpcenter_ticket_department: req.body.helpcenter_ticket_department,
@@ -56,6 +57,8 @@ exports.edit = async (req, res) => {
                     helpcenter_employee_id: req.body.helpcenter_employee_id,
                     helpcenter_employee_code: req.body.helpcenter_employee_code,
                     helpcenter_ticket_description: req.body.helpcenter_ticket_description,
+                    helpcenter_solve_duration: req.body.helpcenter_solve_duration,
+
                     helpcenter_ticket_priority: req.body.helpcenter_ticket_priority,
                     helpcenter_ticket_department: req.body.helpcenter_ticket_department,
                     helpcenter_ticket_created_date: req.body.helpcenter_ticket_created_date,
@@ -64,7 +67,6 @@ exports.edit = async (req, res) => {
                     helpcenter_ticket_solved_by: capitalizeWords(req.body.helpcenter_ticket_solved_by),
                     helpcenter_ticket_managed_by: capitalizeWords(req.body.helpcenter_ticket_managed_by),
                     // helpcenter_ticket_id: 'emp' + req.body.helpcenter_employee_id,
-
                 }
             },
         ).lean().exec();
@@ -99,6 +101,8 @@ exports.editPatch = async (req, res) => {
                     helpcenter_employee_code: req.body.helpcenter_employee_code,
                     helpcenter_ticket_description: req.body.helpcenter_ticket_description,
                     helpcenter_ticket_priority: req.body.helpcenter_ticket_priority,
+                    helpcenter_solve_duration: req.body.helpcenter_solve_duration,
+
                     helpcenter_ticket_department: req.body.helpcenter_ticket_department,
                     helpcenter_ticket_created_date: req.body.helpcenter_ticket_created_date,
                     helpcenter_ticket_status: req.body.helpcenter_ticket_status,
@@ -109,7 +113,7 @@ exports.editPatch = async (req, res) => {
 
                 }
             },
-        ).lean().exec();        
+        ).lean().exec();
 
         if (result) {
             res.json({ success: true, status: status.OK, msg: 'HelpCenter is updated successfully.' });
@@ -175,7 +179,7 @@ exports.delete = async (req, res) => {
         let result = await manageHelpCenterModel.findOneAndDelete({ _id: ID }).lean().exec();
         if (result) {
             res.json({ success: true, status: status.OK, msg: 'HelpCenter is Deleted successfully.' });
-        }
+        }       
         else {
             return res.json({ success: false, status: status.NOTFOUND, msg: 'HelpCenter Id not found' });
         }
@@ -189,12 +193,10 @@ exports.delete = async (req, res) => {
 exports.multidelete = async (req, res) => {
     try {
         const ids = req.body.ids;
-
         // Check if the 'ids' parameter is not available or is not an array
         if (!ids || !Array.isArray(ids) || ids.length === 0) {
             return res.json({ success: false, status: status.NOTFOUND, msg: "IDs parameter not available or invalid" });
         }
-
         // Use $in operator to match multiple IDs and delete them
         let result = await manageHelpCenterModel.deleteMany({ _id: { $in: ids } }).lean().exec();
 
@@ -216,7 +218,7 @@ exports.getHelpCenterById = async (req, res) => {
         if (helpcenterid === undefined) {
             return res.json({ success: false, status: status.NOTFOUND, msg: 'Id Parameter Not Available' });
         }
-        const data = await manageHelpCenterModel.findOne({ _id: helpcenterid }).lean().exec();
+        const data = await manageHelpCenterModel.find({ _id: helpcenterid }).lean().exec();
         return res.json({ data: data, success: true, status: status.OK });
     }
     catch (err) {
@@ -239,7 +241,6 @@ exports.getDataByEmpId = async (req, res) => {
         console.log("error", err);
         return res.json({ success: false, status: status.INVALIDSYNTAX, err: err, msg: 'Get Help Center failed.' });
     }
-
 }
 
 
@@ -254,7 +255,10 @@ exports.search = async (req, res) => {
             $or: [
                 { helpcenter_ticket_solved_by: { $regex: new RegExp(query, "i") } },
                 { helpcenter_ticket_managed_by: { $regex: new RegExp(query, "i") } },
-                { helpcenter_ticket_status: { $regex: new RegExp(query, "i") } }
+                { helpcenter_ticket_status: { $regex: new RegExp(query, "i") } },
+                {
+                    helpcenter_solve_duration: { $regex: new RegExp(query, "i") }}
+                
             ]
         };
         // Check if the query contains both first and last names
