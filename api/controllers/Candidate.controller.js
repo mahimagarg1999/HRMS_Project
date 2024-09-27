@@ -233,10 +233,8 @@ exports.multidelete = async (req, res) => {
         if (!ids || !Array.isArray(ids) || ids.length === 0) {
             return res.json({ success: false, status: status.NOTFOUND, msg: "IDs parameter not available or invalid" });
         }
-
         // Use $in operator to match multiple IDs and delete them
         let result = await manageCandidateModel.deleteMany({ _id: { $in: ids } }).lean().exec();
-
         // Check if at least one document was deleted
         if (result.deletedCount > 0) {
             res.json({ success: true, status: status.OK, msg: 'Candidate data deleted successfully.' });
@@ -284,7 +282,6 @@ exports.search = async (req, res) => {
                 { candidate_linkedIn_profile: { $regex: new RegExp(query, "i") } },
                 { candidate_experience: { $regex: new RegExp(query, "i") } },
                 { candidate_address: { $regex: new RegExp(query, "i") } },
-
             ]
         };
         // Check if the query contains both first and last names

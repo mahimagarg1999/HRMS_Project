@@ -30,6 +30,9 @@ import CandidateByDataModalComponent from './component/user/CandidateByApi/Candi
 import EmployeeDataModal from './component/user/Employee/EmployeeDataModal.js';
 import ProfileModal from './component/user/Profile/UserProfileModal.js';
 import EmpHelpCenterModule from './component/Admin/Emp_HelpcenterModule/Emp_HelpcenterModule.js';
+import LeaveModule from './component/Admin/LeaveModule/Leave';
+import BirthdayEvent from './component/user/Birthday/BIrthday';
+import CodebankModule from './component/user/CodeBank/CodebankModel.js';
  const PrivateRoute = ({ element }) => {
   const isLoggedIn = localStorage.length > 0;
   return isLoggedIn ? element : <Navigate to="/login" />;
@@ -66,6 +69,9 @@ function App() {
         <Route path="/employee_data" element={<EmployeeDataModal />} />
         <Route path="/profile" element={<ProfileModal />} />
         <Route path="/emphelpcenter" element={<EmpHelpCenterModule />} />
+        <Route path="/leave" element={<LeaveModule />} />
+        <Route path="/birthday" element={<BirthdayEvent />} />
+        <Route path="/codebank" element={<CodebankModule                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         />} />
 
 
 

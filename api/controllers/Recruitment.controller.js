@@ -199,8 +199,7 @@ exports.searchRecruitment = async (req, res) => {
                 { profile: { $regex: new RegExp(query, "i") } },
                 { requiredSkills: { $elemMatch: { $regex: new RegExp(query, "i") } } }
 
-                // { applicationStatus: { $regex: new RegExp(query, "i") } }
-
+ 
             ]
         };
         const results = await manageRecruitmentModel.find(searchQuery);

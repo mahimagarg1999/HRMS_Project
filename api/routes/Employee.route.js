@@ -20,16 +20,12 @@ router.route('/edit')
     .put(employeeController.edit)
 router.route('/delete')
     .delete(employeeController.delete);
-
 router.route('/multi-delete')
     .delete(employeeController.multidelete)
-
 router.route('/get')
     .get(employeeController.getEmployeeById)
-
 router.route('/changepassword')
     .put(employeeController.changePassword)
-
 router.route('/search').get(employeeController.search)
 router.route('/sortorder').get(employeeController.sortOrder)
 router.route('/date')
@@ -38,5 +34,6 @@ router.route('/export-data').post(employeeController.export)
 router.route('/import-data').post(upload.single('file'), employeeController.import)
 router.route('/search-advance').get(employeeController.searchAdvance)
 router.route('/send-mail').post(employeeController.sendEmail);
-
+router.route('/get-dob')
+    .get(employeeController.getBirthday)
 module.exports = router;                                                                                                                     

@@ -887,11 +887,7 @@ const EmployeeModule = () => {
                                                                 width: '80px',
                                                                 height: '80px',
                                                                 borderRadius: '50%',
-                                                                 backgroundColor: 'lightgrey',
-                                                                 borderRadius: '78%',
-                                                                 borderWidth: '0.5px', // Example border width
-                                                                 borderStyle: 'solid', // You need to specify the border style as well
-                                                                 borderColor: 'black'  // And the border color  
+                                                                objectFit: 'cover'
                                                             }} // Adjust size as needed
                                                         />
                                                     </td>

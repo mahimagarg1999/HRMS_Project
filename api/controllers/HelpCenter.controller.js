@@ -179,7 +179,7 @@ exports.delete = async (req, res) => {
         let result = await manageHelpCenterModel.findOneAndDelete({ _id: ID }).lean().exec();
         if (result) {
             res.json({ success: true, status: status.OK, msg: 'HelpCenter is Deleted successfully.' });
-        }       
+        }
         else {
             return res.json({ success: false, status: status.NOTFOUND, msg: 'HelpCenter Id not found' });
         }
@@ -256,9 +256,7 @@ exports.search = async (req, res) => {
                 { helpcenter_ticket_solved_by: { $regex: new RegExp(query, "i") } },
                 { helpcenter_ticket_managed_by: { $regex: new RegExp(query, "i") } },
                 { helpcenter_ticket_status: { $regex: new RegExp(query, "i") } },
-                {
-                    helpcenter_solve_duration: { $regex: new RegExp(query, "i") }}
-                
+                { helpcenter_solve_duration: { $regex: new RegExp(query, "i") } }
             ]
         };
         // Check if the query contains both first and last names

@@ -6,14 +6,10 @@ import 'reactjs-popup/dist/index.css';
 import Modal from 'react-modal';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
 import CloseButton from 'react-bootstrap/CloseButton';
-
 const ModalBox = ({ isOpen, onRequestClose, helpCenterId }) => {
-
     const [data, setData] = useState([])
     const [message, setMessage] = useState('');
-
     useEffect(() => {
-
         if (isOpen) {
             setMessage('')
             console.log('model open', helpCenterId)
@@ -21,10 +17,7 @@ const ModalBox = ({ isOpen, onRequestClose, helpCenterId }) => {
             if (helpCenterId) {
                 const fetchData = async () => {
                     try {
-
                         const response = await axios.get(`${BASE_API_URL}helpcenter/get?helpcenterid=${helpCenterId}`);
-
-
                         setData(response.data.data)
                         console.log('data', data)
 

@@ -158,8 +158,6 @@ const SkillsModule = () => {
             [name]: "",
         });
     };
-
-
     const toggleRow = (id) => {
         setExpandedRows(prevRows =>
             prevRows.includes(id) ? prevRows.filter(rowId => rowId !== id) : [...prevRows, id]
@@ -357,9 +355,7 @@ const SkillsModule = () => {
                                                     <div class="row">
                                                         <div class="col-md-6 offset-md-3">
                                                             <div class="signup-form">
-
-
-                                                                <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
+      <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
                                                                     <div style={{ textAlign: 'center' }}>
                                                                         <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Add Profile Data</h4>
                                                                         <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
@@ -462,7 +458,6 @@ const SkillsModule = () => {
                                     />
                                 </div>
                                 <div className="table-responsive">
-
                                     <table className="table">
                                         <thead className="thead-light">
                                             <tr>
@@ -474,7 +469,6 @@ const SkillsModule = () => {
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
                                                 <th scope="col" ><b>Profile</b></th>
-
                                                 <th scope="col" ><b>Actions</b></th>
                                                 <th>
                                                     <label className="customcheckbox m-b-20">

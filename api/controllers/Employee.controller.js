@@ -1030,3 +1030,14 @@ Hope this independence will bring joy and success to your life.</b></i></h3>
         return res.json({ success: false, status: 'INVALIDSYNTAX', err: e, msg: 'Error in sending emails.' });
     }
 };
+
+exports.getBirthday = async (req, res) => {
+    try {
+        const data = await manageEmployeeModel.find({}).select("id employee_first_name employee_last_name employee_dob").lean().exec();
+        return res.json({ data: data, success: true, status: status.OK, msg: 'Get Birthday Successfully.' });
+    }
+    catch (err) {
+        return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Get Birthday failed.' });
+
+    }
+}

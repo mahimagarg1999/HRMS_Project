@@ -1077,7 +1077,6 @@ const CandidateModule = () => {
                                                     <td>
                                                         <button className="editButton" onClick={() => DeleteData(data._id)} title="Delete Data">  <FontAwesomeIcon icon={faTrash} /></button>
                                                         <button className="editButton" onClick={() => openModal(data._id)} title="Edit Data">
-
                                                             <FontAwesomeIcon icon={faEdit} />
                                                         </button>
                                                         <button

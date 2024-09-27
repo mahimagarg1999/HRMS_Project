@@ -27,6 +27,8 @@ const Nav = () => {
               <li  ><Link to="/employee" className="nav-item">Employee</Link></li>
               <li  ><Link to="/candidate" className="nav-item">Candidate</Link></li>
               <li ><Link to="/profile" className="nav-item">Profile</Link></li>
+              <li ><Link to="/birthday" className="nav-item">Birthday</Link></li>
+              <li ><Link to="/codebank" className="nav-item">CodeBank</Link></li>
 
               <li  ><Link to="/recruitment" className="nav-item">Recruitment</Link></li>
               <li  ><Link to="/skills" className="nav-item">Skills</Link></li>
@@ -66,6 +68,7 @@ const Nav = () => {
                 <li  ><Link to="/adminhelpcenter" className="nav-item">Old Help Center</Link></li>
                 <li  ><Link to="/emphelpcenter" className="nav-item">Help Center</Link></li>
                 <li ><Link to="/admin-about" className="nav-item">About</Link></li>
+                <li ><Link to="/leave" className="nav-item">Leave</Link></li>
                 <li className="nav-item" onClick={logout}> Logout </li>
 
               </ul>

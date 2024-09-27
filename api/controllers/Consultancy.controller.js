@@ -25,7 +25,6 @@ exports.create = async (req, res) => {
                 var fileName = current_time;
                 var extension = agreementPdfName.split('.').pop().toLowerCase();
                 var finalname = fileName + "." + extension;
-
                 if (extension == 'pdf') {
                     var base64Data = agreementPdfFile.replace(/^data:application\/pdf;base64,/, "");
                     const buffer = Buffer.from(base64Data, 'base64');

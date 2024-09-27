@@ -10,6 +10,9 @@ const emphelpcenter = require("../routes/EMPHelpCenter.route")
 const skills = require("../routes/Skills.route")
 const candidatethirdparty = require("../routes/CandidateThirdParty.route")
 const profileRoute = require("../routes/Profile.route")
+const leaveRoute = require("../routes/Leave.route")
+const codeBankRoute = require("../routes/CodeBank.route")
+
 
 const router = express.Router();
 router.use('/employee', employeeRoute);
@@ -19,11 +22,12 @@ router.use('/expenses', expensesRoute);
 router.use('/consultancy', consultancyRoute);
 router.use('/user', userRoute);
 router.use('/recruitment', recruitmentRoute);
-
 router.use('/emphelpcenter', emphelpcenter);
 router.use('/skills', skills);
 router.use('/candidatethirdparty', candidatethirdparty);
 router.use('/profiles', profileRoute);
+router.use('/leave', leaveRoute);
+router.use('/codebank', codeBankRoute);
 
 
 
