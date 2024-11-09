@@ -18,6 +18,7 @@ router.route('/get')
 router.route('/search').get(skillsController.search)
 router.route('/sortorder').get(skillsController.sortOrder)
 router.route('/get_skills').get(skillsController.getAllSkills)
+router.route('/getskillbyprofile').get(skillsController.getSkillsByProfile)
 
 
 module.exports = router;                                                                                                                     

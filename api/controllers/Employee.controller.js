@@ -3,6 +3,7 @@ const status = require("../config/status");
 const fs = require('fs'); // Importing fs with promises
 const path = require('path');
 const { resolveTxt } = require("dns/promises");
+const nodemailer = require('nodemailer');
 
 function isValidBase64(str) {
     try {
@@ -16,251 +17,6 @@ function capitalizeWords(str) {
     if (typeof str !== 'string') return str; // Return the input if it's not a string
     return str.replace(/\b\w/g, char => char.toUpperCase()); // Capitalize the first letter of each word
 }
-// exports.create = async (req, res) => {
-//     try {
-//         var uploadDir = process.cwd() + '/public/';
-//         var resumePdfUploadDir = uploadDir + "employee/resume_pdf/";
-//         var proofPdfUploadDir = uploadDir + "employee/proof_pdf/";
-//         var panPdfUploadDir = uploadDir + "employee/pan_card_pdf/";
-//         var expLetterPdfUploadDir = uploadDir + "employee/exe_letter_pdf/";
-//         var marksheetPdfUploadDir = uploadDir + "employee/marksheet_pdf/";
-//         var marksheetPdfUploadDir = uploadDir + "employee/marksheet_pdf/";
-
-//         if (!fs.existsSync(resumePdfUploadDir)) {
-//             fs.mkdirSync(resumePdfUploadDir, { recursive: true });
-//         }
-
-//         if (!fs.existsSync(proofPdfUploadDir)) {
-//             fs.mkdirSync(proofPdfUploadDir, { recursive: true });
-//         }
-//         if (!fs.existsSync(panPdfUploadDir)) {
-//             fs.mkdirSync(panPdfUploadDir, { recursive: true });
-//         }
-//         if (!fs.existsSync(expLetterPdfUploadDir)) {
-//             fs.mkdirSync(expLetterPdfUploadDir, { recursive: true });
-//         }
-//         if (!fs.existsSync(marksheetPdfUploadDir)) {
-//             fs.mkdirSync(marksheetPdfUploadDir, { recursive: true });
-//         }
-
-//         let resumePromise = await new Promise(async function (resolve, reject) {
-//             var resumePdfFile = req.body.employee_resume;
-
-//             if (resumePdfFile) {
-//                 var resumePdfName = req.body.resumePdfName;
-//                 var current_time = new Date().getTime();
-//                 var fileName = current_time;
-//                 var extension = resumePdfName.split('.').pop().toLowerCase();
-//                 var finalname = fileName + "." + extension;
-
-//                 if (extension == 'pdf') {
-//                     var base64Data = resumePdfFile.replace(/^data:application\/pdf;base64,/, "");
-//                     const buffer = Buffer.from(base64Data, 'base64');
-//                     if (buffer.length > 0) {
-//                         await fs.writeFileSync(resumePdfUploadDir + finalname, base64Data, 'base64');
-//                         resolve({ status: 'true', finalname: finalname, fileExt: extension });
-//                     } else {
-//                         resolve({ status: 'true', finalname: '', fileExt: '' });
-//                     }
-//                 } else {
-//                     resolve({ status: 'true', finalname: '', fileExt: '' });
-//                 }
-//             } else {
-//                 resolve({ status: 'true', finalname: '', fileExt: '' });
-//             }
-//         });
-
-//         let proofPromise = await new Promise(async function (resolve, reject) {
-//             var proofPdfFile = req.body.employee_id_proof;
-
-//             if (proofPdfFile) {
-//                 var proofPdfName = req.body.proofPdfName;
-//                 var current_time = new Date().getTime();
-//                 var fileName = current_time;
-//                 var extension = proofPdfName.split('.').pop().toLowerCase();
-//                 var finalname = fileName + "." + extension;
-
-//                 if (extension == 'pdf') {
-//                     var base64Data = proofPdfFile.replace(/^data:application\/pdf;base64,/, "");
-//                     const buffer = Buffer.from(base64Data, 'base64');
-//                     if (buffer.length > 0) {
-//                         await fs.writeFileSync(proofPdfUploadDir + finalname, base64Data, 'base64');
-//                         resolve({ status: 'true', finalname: finalname, fileExt: extension });
-//                     } else {
-//                         resolve({ status: 'true', finalname: '', fileExt: '' });
-//                     }
-//                 } else {
-//                     resolve({ status: 'true', finalname: '', fileExt: '' });
-//                 }
-//             } else {
-//                 resolve({ status: 'true', finalname: '', fileExt: '' });
-//             }
-//         });
-
-//         let panPromise = await new Promise(async function (resolve, reject) {
-//             var panPdfFile = req.body.employee_pan_card;
-
-//             if (panPdfFile) {
-//                 var panPdfName = req.body.panPdfName;
-//                 var current_time = new Date().getTime();
-//                 var fileName = current_time;
-//                 var extension = panPdfName.split('.').pop().toLowerCase();
-//                 var finalname = fileName + "." + extension;
-
-//                 if (extension == 'pdf') {
-//                     var base64Data = panPdfFile.replace(/^data:application\/pdf;base64,/, "");
-//                     const buffer = Buffer.from(base64Data, 'base64');
-//                     if (buffer.length > 0) {
-//                         await fs.writeFileSync(panPdfUploadDir + finalname, base64Data, 'base64');
-//                         resolve({ status: 'true', finalname: finalname, fileExt: extension });
-//                     } else {
-//                         resolve({ status: 'true', finalname: '', fileExt: '' });
-//                     }
-//                 } else {
-//                     resolve({ status: 'true', finalname: '', fileExt: '' });
-//                 }
-//             } else {
-//                 resolve({ status: 'true', finalname: '', fileExt: '' });
-//             }
-//         });
-
-//         let experiencePromise = await new Promise(async function (resolve, reject) {
-//             var experiencePdfFile = req.body.employee_experience_letter;
-
-//             if (experiencePdfFile) {
-//                 var experiencePdfName = req.body.experiencePdfName;
-//                 var current_time = new Date().getTime();
-//                 var fileName = current_time;
-//                 var extension = experiencePdfName.split('.').pop().toLowerCase();
-//                 var finalname = fileName + "." + extension;
-
-//                 if (extension == 'pdf') {
-//                     var base64Data = experiencePdfFile.replace(/^data:application\/pdf;base64,/, "");
-//                     const buffer = Buffer.from(base64Data, 'base64');
-//                     if (buffer.length > 0) {
-//                         await fs.writeFileSync(expLetterPdfUploadDir + finalname, base64Data, 'base64');
-//                         resolve({ status: 'true', finalname: finalname, fileExt: extension });
-//                     } else {
-//                         resolve({ status: 'true', finalname: '', fileExt: '' });
-//                     }
-//                 } else {
-//                     resolve({ status: 'true', finalname: '', fileExt: '' });
-//                 }
-//             } else {
-//                 resolve({ status: 'true', finalname: '', fileExt: '' });
-//             }
-//         });
-
-//         let marksheetPromise = await new Promise(async function (resolve, reject) {
-//             var marksheetPdfFile = req.body.employee_marksheet;
-
-//             if (marksheetPdfFile) {
-//                 var marksheetPdfName = req.body.marksheetPdfName;
-//                 var current_time = new Date().getTime();
-//                 var fileName = current_time;
-//                 var extension = marksheetPdfName.split('.').pop().toLowerCase();
-//                 var finalname = fileName + "." + extension;
-
-//                 if (extension == 'pdf') {
-//                     var base64Data = marksheetPdfFile.replace(/^data:application\/pdf;base64,/, "");
-//                     const buffer = Buffer.from(base64Data, 'base64');
-//                     if (buffer.length > 0) {
-//                         await fs.writeFileSync(marksheetPdfUploadDir + finalname, base64Data, 'base64');
-//                         resolve({ status: 'true', finalname: finalname, fileExt: extension });
-//                     } else {
-//                         resolve({ status: 'true', finalname: '', fileExt: '' });
-//                     }
-//                 } else {
-//                     resolve({ status: 'true', finalname: '', fileExt: '' });
-//                 }
-//             } else {
-//                 resolve({ status: 'true', finalname: '', fileExt: '' });
-//             }
-//         });
-
-//         if (resumePromise.status == 'true' && proofPromise.status == 'true') {
-//             let resumeFinalname = resumePromise.finalname;
-//             let proofFinalname = proofPromise.finalname;
-//             let panFinalname = panPromise.finalname;
-//             let experienceFinalname = experiencePromise.finalname;
-//             let marksheetFinalname = marksheetPromise.finalname;
-
-//             var resumeFullPdfUrl = '';
-//             var proofFullPdfUrl = '';
-//             var panFullPdfUrl = '';
-//             var experienceFullPdfUrl = '';
-//             var marksheetFullPdfUrl = '';
-
-//             if (resumeFinalname != '') {
-//                 resumeFullPdfUrl = "employee/resume_pdf/" + resumeFinalname;
-//             }
-
-//             if (proofFinalname != '') {
-//                 proofFullPdfUrl = "employee/proof_pdf/" + proofFinalname;
-//             }
-//             if (panFinalname != '') {
-//                 panFullPdfUrl = "employee/pan_card_pdf/" + panFinalname;
-//             }
-//             if (experienceFinalname != '') {
-//                 experienceFullPdfUrl = "employee/experience_card_pdf/" + experienceFinalname;
-//             }
-//             if (marksheetFinalname != '') {
-//                 marksheetFullPdfUrl = "employee/marksheet_pdf/" + marksheetFinalname;
-//             }
-
-//             var obj = {
-//                 employee_code: req.body.employee_code,
-//                 employee_first_name: capitalizeWords(req.body.employee_first_name),
-//                 employee_last_name: capitalizeWords(req.body.employee_last_name),
-//                 employee_mobile: req.body.employee_mobile,
-//                 employee_alternate_mobile: req.body.employee_alternate_mobile,
-//                 employee_email: req.body.employee_email,
-//                 employee_password: req.body.employee_password,
-//                 employee_address: req.body.employee_address,
-//                 employee_city: capitalizeWords(req.body.employee_city),
-//                 employee_state: capitalizeWords(req.body.employee_state),
-//                 employee_other_info: req.body.employee_other_info,
-//                 employee_dob: req.body.employee_dob,
-//                 employee_doj: req.body.employee_doj,
-//                 employee_skills: req.body.employee_skills,
-//                 employee_experience: req.body.employee_experience,
-//                 employee_resume: resumeFullPdfUrl, // Use resumeFullPdfUrl here
-//                 employee_id_proof: proofFullPdfUrl, // Use proofFullPdfUrl here
-//                 employee_pan_card: panFullPdfUrl,
-//                 employee_experience_letter: experienceFinalname,
-//                 employee_marksheet: marksheetFullPdfUrl,
-//                 employee_permanant_address_proof: req.body.employee_permanant_address_proof,
-//                 employee_local_address_proof: req.body.employee_local_address_proof,
-//                 employee_reference_one_name: req.body.employee_reference_one_name,
-//                 employee_reference_one_mobile: req.body.employee_reference_one_mobile,
-//                 employee_reference_two_name: req.body.employee_reference_two_name,
-//                 employee_reference_two_mobile: req.body.employee_reference_two_mobile,
-
-//             };
-
-//             const newmanageEmployeeModel = new manageEmployeeModel(obj);
-//             let result = await newmanageEmployeeModel.save();
-
-//             res.json({ success: true, status: status.CREATED, msg: 'Employee is created successfully.' });
-//         }
-
-//     } catch (err) {
-//         console.log("error", err);
-//         if (err.code === 11000 && err.keyPattern && err.keyPattern.employee_code) {
-//             return res.json({ success: false, status: status.BAD_REQUEST, msg: 'Employee Code is already registered.' });
-//         }
-//         else if (err.code === 11000 && err.keyPattern && err.keyPattern.employee_email) {
-//             return res.json({ success: false, status: status.BAD_REQUEST, msg: 'This Email is already registered.' });
-//         }
-//         else {
-//             // For other errors
-//             return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Adding Employee failed.' });
-
-//         }
-//     }
-// }
-
-//get all users 
 
 exports.create = async (req, res) => {
     try {
@@ -657,6 +413,7 @@ if (!fs.existsSync(uploadFolder)) {
 
 
 exports.edit = async (req, res) => {
+    console.log("mahimajjjj", req.body)
     try {
         const employeeId = req.body._id;
         if (!employeeId) {
@@ -884,6 +641,8 @@ exports.edit = async (req, res) => {
             } else if (imageFinalname) {
                 var imageFullUrl = "employee/image/" + imageFinalname;
             }
+            console.log("resumeFinalname", resumeFinalname)
+            console.log("resumeFullPdfUrl", resumeFullPdfUrl)
 
             // Construct the employee object with all data including file URLs
             var obj = {
@@ -1208,3 +967,106 @@ exports.searchAdvance = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+
+exports.sendEmail = async (req, res) => {
+    try {
+        const emails = req.body && req.body.emails ? req.body.emails : [];
+
+        if (!Array.isArray(emails) || emails.length === 0) {
+            return res.json({ success: false, status: 'INVALIDSYNTAX', msg: 'Invalid email list.' });
+        }
+
+        // Create the transporter object
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'mahimagarg1602@gmail.com',
+                pass: 'uixv laul bjpd tqcc'
+            }
+        });
+
+        const sendMailPromises = emails.map(async (email) => {
+            const user = await manageEmployeeModel.findOne({ employee_email: new RegExp(`^${email}$`, 'i') }).lean().exec();
+
+            if (!user) {
+                console.log(`User not found in database: ${email}`);
+            }
+
+            const mailOptions = {
+                from: 'Reinforce Software Solution Pvt. Ltd.:mahimagarg1602@gmail.com',
+                to: email,
+                subject: '**Happy Independence Day**',
+                text: `Celebrate Independence Day with Us & Explore New Opportunities!`,
+
+                html: ` <h2 style="color: black;"><i><b>Celebrate Independence Day with Us & Explore New Opportunities!</b></i></h2>
+<h3 style="color: black;"><i><b>Dear Team,</b></i></h3>
+<h3 style="color: black;"><i><b>
+Wishing you an advanced happy independence day to all our employees and their family members. </b></i></h3>
+<h3 style="color: black;"><i><b>
+Hope this independence will bring joy and success to your life.</b></i></h3>
+<img src="https://img.freepik.com/free-vector/gradient-india-independence-day-background_23-2149491410.jpg" alt="Independence Day Celebration" style="display: block; margin: 20px auto; max-width: 100%; height: auto;">
+ `,
+            };
+
+            return transporter.sendMail(mailOptions)
+                .then(info => {
+                    console.log(`Message sent to ${email}: %s`, info.messageId);
+                    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+                    return `Message sent to ${email}`;
+                })
+                .catch(error => {
+                    console.error(`Error sending mail to ${email}:`, error);
+                    return `Error sending mail to ${email}: ${error.message}`;
+                });
+        });
+
+        const results = await Promise.all(sendMailPromises);
+
+        res.json({ success: true, status: 'OK', msg: 'Emails sent to the provided email addresses.', results });
+
+    } catch (e) {
+        console.log("Error:", e);
+        return res.json({ success: false, status: 'INVALIDSYNTAX', err: e, msg: 'Error in sending emails.' });
+    }
+};
+
+exports.getBirthday = async (req, res) => {
+    try {
+        const data = await manageEmployeeModel.find({}).select("id employee_first_name employee_last_name employee_dob").lean().exec();
+        return res.json({ data: data, success: true, status: status.OK, msg: 'Get Birthday Successfully.' });
+    }
+    catch (err) {
+        return res.json({ success: false, status: status.INTERNAL_SERVER_ERROR, err: err, msg: 'Get Birthday failed.' });
+
+    }
+}
+
+exports.getAllEmployeeIdsForMeeting = async (req, res) => {
+    try {
+        // Fetch all employee IDs
+        const data = await manageEmployeeModel.find({}, { _id: 1  }).lean().exec();
+        // Check if any employee IDs were found
+        if (data.length === 0) {
+            return res.json({
+                success: false,
+                status: status.NOTFOUND,
+                msg: 'No Employees Found'
+            });
+        }
+        return res.json({
+            data: data,
+            success: true,
+            status: status.OK
+        });
+    } catch (err) {
+        console.error("Error fetching employee IDs:", err);
+        return res.json({
+            success: false,
+            status: status.INVALIDSYNTAX,
+            err: err.message, // Return a more readable error message
+            msg: 'Get Employee IDs failed.'
+        });
+    }
+};
+ 

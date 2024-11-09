@@ -13,7 +13,6 @@ const storage = multer.diskStorage({
     },
 });
 const upload = multer({ storage: storage });
-
 router.route('/list')
     .get(expensesController.list)
 router.route('/create')
@@ -30,6 +29,4 @@ router.route('/search').get(expensesController.search)
 router.route('/sortorder').get(expensesController.sortOrder)
 router.route('/export-data').post(expensesController.export)
 router.route('/import-data').post(upload.single('file'), expensesController.import)
-
-
 module.exports = router;                                                                                                                     

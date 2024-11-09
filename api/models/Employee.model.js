@@ -5,7 +5,6 @@ const EmployeeSchema = new Schema({
         type: String,
         required: true,
         unique: true
-
     },
     employee_first_name: {
         type: String,
@@ -18,7 +17,6 @@ const EmployeeSchema = new Schema({
     employee_mobile: {
         type: String,
         required: true,
-
     },
     employee_alternate_mobile: {
         type: String,

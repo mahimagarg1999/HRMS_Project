@@ -21,8 +21,7 @@ app.use('/download', express.static(path.join(__dirname, 'download')));
 
 
 mongoose.connect('mongodb://localhost:27017/HRMS', {
-  useNewUrlParser: true,
-  serverSelectionTimeoutMS: 30000, // Set a higher timeout value (e.g., 30 seconds)
+   serverSelectionTimeoutMS: 30000, // Set a higher timeout value (e.g., 30 seconds)
 
 });
 

@@ -8,14 +8,23 @@ const csvtojson = require('csvtojson');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
 
-  const { parse } = require('json2csv');
+const { parse } = require('json2csv');
+function isValidBase64(str) {
+    try {
+        return btoa(atob(str)) === str;
+    } catch (err) {
+        return false;
+    }
+}
 function capitalizeWords(str) {
     if (typeof str !== 'string') return str; // Return the input if it's not a string
     return str.replace(/\b\w/g, char => char.toUpperCase()); // Capitalize the first letter of each word
 }
 
 exports.edit = async (req, res) => {
+    console.log("dust---", req.body)
     try {
+
         const candidateId = req.body.id;
         if (!candidateId) {
             return res.status(400).json({ success: false, msg: 'Candidate ID is required for update.' });
@@ -36,6 +45,7 @@ exports.edit = async (req, res) => {
             var resumePdfFile = req.body.candidate_document_proof;
 
             if (resumePdfFile) {
+                console.log("hiiiiii")
                 var resumePdfName = req.body.resumePdfName;
                 var current_time = new Date().getTime();
                 var fileName = current_time;
@@ -44,16 +54,23 @@ exports.edit = async (req, res) => {
 
                 if (extension == 'pdf') {
                     var base64Data = resumePdfFile.replace(/^data:application\/pdf;base64,/, "");
-                    const buffer = Buffer.from(base64Data, 'base64');
-                    if (buffer.length > 0) {
-                        await fs.writeFileSync(resumeUploadDir + finalname, base64Data, 'base64');
-                        resolve({ status: 'true', finalname: finalname, fileExt: extension });
+                    const decodedData = base64Data;
+                    if (!isValidBase64(decodedData)) {
+                        return res.status(400).send({ message: "Invalid base64 string" });
                     } else {
-                        resolve({ status: 'true', finalname: '', fileExt: '' });
+                        const buffer = Buffer.from(base64Data, 'base64');
+                        if (buffer.length > 0) {
+                            await fs.writeFileSync(resumeUploadDir + finalname, base64Data, 'base64');
+                            resolve({ status: 'true', finalname: finalname, fileExt: extension });
+                        } else {
+                            resolve({ status: 'true', finalname: '', fileExt: '' });
+                        }
                     }
-                } else {
-                    resolve({ status: 'true', finalname: '', fileExt: '' });
                 }
+
+                // else {
+                //     resolve({ status: 'true', finalname: '', fileExt: '' });
+                // }
             } else {
                 resolve({ status: 'true', finalname: '', fileExt: '' });
             }
@@ -61,9 +78,16 @@ exports.edit = async (req, res) => {
         if (resumePromise.status == 'true') {
             let resumeFinalname = resumePromise.finalname;
             var resumeFullPdfUrl = '';
-            if (resumeFinalname != '') {
+            if (resumeFinalname) {
                 resumeFullPdfUrl = "candidate/document/" + resumeFinalname;
             }
+            else {
+                resumeFullPdfUrl = undefined
+            }
+
+            console.log("resumeFinalname", resumeFinalname)
+            console.log("resumeFullPdfUrl", resumeFullPdfUrl)
+
             // Prepare object for candidate update
             var obj = {
                 candidate_id: req.body.candidate_id,
@@ -79,9 +103,7 @@ exports.edit = async (req, res) => {
                 candidate_expected_salary: req.body.candidate_expected_salary,
                 candidate_expected_joining_date: req.body.candidate_expected_joining_date,
                 candidate_marrital_status: req.body.candidate_marrital_status,
-                candidate_machine_round: req.body.candidate_machine_round,
-                candidate_technical_interview_round: req.body.candidate_technical_interview_round,
-                candidate_hr_interview_round: req.body.candidate_hr_interview_round,
+                interview_rounds:req.body.interview_rounds,
                 candidate_selection_status: req.body.candidate_selection_status,
                 candidate_feedback: req.body.candidate_feedback,
                 source_of_candidate: req.body.source_of_candidate,
@@ -90,6 +112,7 @@ exports.edit = async (req, res) => {
                 tenth_percentage: req.body.tenth_percentage,
                 twelfth_percentage: req.body.twelfth_percentage,
                 graduationPercentage: req.body.graduationPercentage,
+                postGraduationPercentage:req.body.postGraduationPercentage,
                 profile: req.body.profile
             };
             // Find the existing candidate profile
@@ -210,10 +233,8 @@ exports.multidelete = async (req, res) => {
         if (!ids || !Array.isArray(ids) || ids.length === 0) {
             return res.json({ success: false, status: status.NOTFOUND, msg: "IDs parameter not available or invalid" });
         }
-
         // Use $in operator to match multiple IDs and delete them
         let result = await manageCandidateModel.deleteMany({ _id: { $in: ids } }).lean().exec();
-
         // Check if at least one document was deleted
         if (result.deletedCount > 0) {
             res.json({ success: true, status: status.OK, msg: 'Candidate data deleted successfully.' });
@@ -261,7 +282,6 @@ exports.search = async (req, res) => {
                 { candidate_linkedIn_profile: { $regex: new RegExp(query, "i") } },
                 { candidate_experience: { $regex: new RegExp(query, "i") } },
                 { candidate_address: { $regex: new RegExp(query, "i") } },
-
             ]
         };
         // Check if the query contains both first and last names
@@ -341,9 +361,7 @@ exports.create = async (req, res) => {
                 candidate_expected_salary: req.body.candidate_expected_salary,
                 candidate_expected_joining_date: req.body.candidate_expected_joining_date,
                 candidate_marrital_status: req.body.candidate_marrital_status,
-                candidate_machine_round: req.body.candidate_machine_round,
-                candidate_technical_interview_round: req.body.candidate_technical_interview_round,
-                candidate_hr_interview_round: req.body.candidate_hr_interview_round,
+                interview_rounds:req.body.interview_rounds,
                 candidate_selection_status: req.body.candidate_selection_status,
                 candidate_feedback: req.body.candidate_feedback,
                 source_of_candidate: req.body.source_of_candidate,
@@ -352,6 +370,7 @@ exports.create = async (req, res) => {
                 tenth_percentage: req.body.tenth_percentage,
                 twelfth_percentage: req.body.twelfth_percentage,
                 graduationPercentage: req.body.graduationPercentage,
+                postGraduationPercentage:req.body.postGraduationPercentage,
                 profile: req.body.profile
             };
 
@@ -494,35 +513,7 @@ exports.import = async (req, res) => {
 //     }
 // };
 
-// exports.searchAdvance = async (req, res) => {
-//     try {
-//         const { candidate_skills, candidate_experience, all_skills } = req.query;
-//         // Query banayein filter karne ke liye
-//         let query = {};
-//         if (candidate_skills) {
-//             const skillsArray = candidate_skills.split(',');
-//             if (all_skills === 'yes') {
-//                 query.candidate_skills = { $all: skillsArray }; // All skills required
-//             } else {
-//                 query.candidate_skills = { $in: skillsArray }; // Any skill match
-//             }
-//         }
-//         if (candidate_experience) {
-//             // Extract numeric part from candidate_experience
-//             const experienceInYears = parseInt(candidate_experience.split(' ')[0]);
-
-//             // Ensure numeric conversion is valid
-//             if (!isNaN(experienceInYears)) {
-//                 // Filter candidates where candidate_experience is equal to the requested experience
-//                 query.candidate_experience = { $eq: experienceInYears }; // Exact match
-//             }
-//         }
-//         const candidates = await manageCandidateModel.find(query);
-//         res.json(candidates);
-//     } catch (err) {
-//         res.status(500).json({ message: err.message });
-//     }
-// };
+ 
 
 exports.searchAdvance = async (req, res) => {
     try {
@@ -553,185 +544,179 @@ exports.searchAdvance = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+// exports.sendEmail = async (req, res) => {
+//     try {
+//         const emails = req.body && req.body.emails ? req.body.emails : [];
+
+//         if (!Array.isArray(emails) || emails.length === 0) {
+//             return res.json({ success: false, status: status.INVALIDSYNTAX, msg: 'Invalid email list.' });
+//         }
+
+//         // Create the transporter object
+//         const transporter = nodemailer.createTransport({
+//             service: 'gmail',
+//             auth: {
+//                 user: 'mahimagarg1602@gmail.com',
+//                 pass: 'uixv laul bjpd tqcc'
+//             }
+//         });
+
+//         const sendMailPromises = emails.map(async (email) => {
+//             const user = await manageCandidateModel.findOne({ candidate_email: new RegExp(`^${email}$`, 'i') }).lean().exec();
+
+//             if (!user) {
+//                 console.log(`Authentication failed. User not found: ${email}`);
+//                 return Promise.resolve(`User not found: ${email}`);
+//             } else {
+//                 const mailOptions = {
+//                     from: 'mailto:mahimagarg1602@gmail.com',
+//                     to: email,
+//                     subject: 'Requirement..Hiring',
+//                     text: 'Hello world?',
+//                     html: `
+//               <h2>About the Role:</h2>
+//               <p>We are seeking a skilled and passionate Laravel Developer to join our dynamic team. The ideal candidate will have 2-3 years of experience in developing robust and scalable web applications using the Laravel framework.</p>
+//               <h2>Key Responsibilities:</h2>
+//               <ol>
+//                   <li>Develop, test, and maintain web applications using Laravel.</li>
+//                   <li>Collaborate with cross-functional teams to define, design, and ship new features.</li>
+//                   <li>Troubleshoot, test, and maintain the core product software and databases to ensure strong optimization and functionality.</li>
+//               </ol>
+//               <h2>Required Skills:</h2>
+//               <ul>
+//                   <li>2-3 years of experience in Laravel development.</li>
+//                   <li>Strong knowledge of PHP Framework.</li>
+//                   <li>Experience with front-end technologies such as JavaScript, HTML, and CSS.</li>
+//                   <li>Familiarity with version control tools (e.g., Git).</li>
+//                   <li>Knowledge of database design and querying using MySQL.</li>
+//               </ul>
+//               <h2>Why Join Us:</h2>
+//               <ul>
+//                   <li>Opportunity to work on exciting projects with a talented team.</li>
+//                   <li>Competitive salary and benefits package.</li>
+//                   <li>Continuous learning and professional development opportunities.</li>
+//                   <li>Positive and inclusive work environment.</li>
+//               </ul>
+//               <p>Thank you</p>
+//             `,
+//                 };
+
+//                 return transporter.sendMail(mailOptions)
+//                     .then(info => {
+//                         console.log(`Message sent to ${email}: %s`, info.messageId);
+//                         console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+//                         return `Message sent to ${email}`;
+//                     })
+//                     .catch(error => {
+//                         console.error(`Error sending mail to ${email}:`, error);
+//                         return `Error sending mail to ${email}: ${error.message}`;
+//                     });
+//             }
+//         });
+
+//         const results = await Promise.all(sendMailPromises);
+
+//         res.json({ success: true, status: status.OK, msg: 'Emails sent to the provided email addresses.', results });
+
+//     } catch (e) {
+//         console.log("e", e);
+//         return res.json({ success: false, status: status.INVALIDSYNTAX, err: e, msg: 'Error in sending emails.' });
+//     }
+// }
+  
 exports.sendEmail = async (req, res) => {
     try {
-      const emails = req.body && req.body.emails ? req.body.emails : [];
-  
-      if (!Array.isArray(emails) || emails.length === 0) {
-        return res.json({ success: false, status: status.INVALIDSYNTAX, msg: 'Invalid email list.' });
-      }
-  
-      // Create the transporter object
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: 'mahimagarg1602@gmail.com',
-          pass: 'uixv laul bjpd tqcc'
+        const emails = req.body && req.body.emails ? req.body.emails : [];
+
+        if (!Array.isArray(emails) || emails.length === 0) {
+            return res.json({ success: false, status: 'INVALIDSYNTAX', msg: 'Invalid email list.' });
         }
-      });
-  
-      const sendMailPromises = emails.map(async (email) => {
-          const user = await manageCandidateModel.findOne({ candidate_email: new RegExp(`^${email}$`, 'i') }).lean().exec();
-  
-        if (!user) {
-          console.log(`Authentication failed. User not found: ${email}`);
-          return Promise.resolve(`User not found: ${email}`);
-        } else {
-          const mailOptions = {
-            from: 'mailto:mahimagarg1602@gmail.com',
-            to: email,
-            subject: 'Requirement..Hiring',
-            text: 'Hello world?',
-            html: `
-              <h2>About the Role:</h2>
-              <p>We are seeking a skilled and passionate Laravel Developer to join our dynamic team. The ideal candidate will have 2-3 years of experience in developing robust and scalable web applications using the Laravel framework.</p>
-              <h2>Key Responsibilities:</h2>
-              <ol>
-                  <li>Develop, test, and maintain web applications using Laravel.</li>
-                  <li>Collaborate with cross-functional teams to define, design, and ship new features.</li>
-                  <li>Troubleshoot, test, and maintain the core product software and databases to ensure strong optimization and functionality.</li>
-              </ol>
-              <h2>Required Skills:</h2>
-              <ul>
-                  <li>2-3 years of experience in Laravel development.</li>
-                  <li>Strong knowledge of PHP Framework.</li>
-                  <li>Experience with front-end technologies such as JavaScript, HTML, and CSS.</li>
-                  <li>Familiarity with version control tools (e.g., Git).</li>
-                  <li>Knowledge of database design and querying using MySQL.</li>
-              </ul>
-              <h2>Why Join Us:</h2>
-              <ul>
-                  <li>Opportunity to work on exciting projects with a talented team.</li>
-                  <li>Competitive salary and benefits package.</li>
-                  <li>Continuous learning and professional development opportunities.</li>
-                  <li>Positive and inclusive work environment.</li>
-              </ul>
-              <p>Thank you</p>
-            `,
-          };
-  
-          return transporter.sendMail(mailOptions)
-            .then(info => {
-              console.log(`Message sent to ${email}: %s`, info.messageId);
-              console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-              return `Message sent to ${email}`;
-            })
-            .catch(error => {
-              console.error(`Error sending mail to ${email}:`, error);
-              return `Error sending mail to ${email}: ${error.message}`;
-            });
-        }
-      });
-  
-      const results = await Promise.all(sendMailPromises);
-  
-      res.json({ success: true, status: status.OK, msg: 'Emails sent to the provided email addresses.', results });
-  
-    } catch (e) {
-      console.log("e", e);
-      return res.json({ success: false, status: status.INVALIDSYNTAX, err: e, msg: 'Error in sending emails.' });
-    }
-  }
 
-// third party api
-  exports.listing = async (req, res) => {
-    try {
-        // Fetch data from the external API
-        const response = await axios.get('https://www.reinforcewebsol.com/Api/jobform.php');
-        const externalData = response.data;
-
-        // Return the external data in the response
-        return res.json({
-            data: externalData,
-            success: true,
-            status: status.OK
-        });
-    } catch (err) {
-        return res.json({
-            success: false,
-            status: status.INTERNAL_SERVER_ERROR,
-            err: err.message,
-            msg: 'Fetching data from external API failed.'
-        });
-    }
-};
- 
-    
-exports.candidatebyapigetDataById = async (req, res) => {
-        const id = req.params.id;
-        try {
-            // Fetch data from the external API
-            const response = await axios.get(`https://www.reinforcewebsol.com/Api/jobform.php?id=${id}`);
-            const externalData = response.data;
-
-            // Log the entire data to inspect its structure
-            console.log(externalData);
-
-            // Check if the data has the 'data' key containing an array
-            if (externalData.status === 'success' && Array.isArray(externalData.data)) {
-                // Find the item with the matching ID
-                const item = externalData.data.find(data => data.id === id);
-
-                if (!item) {
-                    return res.status(status.NOT_FOUND).json({
-                        success: false,
-                        status: status.NOT_FOUND,
-                        msg: 'Item not found.'
-                    });
-                }
-
-                return res.json({
-                    data: item,
-                    success: true,
-                    status: status.OK
-                });
-            } else {
-                return res.status(status.INTERNAL_SERVER_ERROR).json({
-                    success: false,
-                    status: status.INTERNAL_SERVER_ERROR,
-                    msg: 'Unexpected data format from external API.'
-                });
+        // Create the transporter object
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'mahimagarg1602@gmail.com',
+                pass: 'uixv laul bjpd tqcc'
             }
-        } catch (err) {
-            return res.status(status.INTERNAL_SERVER_ERROR).json({
-                success: false,
-                status: status.INTERNAL_SERVER_ERROR,
-                err: err.message,
-                msg: 'Fetching data from external API failed.'
-            });
-        }
-    };
-
-
-// 
- 
-exports.deleteThirdParty = async (req, res) => {
-    try {
-        const ID = req.query.id; // Get the ID from query parameters
-        if (!ID) {
-            return res.status(400).json({ success: false, msg: 'Id parameter not available' });
-        }
-
-        // Send DELETE request to the third-party API
-        const response = await axios.delete(`https://www.reinforcewebsol.com/Api/jobform.php/${ID}`);
-
-        // Check if the response indicates success
-        if (response.status === 200) {
-            return res.json({
-                success: true,
-                message: 'Record deleted successfully.'
-            });
-        } else {
-            return res.status(response.status).json({
-                success: false,
-                message: 'Failed to delete the record.'
-            });
-        }
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: 'Error deleting record.',
-            error: error.message
         });
+
+        const sendMailPromises = emails.map(async (email) => {
+            const user = await manageCandidateModel.findOne({ candidate_email: new RegExp(`^${email}$`, 'i') }).lean().exec();
+
+            if (!user) {
+                console.log(`User not found in database: ${email}`);
+            }
+
+            const mailOptions = {
+                from: 'mailto:mahimagarg1602@gmail.com',
+                to: email,
+                subject: 'Requirement..Hiring',
+                text: 'Hello world?',
+                html: `
+                    <h2>About the Role:</h2>
+                    <p>We are seeking a skilled and passionate Laravel Developer to join our dynamic team. The ideal candidate will have 2-3 years of experience in developing robust and scalable web applications using the Laravel framework.</p>
+                    <h2>Key Responsibilities:</h2>
+                    <ol>
+                        <li>Develop, test, and maintain web applications using Laravel.</li>
+                        <li>Collaborate with cross-functional teams to define, design, and ship new features.</li>
+                        <li>Troubleshoot, test, and maintain the core product software and databases to ensure strong optimization and functionality.</li>
+                    </ol>
+                    <h2>Required Skills:</h2>
+                    <ul>
+                        <li>2-3 years of experience in Laravel development.</li>
+                        <li>Strong knowledge of PHP Framework.</li>
+                        <li>Experience with front-end technologies such as JavaScript, HTML, and CSS.</li>
+                        <li>Familiarity with version control tools (e.g., Git).</li>
+                        <li>Knowledge of database design and querying using MySQL.</li>
+                    </ul>
+                    <h2>Why Join Us:</h2>
+                    <ul>
+                        <li>Opportunity to work on exciting projects with a talented team.</li>
+                        <li>Competitive salary and benefits package.</li>
+                        <li>Continuous learning and professional development opportunities.</li>
+                        <li>Positive and inclusive work environment.</li>
+                    </ul>
+                    <p>Thank you</p>
+                `,
+            };
+
+            return transporter.sendMail(mailOptions)
+                .then(info => {
+                    console.log(`Message sent to ${email}: %s`, info.messageId);
+                    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+                    return `Message sent to ${email}`;
+                })
+                .catch(error => {
+                    console.error(`Error sending mail to ${email}:`, error);
+                    return `Error sending mail to ${email}: ${error.message}`;
+                });
+        });
+
+        const results = await Promise.all(sendMailPromises);
+
+        res.json({ success: true, status: 'OK', msg: 'Emails sent to the provided email addresses.', results });
+
+    } catch (e) {
+        console.log("Error:", e);
+        return res.json({ success: false, status: 'INVALIDSYNTAX', err: e, msg: 'Error in sending emails.' });
     }
 };
+
+
+// =========
+exports.getProfileById = async (req, res) => {
+    try {
+        let profileid = req.query.profile_id;
+        // const ID = req.query.userid;
+        if (profileid === undefined) {
+            return res.json({ success: false, status: status.NOTFOUND, msg: 'Id Parameter Not Available' });
+        }
+        const data = await manageCandidateModel.find({ profile: profileid }).lean().exec();
+        return res.json({ data: data, success: true, status: status.OK });
+    }
+    catch (err) {
+        console.log("error", err);
+        return res.json({ success: false, status: status.INVALIDSYNTAX, err: err, msg: 'Get Candidate failed.' });
+    }
+}

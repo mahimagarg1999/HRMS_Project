@@ -6,7 +6,9 @@ exports.create = async (req, res) => {
     try {
         const obj = {
             skills: req.body.skills,
-            description: req.body.description
+            profile: req.body.profile,
+            description: req.body.description,
+            profile_id: req.body.profile_id
         };
 
         // Create a new instance of manageSkillsModel and save to database
@@ -41,7 +43,9 @@ exports.edit = async (req, res) => {
             {
                 $set: {
                     skills: req.body.skills,
-                    description: req.body.description
+                    profile: req.body.profile,
+                    description: req.body.description,
+                    profile_id: req.body.profile_id
 
                 }
             },
@@ -159,6 +163,30 @@ exports.sortOrder = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+// exports.search = async (req, res) => {
+//     try {
+//         const query = req.query.search;
+
+//         if (!query) {
+//             return res.status(400).json({ error: 'No search query provided' });
+//         }
+//         const searchQuery = {
+//             $or: [
+//                 { skills: { $regex: new RegExp(query, "i") } },
+//                 { profile:  { $regex: new RegExp(query, "i") } } , // This line is modified
+//                 { profile_id: { $regex: new RegExp(query, "i") } },
+
+
+//             ]
+//         };
+//         const results = await manageSkillsModel.find(searchQuery);
+
+//         res.json(results);
+//     } catch (err) {
+//         console.error("Error:", err);
+//         return res.status(500).json({ success: false, status: 500, msg: 'Internal Server Error' });
+//     }
+// }
 exports.search = async (req, res) => {
     try {
         const query = req.query.search;
@@ -166,12 +194,30 @@ exports.search = async (req, res) => {
         if (!query) {
             return res.status(400).json({ error: 'No search query provided' });
         }
+
         const searchQuery = {
             $or: [
                 { skills: { $regex: new RegExp(query, "i") } },
-
+                { description: { $regex: new RegExp(query, "i") } },
+                { 
+                    profile: { 
+                        $elemMatch: { 
+                            profile: { $regex: new RegExp(query, "i") } 
+                        } 
+                    } 
+                },
+                { 
+                    profile: { 
+                        $elemMatch: { 
+                            profile_id: { $regex: new RegExp(query, "i") } 
+                        } 
+                    } 
+                },
             ]
         };
+
+        console.log("Search Query:", searchQuery);  // Debugging the query
+
         const results = await manageSkillsModel.find(searchQuery);
 
         res.json(results);
@@ -180,6 +226,8 @@ exports.search = async (req, res) => {
         return res.status(500).json({ success: false, status: 500, msg: 'Internal Server Error' });
     }
 }
+
+
 
 exports.getAllSkills = async (req, res) => {
     try {
@@ -197,3 +245,26 @@ exports.getAllSkills = async (req, res) => {
         return res.json({ success: false, status: 500, err: err.message, msg: 'Failed to fetch skills.' });
     }
 };
+
+exports.getSkillsByProfile = async (req, res) => {
+    try {
+        let profile = req.query.profile;
+
+        // If profile parameter is not provided, return an error
+        if (!profile) {
+            return res.json({ success: false, status: status.NOTFOUND, msg: 'Profile parameter not provided' });
+        }
+
+        // Find the data based on the provided profile
+        const data = await manageSkillsModel.find({ profile_id: profile }).lean().exec();
+
+        // Return the filtered data
+        return res.json({ data: data, success: true, status: status.OK });
+    } catch (err) {
+        console.log("Error:", err);
+        return res.json({ success: false, status: status.INVALIDSYNTAX, err: err, msg: 'Failed to retrieve skills.' });
+    }
+}
+
+
+

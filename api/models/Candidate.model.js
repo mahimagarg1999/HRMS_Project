@@ -51,15 +51,11 @@ const CandidateSchema = new Schema({
     candidate_marrital_status: {
         type: String,
     },
-    candidate_machine_round: {
+    
+    interview_rounds : {
         type: String,
     },
-    candidate_technical_interview_round: {
-        type: String,
-    },
-    candidate_hr_interview_round: {
-        type: String,
-    },
+    
     candidate_selection_status: {
         type: String,
     },
@@ -82,6 +78,9 @@ const CandidateSchema = new Schema({
         type: Number
     },
     graduationPercentage: {
+        type: Number
+    },
+    postGraduationPercentage: {
         type: Number
     },
     profile: {

@@ -10,7 +10,6 @@ exports.emphelpcentercreate = async (req, res) => {
     console.log("manageEMPHelpCenterModel")
     try {
         var obj = {
-
             helpcenter_ticket_id: 'emp' + req.body.helpcenter_employee_id,
             helpcenter_employee_id: req.body.helpcenter_employee_id,
             helpcenter_ticket_description: req.body.helpcenter_ticket_description,
