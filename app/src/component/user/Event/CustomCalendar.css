@@ -1,0 +1,141 @@
+ .calendar-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px;
+    margin: 20px auto;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+     width:100%
+  }
+  
+   .custom-calendar {
+    width: 100%;
+    border: none;
+    font-family: 'Arial', sans-serif;
+    background-color: #f7f7f7;
+    border-radius: 10px;
+    padding: 10px;
+  }
+  
+   .custom-calendar .react-calendar__tile {
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    padding: 15px;
+  }
+  
+  .custom-calendar .react-calendar__tile:hover {
+    background-color: #007bff;
+    color: white;
+    transform: scale(1.05);
+    cursor: pointer;
+  }
+  
+   .event-indicator {
+    background-color: #ff5733;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin: 0 auto;
+    position: relative;
+    top: 5px;
+  }
+  
+   .custom-calendar .react-calendar__tile--active {
+    background-color: #007bff;
+    color: white;
+    border-radius: 8px;
+  }
+  
+   .custom-calendar .react-calendar__navigation button {
+    color: #007bff;
+    font-weight: bold;
+    border: none;
+    background: none;
+  }
+  
+  .custom-calendar .react-calendar__navigation button:hover {
+    background-color: #e9ecef;
+    border-radius: 8px;
+  }
+  
+   .custom-calendar .react-calendar__tile--now {
+    background-color: #ffd700;
+    color: black;
+    border-radius: 8px;
+  }
+  
+   .custom-calendar .react-calendar__month-view__days__day--weekend {
+    color: #d9534f;
+  }
+  
+  .custom-calendar .react-calendar__tile--now:hover {
+    background-color: #ffeb3b;
+  }
+  
+   .button_design {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+  }
+  
+  .button_design:hover {
+    background-color: #0056b3;
+  }
+ 
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+   .modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 600px;
+    width: 100%;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2);
+    text-align: left;
+  }
+  
+  .modal-content h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #007bff;
+  }
+  
+  .modal-content p {
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  
+   .close-modal-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .close-modal-btn:hover {
+    background-color: #0056b3;
+  }
+ 
+ 

@@ -146,8 +146,11 @@ const ExpensesModule = () => {
                 const response = await axios.post(`${BASE_API_URL}expenses/create`, formData);
                 settogle(!togle)
                 console.log(response.data); // Handle the response as needed
-                setMessage(response.data.msg)
-
+                setMessage(response.data.msg);
+                if (response.data.success) {
+                    closePopup();
+                }
+                setTimeout(() => setMessage(''), 3000);
 
             } catch (error) {
                 console.error('Error:', error);
@@ -504,17 +507,7 @@ const ExpensesModule = () => {
                                         </tbody>
                                     </table>
                                 </div>
-                                {/* <ReactPaginate
-                                    previousLabel={'Previous'}
-                                    nextLabel={'Next'}
-                                    breakLabel={'...'}
-                                    pageCount={pageCount}
-                                    marginPagesDisplayed={2}
-                                    pageRangeDisplayed={5}
-                                    onPageChange={handlePageChange}
-                                    containerClassName={'pagination'}
-                                    activeClassName={'active'}
-                                /> */}
+                                
                                 {tableData.length > itemsPerPage && (
                                     <div className="pagination-container">
                                         <ReactPaginate

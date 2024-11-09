@@ -1,0 +1,40 @@
+.birthday {
+    background-color: white;
+    border: 1px solid blue;
+    color: red;
+    padding: 5px;
+    border-radius: 4px;
+   }
+  
+  
+  .event {
+    color: blue;
+  }
+  
+  .meeting {
+    color: black;
+  }
+  
+  .tile-content p {
+    margin: 0;
+    padding: 2px 0;
+    font-size: 12px;
+  }
+  .filter-dropdown {
+    padding: 5px 10px;
+    margin: 10px 0;
+    font-size: 16px;
+    background-color: #fff;
+    border-radius: 4px;
+  }
+  .tile-content p {
+    display: flex;
+    align-items: center;
+  }
+  
+  .tile-content i {
+    margin-right: 8px; /* Adjust space between icon and text */
+    font-size: 18px; /* Adjust icon size */
+  }
+  
+

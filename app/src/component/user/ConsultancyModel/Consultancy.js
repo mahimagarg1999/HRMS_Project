@@ -6,7 +6,7 @@ import ModalBox from './EditConsultancyModel.js';
 import Nav from '../../navComponent/Nav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
-import { faTrash, faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faSortUp, faSortDown, faEnvelope,faFilePdf } from '@fortawesome/free-solid-svg-icons';
 import { faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import ReactPaginate from 'react-paginate';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
@@ -25,10 +25,8 @@ const ConsultancyModule = () => {
     const [agreement, setAgreement] = useState('');
     const [selectedFile, setSelectedFile] = useState('');
     const [query, setQuery] = useState('');
-
-
-
-
+    const [selectedEmails, setSelectedEmails] = useState([]);
+    const [selectAll, setSelectAll] = useState(false);
 
     const handlePageChange = ({ selected }) => {
         setCurrentPage(selected); // Update the current page when pagination changes
@@ -194,6 +192,10 @@ const ConsultancyModule = () => {
                 settogle(!togle)
                 console.log(response.data); // Handle the response as needed
                 setMessage(response.data.msg);
+                if (response.data.success) {
+                    closePopup();
+                }
+                setTimeout(() => setMessage(''), 3000);
 
             } catch (error) {
                 console.error('Error:', error);
@@ -231,7 +233,7 @@ const ConsultancyModule = () => {
             setIds(prevIds => prevIds.filter(prevId => prevId !== id));
         }
     };
-    const DEletemulti = async () => {
+    const Deletemulti = async () => {
         const data = {
             "ids": ids
         };
@@ -319,6 +321,34 @@ const ConsultancyModule = () => {
             }
         }
     };
+    const handleCheckboxChangeEmail = (email) => {
+        setSelectedEmails(prevSelectedEmails =>
+            prevSelectedEmails.includes(email)
+                ? prevSelectedEmails.filter(e => e !== email)
+                : [...prevSelectedEmails, email]
+        );
+    };
+ 
+
+    const sendEmails = async () => {
+        if (selectedEmails.length === 0) {
+            setMessage('Please select at least one email to send.');
+            return;
+        }
+        setMessage('Sending emails...');
+        try {
+            const response = await axios.post(`${BASE_API_URL}consultancy/send-mail`, { emails: selectedEmails });
+            console.log('Response:', response.data);
+            setMessage(response.data.msg);
+            setTimeout(() => setMessage(''), 2000);
+            // Reset selected emails and checkboxes after sending emails
+            setSelectedEmails([]);
+            setSelectAll(false);
+        } catch (error) {
+            console.error('Error sending emails:', error);
+            setMessage('Error sending emails.');
+        }
+    };
     return (
         <>
             <div >
@@ -341,9 +371,14 @@ const ConsultancyModule = () => {
                                             Add &nbsp;<FontAwesomeIcon icon={faPlusCircle} />
                                         </button>
 
-                                        <span> <button className="button_design" onClick={() => { DEletemulti() }}    >
-                                            <FontAwesomeIcon icon={faTrashAlt} />
-                                        </button></span></div>
+                                        <span> <button onClick={() => { Deletemulti() }} className='button_design'  >
+                                            MultiDel&nbsp;  <FontAwesomeIcon icon={faTrashAlt} />
+                                        </button></span>
+                                        <span>   <button onClick={sendEmails} className='button_design'>Send Emails &nbsp; <FontAwesomeIcon icon={faEnvelope} /></button>
+                                        </span>
+                                        </div>
+                                        {message && <div className="mt-3 alert alert-success">{message}</div>}
+
                                     {isOpen && (
                                         <div>
                                             <div>
@@ -463,6 +498,12 @@ const ConsultancyModule = () => {
                                                         {/* <span className="checkmark"></span> */}
                                                     </label>
                                                 </th>
+                                                <th>
+                                                    <button style={{
+                                                        border: 'none',
+                                                        backgroundColor: 'white'
+                                                    }} title="Send Mail"><FontAwesomeIcon icon={faEnvelope} /></button>
+                                                </th>
 
                                             </tr>
                                         </thead>
@@ -476,7 +517,15 @@ const ConsultancyModule = () => {
                                                     <td>{data.consultancy_mobile}</td>
 
                                                     <td>
-                                                        <a style={{ color: 'rgb(40, 118, 154)' }} href={`http://localhost:5000/${data.contract_agreement}`} target="_blank">{data.contract_agreement}</a>
+                                                        {/* <a style={{ color: 'rgb(40, 118, 154)' }} href={`http://localhost:5000/${data.contract_agreement}`} target="_blank">{data.contract_agreement}</a> */}
+                                                        <button
+                                                            className="editButton"
+                                                            onClick={() => window.open(`http://localhost:5000/${data.contract_agreement}`, '_blank')}
+                                                            style={{ color: 'rgb(40, 118, 154)', background: 'none', border: 'none', cursor: 'pointer' }} title="Show Pdf"
+                                                        >
+                                                            <FontAwesomeIcon icon={faFilePdf} />
+
+                                                        </button>
                                                     </td>
 
                                                     <td>
@@ -501,6 +550,13 @@ const ConsultancyModule = () => {
                                                             />
                                                             <span className="checkmark"></span>
                                                         </label>
+                                                    </td>
+                                                    <td>
+                                                        <input style={{ marginLeft: "18px" }}
+                                                            type="checkbox"
+                                                            checked={selectedEmails.includes(data.consultancy_email)}
+                                                            onChange={() => handleCheckboxChangeEmail(data.consultancy_email)}
+                                                        />
                                                     </td>
 
                                                     <ModalBox isOpen={modalIsOpen} consultancyId={selectedConsultancyId} onRequestClose={closeModal}>

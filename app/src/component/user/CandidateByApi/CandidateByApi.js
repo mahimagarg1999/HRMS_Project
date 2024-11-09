@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-// import './Employee.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios'; // For Axios
-// import ModalBox from './EditEmployeeModel.js';
 import Nav from '../../navComponent/Nav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactPaginate from 'react-paginate';
-import { faEdit, faTrashAlt, faTrash, faSortUp, faSortDown, faPlusCircle, faEye, faFilePdf } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrashAlt, faEnvelope, faTrash, faSortUp, faSortDown, faPlusCircle, faEye, faFilePdf } from '@fortawesome/free-solid-svg-icons';
 import Footer from '../../FooterModule/Footer.js';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
 import CandidateDataModal from './CandidateByDataModal.js'
@@ -22,7 +20,6 @@ const CandidateByApiModule = () => {
     const [message, setMessage] = useState('');
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
-    const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
     const [currentPage, setCurrentPage] = useState(0);
     const [availableSkills, setAvailableSkills] = useState([]);
     const [selectedSkills, setSelectedSkills] = useState([]);
@@ -39,6 +36,9 @@ const CandidateByApiModule = () => {
     const [sortDirection, setSortDirection] = useState('ascending');
     const [modalIsOpen1, setModalIsOpen1] = useState(false);
     const [modalData, setModalData] = useState(null);
+    const [selectedEmails, setSelectedEmails] = useState([]);
+    const [selectAll, setSelectAll] = useState(false);
+    const [data, setData] = useState([]); // Initialize data with an empty array
 
     const handlePageChange = ({ selected }) => {
         setCurrentPage(selected); // Update the current page when pagination changes
@@ -48,12 +48,6 @@ const CandidateByApiModule = () => {
     const offset = currentPage * itemsPerPage;
     const pageCount = Math.ceil(tableData.length / itemsPerPage);
 
-    // const openModal = (employeeId) => {
-    //     console.log('employeeId', employeeId)
-    //     setModalIsOpen(true);
-    //     setSelectedEmployeeId(employeeId);
-
-    // };
     const handleSort = async (column) => {
         console.log("Sort column clicked:", column);
         console.log("Current sort direction:", sortDirection);
@@ -62,7 +56,7 @@ const CandidateByApiModule = () => {
             setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
 
             try {
-                const response = await axios.get(`${BASE_API_URL}employee/sortorder?order=${sortDirection}&coloum=${sortColumn}`);
+                const response = await axios.get(`${BASE_API_URL}candidatethirdparty/sortorder?order=${sortDirection}&coloum=${sortColumn}`);
                 settableData(response.data)
             } catch (error) {
                 console.error('Error:', error);
@@ -89,7 +83,7 @@ const CandidateByApiModule = () => {
         console.log('ids', data);
 
         try {
-            const response = await axios.delete(`${BASE_API_URL}employee/multi-delete`, {
+            const response = await axios.delete(`${BASE_API_URL}candidatethirdparty/multi-delete`, {
                 data: data // IDs ko data body mein bhejna
             });
             console.log(response.data); // Response ke saath kuch karne ke liye
@@ -102,48 +96,63 @@ const CandidateByApiModule = () => {
     const validateForm = () => {
         let isValid = true;
         const newErrors = {};
-        if (!formData.employee_code.trim()) {
-            newErrors.employee_code = "employee_code is required";
+        if (!formData.student_name.trim()) {
+            newErrors.student_name = "student_name is required";
             isValid = false;
         }
 
-        if (!formData.employee_first_name.trim()) {
-            newErrors.employee_first_name = "employee_first_name is required";
+        if (!formData.student_email.trim()) {
+            newErrors.student_email = "student_email is required";
             isValid = false;
         }
 
-        if (!formData.employee_last_name.trim()) {
-            newErrors.employee_last_name = "employee_last_name is required";
-            isValid = false;
-        }
-
-        if (!formData.employee_mobile.trim()) {
-            newErrors.employee_mobile = "Employee mobile number is required";
+        if (!formData.student_mobile.trim()) {
+            newErrors.student_mobile = "student_mobile number is required";
             isValid = false;
         } else {
             const mobileNumberRegex = /^\d{10}$/; // Match exactly 10 digits
-            if (!mobileNumberRegex.test(formData.employee_mobile.trim())) {
-                newErrors.employee_mobile = "Please enter a valid 10-digit mobile number";
+            if (!mobileNumberRegex.test(formData.student_mobile.trim())) {
+                newErrors.student_mobile = "Please enter a valid 10-digit mobile number";
                 isValid = false;
             }
         }
 
-        if (!formData.employee_email.trim()) {
-            newErrors.employee_email = "employee_email is required";
+        if (!formData.student_qualification.trim()) {
+            newErrors.student_qualification = "student_qualification is required";
             isValid = false;
         }
 
-        if (!formData.employee_password.trim()) {
-            newErrors.employee_password = "employee_password is required";
+        if (!formData.student_exp.trim()) {
+            newErrors.student_exp = "student_exp is required";
             isValid = false;
         }
 
-        if (!formData.employee_experience.trim()) {
-            newErrors.employee_experience = "employee_experience is required";
+        if (!formData.student_position.trim()) {
+            newErrors.student_position = "student_position is required";
             isValid = false;
         }
-        if (!formData.employee_skills.length) {
-            newErrors.employee_skills = "employee_skills is required";
+        if (!formData.student_intdate.length) {
+            newErrors.student_intdate = "student_intdate is required";
+            isValid = false;
+        }
+        if (!formData.student_time.length) {
+            newErrors.student_time = "student_time is required";
+            isValid = false;
+        }
+        if (!formData.student_resume.length) {
+            newErrors.student_resume = "student_resume is required";
+            isValid = false;
+        }
+        if (!formData.date_time.length) {
+            newErrors.date_time = "date_time is required";
+            isValid = false;
+        }
+        if (!formData.status.length) {
+            newErrors.status = "status is required";
+            isValid = false;
+        }
+        if (!formData.technologies.length) {
+            newErrors.technologies = "technologies is required";
             isValid = false;
         }
         setErrors(newErrors);
@@ -155,14 +164,18 @@ const CandidateByApiModule = () => {
         setModalIsOpen(false);
     };
     const [errors, setErrors] = useState({
-        employee_code: "",
-        employee_first_name: "",
-        employee_last_name: "",
-        employee_mobile: "",
-        employee_email: "",
-        employee_password: "",
-        employee_experience: "",
-        employee_skills: ""
+        student_name: "",
+        student_email: "",
+        student_mobile: "",
+        student_qualification: "",
+        student_exp: "",
+        student_position: "",
+        student_intdate: "",
+        student_time: "",
+        student_resume: "",
+        date_time: "",
+        status: "",
+        technologies: "",
 
 
     });
@@ -204,43 +217,11 @@ const CandidateByApiModule = () => {
             console.error("The selected file is not a Blob.");
         }
     };
-    // const handleFileChange = (e) => {
-    //     const file = e.target.files[0];
-    //     if (file instanceof Blob) {
-    //         const reader = new FileReader();
-    //         reader.onloadend = () => {
-    //             if (e.target && e.target.name === 'id') {
-    //                 setidproofFile(reader.result);
-    //             } else if (e.target && e.target.name === 'resume_file') {
-    //                 setSelectedFile(reader.result);
-    //             } else if (e.target && e.target.name === 'mark') {
-    //                 setmarksheet(reader.result);
-    //             } else if (e.target && e.target.name === 'pancard') {
-    //                 setPancard(reader.result);
-    //             } else if (e.target && e.target.name === 'image') {
-    //                 setImage(reader.result);
-    //             } else {
-    //                 seteletter(reader.result);
-    //             }
-    //             console.log('idproof', idproof);
-    //             console.log('selectedFile', selectedFile);
-    //         };
-
-    //         // reader.readAsDataURL(file);
-    //         if (e.target.name === 'image') {
-    //             reader.readAsDataURL(file); // Read image files as Data URL
-    //         } else {
-    //             reader.readAsArrayBuffer(file); // Read non-image files as ArrayBuffer
-    //         }
-    //     } else {
-    //         console.error("The selected file is not a Blob.");
-    //     }
-    // };
 
 
     const fetchData = async () => {
         try {
-            const response = await axios.get(`${BASE_API_URL}candidate/listing`);
+            const response = await axios.get(`${BASE_API_URL}candidatethirdparty/listing`);
 
             console.log(response.data.data.data); // Handle the response as needed
             settableData(response.data.data.data)
@@ -258,41 +239,20 @@ const CandidateByApiModule = () => {
         setMessage('');
         setFormData('');
         let formDataNew = {
-            employee_code: '',
-            employee_first_name: '',
-            employee_last_name: '',
-            employee_mobile: '',
-            employee_alternate_mobile: '',
-            employee_email: '',
-            employee_password: '',
-            employee_address: '',
-            employee_city: '',
-            employee_state: '',
-            employee_other_info: '',
-            employee_dob: '',
-            employee_doj: '',
-            employee_skills: [],
-            employee_experience: '',
-            employee_resume: '',
-            employee_id_proof: '',
-            employee_permanant_address_proof: '',
-
-            employee_local_address_proof: '',
-            employee_reference_one_name: '',
-            employee_reference_one_mobile: '',
-            employee_reference_two_name: '',
-            employee_reference_two_mobile: '',
-
-            employee_pan_card: '',
-            employee_marksheet: '',
-            employee_experience_letter: '',
-            image: '',
+            student_name: '',
+            student_email: '',
+            student_mobile: '',
+            student_qualification: '',
+            student_exp: '',
+            student_position: '',
+            student_intdate: '',
+            student_time: '',
+            student_resume: '',
+            date_time: '',
+            status: '',
+            technologies: '',
             resumePdfName: "pdf",
-            proofPdfName: "pdf",
-            panPdfName: "pdf",
-            marksheetPdfName: "pdf",
-            experiencePdfName: "pdf",
-            imageName: "png"
+
         }
         setFormData(formDataNew);
         setIsOpen(true);
@@ -319,26 +279,24 @@ const CandidateByApiModule = () => {
     const handleSubmit = async (e) => {
         console.log("check resume", selectedFile);
         e.preventDefault();
-        formData.employee_skills = selectedSkills; // Add selected skills to form data
-        formData.employee_resume = selectedFile;
-        formData.employee_id_proof = idproof;
-        formData.employee_marksheet = marksheet;
-        formData.employee_pan_card = pancard;
-        formData.employee_experience_letter = e_letter;
-        formData.employee_marksheet = marksheet;
-        formData.image = image.split(',')[1]
 
-        // mydata.image.split(',')[1]
+        formData.student_resume = selectedFile;
 
         // Handle form submission here, for example, send data to backend or perform validation
         console.log('Form Data:', formData);
 
         if (validateForm()) {
             try {
-                const response = await axios.post(`${BASE_API_URL}employee/create`, formData);
+                const response = await axios.post(`${BASE_API_URL}candidatethirdparty/create`, formData);
                 settogle(!togle);
                 console.log(response.data); // Handle the response as needed
+                
                 setMessage(response.data.msg);
+                if (response.data.success) {
+                    closePopup();
+                }
+                setTimeout(() => setMessage(''), 3000);
+
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -352,7 +310,7 @@ const CandidateByApiModule = () => {
             // Delete logic here
             try {
                 console.log('id', id)
-                const response = axios.delete(`${BASE_API_URL}candidate/deleting?id=${id}`)
+                const response = axios.delete(`${BASE_API_URL}candidatethirdparty/deleting?id=${id}`)
 
                 console.log(response.data); // Handle the response as needed
                 settogle(!togle)
@@ -368,23 +326,20 @@ const CandidateByApiModule = () => {
     }
 
     const handleChange = async (event) => {
-        setQuery(event.target.value);
-        console.log(event.target.value)
-        if (event.target.value !== '') {
+        const searchTerm = event.target.value;
+        setQuery(searchTerm);
+
+        if (searchTerm !== '') {
             try {
-                const response = await axios.get(`${BASE_API_URL}employee/search?search=${event.target.value}`, {
-                });
-                console.log(query)
-                settableData(response.data)
+                const response = await axios.get(`${BASE_API_URL}candidatethirdparty/search?searchKey=${searchTerm}`);
+                settableData(response.data.data); // Assuming response has a data property
             } catch (error) {
                 console.error('Error:', error);
             }
-        }
-        else {
+        } else {
             try {
-                const response = await axios.get(`${BASE_API_URL}employee/list`);
-                console.log(response.data.data); // Handle the response as needed
-                settableData(response.data.data)
+                const response = await axios.get(`${BASE_API_URL}candidatethirdparty/list`);
+                settableData(response.data.data); // Assuming response has a data property
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -464,7 +419,7 @@ const CandidateByApiModule = () => {
     };
 
     const downloadCSV = (csv, filename) => {
-        fetch(`${BASE_API_URL}employee/export-data`, {
+        fetch(`${BASE_API_URL}candidatethirdparty/export-data`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -494,14 +449,10 @@ const CandidateByApiModule = () => {
             .catch(error => console.error('Error:', error));
     };
 
-    // const openView = () => {
-    //     const csv = convertToCSV(tableData);
-    //     downloadCSV(csv, 'data.csv');
-    // };
     const openView = () => {
         const csv = convertToCSV(tableData);
         downloadCount += 1; // Increment the download count
-        const filename = `emp_data${downloadCount}.csv`; // Dynamic filename
+        const filename = `can_third_data${downloadCount}.csv`; // Dynamic filename
         downloadCSV(csv, filename);
     };
 
@@ -512,7 +463,7 @@ const CandidateByApiModule = () => {
         formData.append('file', file);
 
         try {
-            const response = await axios.post(`${BASE_API_URL}employee/import-data`, formData, {
+            const response = await axios.post(`${BASE_API_URL}candidatethirdparty/import-data`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -544,7 +495,7 @@ const CandidateByApiModule = () => {
 
     const fetchCandidateData = async (id) => {
         try {
-            const response = await axios.get(`${BASE_API_URL}candidate/listing_data/${id}`);
+            const response = await axios.get(`${BASE_API_URL}candidatethirdparty/listing_data/${id}`);
             setModalData(response.data.data); // Adjust based on the actual structure of the response
             setModalIsOpen1(prevState => ({
                 ...prevState,
@@ -555,13 +506,62 @@ const CandidateByApiModule = () => {
             // Handle error (e.g., set an error state or show an error message)
         }
     };
+    // const handleButtonClick = (student_resume) => {
+    //     const resumeUrl = `https://www.reinforcewebsol.com/${student_resume}`;
+    //     window.open(resumeUrl, '_blank');
+    // };
+    const handleButtonClick = (student_resume) => {
+        const resumeUrl = `https://www.reinforcewebsol.com/${student_resume}`;
+        const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(resumeUrl)}`;
+        window.open(viewerUrl, '_blank');
+    };
+
+    // mail
+    const handleCheckboxChangeEmail = (email) => {
+        setSelectedEmails(prevSelectedEmails =>
+            prevSelectedEmails.includes(email)
+                ? prevSelectedEmails.filter(e => e !== email)
+                : [...prevSelectedEmails, email]
+        );
+    };
+
+    const handleSelectAll = () => {
+        if (selectAll) {
+            setSelectedEmails([]); // Deselect all
+
+        } else {
+            setSelectedEmails(data.map(data => data.student_email)); // Select all
+        }
+        setSelectAll(!selectAll); // Toggle selectAll state
+    };
+
+
+    const sendEmails = async () => {
+        if (selectedEmails.length === 0) {
+            setMessage('Please select at least one email to send.');
+            return;
+        }
+        setMessage('Sending emails...');
+        try {
+            const response = await axios.post(`${BASE_API_URL}candidatethirdparty/send-mail`, { emails: selectedEmails });
+            console.log('Response:', response.data);
+            setMessage(response.data.msg);
+            setTimeout(() => setMessage(''), 2000);
+            // Reset selected emails and checkboxes after sending emails
+            setSelectedEmails([]);
+            setSelectAll(false);
+        } catch (error) {
+            console.error('Error sending emails:', error);
+            setMessage('Error sending emails.');
+        }
+    };
+
 
     return (
         <>
             <div >
                 <Nav />
                 <div style={{ backgroundColor: '#28769a' }}>
-                    {/* <h1 className='headerData'>Welcome To Employee Page</h1> */}
                     <h1 className='headerData'>WELCOME TO CANDIDATEBYAPI PAGE</h1>
                 </div>
                 <div >
@@ -579,7 +579,12 @@ const CandidateByApiModule = () => {
                                         </button>
                                         <span> <button className="button_design" onClick={() => { Deletemulti() }}    >
                                             MultiDel&nbsp;<FontAwesomeIcon icon={faTrashAlt} />
-                                        </button></span></div>
+                                        </button></span>
+                                        <span>   <button onClick={sendEmails} className='button_design'>Send Emails &nbsp; <FontAwesomeIcon icon={faEnvelope} /></button>
+                                        </span>
+                                    </div>
+                                    {message && <div className="mt-3 alert alert-success">{message}</div>}
+
 
                                     {isOpen && (
                                         <div>
@@ -591,143 +596,38 @@ const CandidateByApiModule = () => {
 
 
                                                                 <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
-                                                                    <div style={{ textAlign: 'center' }}>
+                                                                    <div className="addHeading">
                                                                         <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Create Your Account</h4>
                                                                         <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
                                                                     </div>
                                                                     <div class="row">
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Code*</b></label>
-                                                                            <input type="text" name="employee_code" value={formData.employee_code} onChange={handleInputChange} class="form-control" placeholder="Emp Code" />
-                                                                            {errors.employee_code && <span className="error" style={{ color: 'red' }}>{errors.employee_code}</span>}
+                                                                            <label><b>Student_name*</b></label>
+                                                                            <input type="text" name="student_name" value={formData.student_name} onChange={handleInputChange} class="form-control" placeholder="student_name" />
+                                                                            {errors.student_name && <span className="error" style={{ color: 'red' }}>{errors.student_name}</span>}
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee First Name*</b></label>
-                                                                            <input type="text" name="employee_first_name" value={formData.employee_first_name} onChange={handleInputChange} class="form-control" placeholder="First Name" />
-                                                                            {errors.employee_first_name && <span className="error" style={{ color: 'red' }}>{errors.employee_first_name}</span>}
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Last Name*</b></label>
-                                                                            <input type="text" name="employee_last_name" value={formData.employee_last_name} onChange={handleInputChange} class="form-control" placeholder="Last Name" />
-                                                                            {errors.employee_last_name && <span className="error" style={{ color: 'red' }}>{errors.employee_last_name}</span>}
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Mobile No*</b></label>
-                                                                            <input type="text" name="employee_mobile" value={formData.employee_mobile} onChange={handleInputChange} class="form-control" placeholder="Mobile Number" />
-                                                                            {errors.employee_mobile && <span className="error" style={{ color: 'red' }}>{errors.employee_mobile}</span>}
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Alternate Mo. No.</b></label>
-                                                                            <input type="text" name="employee_alternate_mobile" value={formData.employee_alternate_mobile} onChange={handleInputChange} class="form-control" placeholder="Alternate Mobile Number" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Email*</b></label>
-                                                                            <input type="email" name="employee_email" value={formData.employee_email} onChange={handleInputChange} class="form-control" placeholder="Email" />
-                                                                            {errors.employee_email && <span className="error" style={{ color: 'red' }}>{errors.employee_email}</span>}
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Password*</b></label>
-                                                                            <input type="text" name="employee_password" value={formData.employee_password} onChange={handleInputChange} class="form-control" placeholder="Password" />
-                                                                            {errors.employee_password && <span className="error" style={{ color: 'red' }}>{errors.employee_password}</span>}
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Address</b></label>
-                                                                            {/* <input type="text" name="employee_address" value={formData.employee_address} onChange={handleInputChange} class="form-control" placeholder="Address" /> */}
-                                                                            <textarea name="employee_address" value={formData.employee_address} onChange={handleInputChange} class="form-control" placeholder="Address"></textarea>
 
-                                                                        </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee City</b></label>
-                                                                            <input type="text" name="employee_city" value={formData.employee_city} onChange={handleInputChange} class="form-control" placeholder="City" />
+                                                                            <label><b>Student Mobile No*</b></label>
+                                                                            <input type="text" name="student_mobile" value={formData.student_mobile} onChange={handleInputChange} class="form-control" placeholder="Mobile Number" />
+                                                                            {errors.student_mobile && <span className="error" style={{ color: 'red' }}>{errors.student_mobile}</span>}
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee State</b></label>
-                                                                            <input type="text" name="employee_state" value={formData.employee_state} onChange={handleInputChange} class="form-control" placeholder="State" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Other Info</b></label>
-                                                                            <input type="text" name="employee_other_info" value={formData.employee_other_info} onChange={handleInputChange} class="form-control" placeholder="Employee Info" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6"  >
-                                                                            <label><b>Date of Birth</b></label>
-                                                                            <input type="date" name="employee_dob" value={formData.employee_dob} onChange={handleInputChange} class="form-control" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6" >
-                                                                            <label ><b>Date of Joining</b></label>
-                                                                            <input type="date" name="employee_doj" value={formData.employee_doj} onChange={handleInputChange} class="form-control" />
-                                                                        </div>
-                                                                        {/* <div className="row"> */}
-                                                                        {/* <div className="mb-3 col-md-6">
-                                                                            <label><b>Skills</b></label>
-                                                                            <select className="form-control" multiple size="3">
-                                                                                {availableSkills.map(skill => (
-                                                                                    <option key={skill} onClick={() => handleAddSkill(skill)}>
-                                                                                        {skill}
-                                                                                    </option>
-                                                                                ))}
-                                                                            </select>
-                                                                        </div>
-                                                                        <div className="mb-3 col-md-6">
-                                                                            <label><b>Selected Skills</b></label>
-                                                                            <div className="selected-skills">
-                                                                                {selectedSkills.map(skill => (
-                                                                                    <SkillTag key={skill} skill={skill} onRemove={handleRemoveSkill} />
-                                                                                ))}
-                                                                            </div>
-                                                                        </div> */}
-                                                                        {/* <div className="mb-3 col-md-12">
-                                                                            <label><b>Skills</b></label>
-                                                                            <div className="skills-container">
-                                                                                <div className="available-skills">
-                                                                                    <select className="form-control" multiple size="4">
-                                                                                        {availableSkills.map(skill => (
-                                                                                            <option key={skill} onClick={() => handleAddSkill(skill)}>
-                                                                                                {skill}
-                                                                                            </option>
-                                                                                        ))}
-                                                                                    </select>
-                                                                                </div>
-                                                                                <div className="selected-skills">
-                                                                                    <label>Selected Skills</label>
-                                                                                    <div>
-                                                                                        {selectedSkills.map(skill => (
-                                                                                            <SkillTag key={skill} skill={skill} onRemove={handleRemoveSkill} />
-                                                                                        ))}
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div> */}
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Skills</b></label>
-                                                                            <div className="skills-container">
-                                                                                <div className="available-skills">
-                                                                                    <select className="form-control" multiple size="4">
-                                                                                        {availableSkills.map(skill => (
-                                                                                            <option key={skill} onClick={() => handleAddSkill(skill)}>
-                                                                                                {skill}
-                                                                                            </option>
-                                                                                        ))}
-                                                                                    </select>
-                                                                                </div>
-                                                                                <div className="selected-skills">
-                                                                                    <label>Selected Skills</label>
-                                                                                    <div>
-                                                                                        {selectedSkills.map(skill => (
-                                                                                            <SkillTag key={skill} skill={skill} onRemove={handleRemoveSkill} />
-                                                                                        ))}
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
 
-                                                                            {errors.employee_skills && <span className="error" style={{ color: 'red' }}>{errors.employee_skills}</span>}
-
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <label><b>student_email*</b></label>
+                                                                            <input type="email" name="student_email" value={formData.student_email} onChange={handleInputChange} class="form-control" placeholder="student_email" />
+                                                                            {errors.student_email && <span className="error" style={{ color: 'red' }}>{errors.student_email}</span>}
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Experience*</b></label>
-                                                                            {/* <input type="text" name="employee_experience" value={formData.employee_experience} onChange={handleInputChange} class="form-control" placeholder="Experience" /> */}
+                                                                            <label><b>student_qualification  *</b></label>
+                                                                            <input type="text" name="student_qualification" value={formData.student_qualification} onChange={handleInputChange} class="form-control" placeholder="student_qualification" />
+                                                                            {errors.student_qualification && <span className="error" style={{ color: 'red' }}>{errors.student_qualification}</span>}
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <label><b>student_exp*</b></label>
                                                                             <select
-                                                                                name="employee_experience"
-                                                                                value={formData.employee_experience}
+                                                                                name="student_exp"
+                                                                                value={formData.student_exp}
                                                                                 onChange={handleInputChange}
                                                                                 className="form-control"
                                                                             >
@@ -747,60 +647,30 @@ const CandidateByApiModule = () => {
 
 
 
-                                                                            {errors.employee_experience && <span className="error" style={{ color: 'red' }}>{errors.employee_experience}</span>}
+                                                                            {errors.student_exp && <span className="error" style={{ color: 'red' }}>{errors.student_exp}</span>}
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <label><b>student_position</b></label>
+                                                                            <input type="text" name="student_position" value={formData.student_position} onChange={handleInputChange} class="form-control" placeholder="student_position" />
+                                                                            {errors.student_position && <span className="error" style={{ color: 'red' }}>{errors.student_position}</span>}
+
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <label><b>student_intdate</b></label>
+                                                                            <input type="date" name="student_intdate" value={formData.student_intdate} onChange={handleInputChange} class="form-control" placeholder="student_intdate" />
+                                                                            {errors.student_intdate && <span className="error" style={{ color: 'red' }}>{errors.student_intdate}</span>}
+
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <label><b>student_time</b></label>
+                                                                            <input type="date" name="student_time" value={formData.student_time} onChange={handleInputChange} class="form-control" placeholder="student_time" />
+                                                                            {errors.student_time && <span className="error" style={{ color: 'red' }}>{errors.student_time}</span>}
+
                                                                         </div>
 
                                                                         <div class="mb-3 col-md-6">
                                                                             <label><b>Resume</b></label>
-                                                                            <input type="file" onChange={handleFileChange} class="form-control" placeholder='resume file' name="resume_file" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Id Proof</b></label>
-
-                                                                            <input type="file" name="id" onChange={handleFileChange} class="form-control" placeholder="Id Proof" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Highest Education</b></label>
-                                                                            <input type="file" name="mark" onChange={handleFileChange} class="form-control" placeholder="Highest Education" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Pan Card</b></label>
-                                                                            <input type="file" name="pancard" onChange={handleFileChange} class="form-control" placeholder="Pan Card" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Image</b></label>
-                                                                            <input type="file" name="image" onChange={handleFileChange} class="form-control" placeholder="Image" />
-                                                                        </div>
-
-
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b> Expirence Letter</b></label>
-                                                                            <input type="file" name="e_letter" onChange={handleFileChange} class="form-control" placeholder="Experience Letter" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Address Proof</b></label>
-
-                                                                            <input type="text" name="employee_permanant_address_proof" value={formData.employee_permanant_address_proof} onChange={handleInputChange} class="form-control" placeholder="Permanant address proof" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Local Address Proof</b></label>
-                                                                            <input type="text" name="employee_local_address_proof" value={formData.employee_local_address_proof} onChange={handleInputChange} class="form-control" placeholder="Local address proof" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>First Reference Name</b></label>
-                                                                            <input type="text" name="employee_reference_one_name" value={formData.employee_reference_one_name} onChange={handleInputChange} class="form-control" placeholder="Reference One Name" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>First Reference Mobile No.</b></label>
-                                                                            <input type="text" name="employee_reference_one_mobile" value={formData.employee_reference_one_mobile} onChange={handleInputChange} class="form-control" placeholder="Reference One Mobile" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Second Reference Name</b></label>
-                                                                            <input type="text" name="employee_reference_two_name" value={formData.employee_reference_two_name} onChange={handleInputChange} class="form-control" placeholder="Reference Two Name" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Second Reference Mobile No.</b></label>
-                                                                            <input type="text" name="employee_reference_two_mobile" value={formData.employee_reference_two_mobile} onChange={handleInputChange} class="form-control" placeholder="Reference Two Mobile" />
+                                                                            <input type="file" onChange={handleFileChange} class="form-control" placeholder='resume file' name="student_resume" />
                                                                         </div>
 
 
@@ -858,7 +728,15 @@ const CandidateByApiModule = () => {
                                                 )}</th>
                                                 <th scope="col"  ><b>Actions</b></th>
 
+                                                <th scope="col"  ><b> </b></th>
+                                                <th>
+                                                    <button style={{
+                                                        border: 'none',
+                                                        backgroundColor: 'white'
+                                                    }} title="Send Mail"><FontAwesomeIcon icon={faEnvelope} /></button>
 
+
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody className="customtable">
@@ -872,12 +750,10 @@ const CandidateByApiModule = () => {
                                                     <td>
                                                         {data.hiringStatus ? data.hiringStatus : "Not Applicable"}
                                                     </td>
-
-
                                                     <td>
                                                         <button
                                                             className="editButton"
-                                                            onClick={() => window.open(`${data.student_resume}`, '_blank')}
+                                                            onClick={() => handleButtonClick(data.student_resume)}
                                                             style={{ color: 'rgb(40, 118, 154)', background: 'none', border: 'none', cursor: 'pointer' }}
                                                             title="Show Pdf"
                                                         >
@@ -904,6 +780,13 @@ const CandidateByApiModule = () => {
                                                             />
                                                             <span className="checkmark"></span>
                                                         </label>
+                                                    </td>
+                                                    <td>
+                                                        <input style={{ marginLeft: "18px" }}
+                                                            type="checkbox"
+                                                            checked={selectedEmails.includes(data.student_email)}
+                                                            onChange={() => handleCheckboxChangeEmail(data.student_email)}
+                                                        />
                                                     </td>
                                                     {modalIsOpen1[data.id] && (
                                                         <CandidateDataModal isOpen1={modalIsOpen1[data.id]} onRequestClose={() => closeModal1(data.id)} data={modalData} />

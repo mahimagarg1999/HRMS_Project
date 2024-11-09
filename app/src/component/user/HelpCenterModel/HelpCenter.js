@@ -5,8 +5,9 @@ import axios from 'axios'; // For Axios
 import ModalBox from './EditHelpCenterModel.js';
 import Nav from '../../navComponent/Nav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrashAlt, faTrash, faSortUp, faSortDown, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrashAlt, faEye, faSortUp, faSortDown, faPlusCircle } from '@fortawesome/free-solid-svg-icons';
 import ReactPaginate from 'react-paginate';
+import ModalComponent from './ModelComponent.js'; // Adjust the import path as needed
 
 import Footer from '../../FooterModule/Footer.js';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
@@ -24,6 +25,8 @@ const HelpCenterModule = () => {
     const id = localStorage.getItem("_id")
     const [query, setQuery] = useState('');
     const empCode = localStorage.getItem("employee_code")
+    const [modalIsOpen1, setModalIsOpen1] = useState(false);
+    const [modalData, setModalData] = useState(null);
 
     const handlePageChange = ({ selected }) => {
         setCurrentPage(selected); // Update the current page when pagination changes
@@ -103,16 +106,7 @@ const HelpCenterModule = () => {
         helpcenter_ticket_managed_by: '',
         helpcenter_solve_duration: '',
 
-        // helpcenter_ticket1: '',
-        // helpcenter_ticket2: '',
-        // helpcenter_ticket3: '',
-        // helpcenter_ticket4: '',
-        // helpcenter_ticket5: '',
-        // helpcenter_ticket6: '',
-        // helpcenter_ticket7: '',
-        // helpcenter_ticket8: '',
-        // helpcenter_ticket9: '',
-        // helpcenter_ticket10: '',
+        
 
     });
     useEffect(() => {
@@ -129,11 +123,7 @@ const HelpCenterModule = () => {
 
         fetchData();
     }, [togle]);
-
-    // const openPopup = () => {
-    //     setMessage('')
-    //     setIsOpen(true);
-    // };
+ 
     const openPopup = () => {
         setMessage('');
         setFormData('');
@@ -146,7 +136,7 @@ const HelpCenterModule = () => {
             helpcenter_ticket_status: 'Active',
             helpcenter_ticket_solved_by: 'hr',
             helpcenter_ticket_managed_by: 'hr',
-            helpcenter_employee_code: empCode,
+            helpcenter_employee_code: localStorage.getItem("_id"),
             helpcenter_solve_duration: ''
         }
         setFormData(formDataNew);
@@ -181,7 +171,10 @@ const HelpCenterModule = () => {
                 settogle(!togle)
                 console.log(response.data); // Handle the response as needed
                 setMessage(response.data.msg);
-
+                if (response.data.success) {
+                    closePopup();
+                }
+                setTimeout(() => setMessage(''), 3000);
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -219,18 +212,7 @@ const HelpCenterModule = () => {
         let isValid = true;
         const newErrors = {};
 
-        if (!formData.helpcenter_ticket_id.trim()) {
-            newErrors.helpcenter_ticket_id = "helpcenter_ticket_id is required";
-            isValid = false;
-        }
-
-        if (!formData.helpcenter_employee_id.trim()) {
-            newErrors.helpcenter_employee_id = "helpcenter_employee_id is required";
-            isValid = false;
-        }
-
-
-
+          
         setErrors(newErrors);
         return isValid;
     };
@@ -255,6 +237,35 @@ const HelpCenterModule = () => {
             } catch (error) {
                 console.error('Error:', error);
             }
+        }
+    };
+
+    const openModal1 = (recruitmentId) => {
+        setModalIsOpen1(prevState => ({
+            ...prevState,
+            [recruitmentId]: true // Set modal open for this recruitment ID
+        }));
+        fetchHelpCenterData(recruitmentId);
+    };
+
+    // Function to close modal for a specific recruitment ID
+    const closeModal1 = (recruitmentId) => {
+        setModalIsOpen1(prevState => ({
+            ...prevState,
+            [recruitmentId]: false // Set modal closed for this recruitment ID
+        }));
+    };
+
+    const fetchHelpCenterData = async (id) => {
+        try {
+            const response = await axios.get(`${BASE_API_URL}helpcenter/get?helpcenterid=${id}`);
+            setModalData(response.data); // Ensure response.data contains the correct data structure
+            setModalIsOpen1(prevState => ({
+                ...prevState,
+                [id]: true // Set modal open for this recruitment ID
+            }));
+        } catch (error) {
+            console.error('Error fetching data:', error);
         }
     };
 
@@ -293,15 +304,15 @@ const HelpCenterModule = () => {
                                                                     <div class="row">
 
                                                                         {/* <div class="mb-3 col-md-6">
-                                                                        <label><b>Employee Id</b></label>
-                                                                        <input type="text" name="helpcenter_employee_id" value={formData.helpcenter_employee_id} readOnly class="form-control" placeholder="Employee Id" />
- 
-                                                                    </div> */}
-                                                                        <div class="mb-3 col-md-6">
+                                                                            <label><b>Employee Code</b></label>
+                                                                            <input type="text" name="helpcenter_ticket_id" value={formData.helpcenter_ticket_id} readOnly class="form-control" placeholder="Employee Code" />
+
+                                                                        </div> */}
+                                                                        {/* <div class="mb-3 col-md-6">
                                                                             <label><b>Employee Code</b></label>
                                                                             <input type="text" name="helpcenter_employee_id" value={empCode} readOnly class="form-control" placeholder="Employee Code" />
 
-                                                                        </div>
+                                                                        </div> */}
 
 
                                                                         <div class="mb-3 col-md-6">
@@ -311,6 +322,7 @@ const HelpCenterModule = () => {
                                                                                 value={formData.helpcenter_ticket_priority}
                                                                                 onChange={handleInputChange}
                                                                                 className="form-control"
+                                                                                disabled
                                                                             >
                                                                                 <option value="">Select Ticket Priority</option>
                                                                                 <option value="low">low</option>
@@ -327,6 +339,7 @@ const HelpCenterModule = () => {
                                                                                 value={formData.helpcenter_ticket_department}
                                                                                 onChange={handleInputChange}
                                                                                 className="form-control"
+                                                                                
                                                                             >
                                                                                 <option value="">Select Ticket Department</option>
                                                                                 <option value="Administer">Administer</option>
@@ -461,10 +474,7 @@ const HelpCenterModule = () => {
                                         <thead className="thead-light">
                                             <tr>
 
-                                                {/* <th scope="col"  >ID  </th>
-                                                <th scope="col" onClick={() => handleSort('helpcenter_employee_id')}> Emp Id{sortColumn === 'helpcenter_employee_id' && (
-                                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
-                                                )}</th> */}
+
                                                 <th scope="col" onClick={() => handleSort('helpcenter_employee_code')}><b> Emp Code</b>{sortColumn === 'helpcenter_employee_code' && (
                                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                                 )}</th>
@@ -499,8 +509,8 @@ const HelpCenterModule = () => {
                                                 <tr key={index}>
 
                                                     {/* <td>{data._id}</td>
-                                                    <td>{data.helpcenter_employee_id}</td> */}
-                                                    <td>{data.helpcenter_employee_code}</td>
+                                                    // <td>{data.helpcenter_employee_id}</td> */}
+                                                    <td>{data.helpcenter_ticket_id}</td>
                                                     <td>{data.helpcenter_ticket_status}</td>
                                                     <td>{data.helpcenter_ticket_solved_by}</td>
                                                     <td>{data.helpcenter_ticket_managed_by}</td>
@@ -512,6 +522,12 @@ const HelpCenterModule = () => {
                                                         {/* <button className="editButton" onClick={() => DeleteData(data._id)} >  <FontAwesomeIcon icon={faTrash} /></button> */}
                                                         <button className="editButton" onClick={() => openModal(data._id)} >
                                                             <FontAwesomeIcon icon={faEdit} />
+                                                        </button>
+                                                        <button
+                                                            className="editButton"
+                                                            onClick={() => openModal1(data._id)}
+                                                        >
+                                                            <FontAwesomeIcon icon={faEye} />
                                                         </button>
                                                     </td>
                                                     <td>
@@ -530,6 +546,9 @@ const HelpCenterModule = () => {
                                                         <h2>Modal Title</h2>
                                                         <p>Modal Content</p>
                                                     </ModalBox>
+                                                    {modalIsOpen1[data._id] && (
+                                                        <ModalComponent isOpen1={modalIsOpen1[data._id]} onRequestClose={() => closeModal1(data._id)} data={modalData} />
+                                                    )}
                                                 </tr>
                                             ))}
                                         </tbody>

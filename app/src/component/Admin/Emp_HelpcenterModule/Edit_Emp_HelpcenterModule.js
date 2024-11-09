@@ -6,14 +6,10 @@ import 'reactjs-popup/dist/index.css';
 import Modal from 'react-modal';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
 import CloseButton from 'react-bootstrap/CloseButton';
-
 const ModalBox = ({ isOpen, onRequestClose, helpCenterId }) => {
-
     const [data, setData] = useState([])
     const [message, setMessage] = useState('');
-
     useEffect(() => {
-
         if (isOpen) {
             setMessage('')
             console.log('model open', helpCenterId)
@@ -21,10 +17,7 @@ const ModalBox = ({ isOpen, onRequestClose, helpCenterId }) => {
             if (helpCenterId) {
                 const fetchData = async () => {
                     try {
-
                         const response = await axios.get(`${BASE_API_URL}helpcenter/get?helpcenterid=${helpCenterId}`);
-
-
                         setData(response.data.data)
                         console.log('data', data)
 
@@ -103,14 +96,17 @@ const ModalBox = ({ isOpen, onRequestClose, helpCenterId }) => {
                             <div class="row">
                                 <div class="mb-3 col-md-6">
                                     <label><b>Ticket Id</b></label>
-                                    <input type="text" name="helpcenter_ticket_id" value={data.helpcenter_ticket_id} disabled onChange={handleInputChange} class="form-control"     placeholder="Ticket Id" />
+                                    <input type="text" name="helpcenter_ticket_id" value={data.helpcenter_ticket_id} onChange={handleInputChange} class="form-control" placeholder="Ticket Id" />
                                 </div>
                                 <div class="mb-3 col-md-6">
                                     <label><b>Employee Id</b></label>
-                                    <input type="text" name="helpcenter_employee_id" value={data.helpcenter_employee_id} disabled onChange={handleInputChange} class="form-control" placeholder="Employee Id" />
+                                    <input type="text" name="helpcenter_employee_id" value={data.helpcenter_employee_id} onChange={handleInputChange} class="form-control" placeholder="Employee Id" />
                                 </div>
 
-                              
+                                {/* <div class="mb-3 col-md-6">
+                                    <label><b>Ticket Priority</b></label>
+                                    <input type="text" name="helpcenter_ticket_priority" value={data.helpcenter_ticket_priority} onChange={handleInputChange} class="form-control" placeholder="Ticket Priority" />
+                                </div> */}
                                 <div class="mb-3 col-md-6">
                                     <label><b>Ticket Priority</b></label>
                                     <select
@@ -118,7 +114,6 @@ const ModalBox = ({ isOpen, onRequestClose, helpCenterId }) => {
                                         value={data.helpcenter_ticket_priority}
                                         onChange={handleInputChange}
                                         className="form-control"
-                                        disabled
                                     >
                                         <option value="">Select Ticket Priority</option>
                                         <option value="low">low</option>
@@ -139,15 +134,20 @@ const ModalBox = ({ isOpen, onRequestClose, helpCenterId }) => {
                                         value={data.helpcenter_ticket_department}
                                         onChange={handleInputChange}
                                         className="form-control"
-                                        disabled
-
                                     >
                                         <option value="">Select Ticket Department</option>
                                         <option value="Administer">Administer</option>
                                         <option value="HR">HR</option>
                                     </select>
                                 </div>
-                                
+                                {/* <div class="mb-3 col-md-6">
+                                    <label><b>Ticket Created Date</b></label>
+                                    <input type="date" name="helpcenter_ticket_created_date" value={data.helpcenter_ticket_created_date} onChange={handleInputChange} class="form-control" />
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label><b>Ticket Solved Date</b></label>
+                                    <input type="date" name="helpcenter_ticket_solved_date" value={data.helpcenter_ticket_solved_date} onChange={handleInputChange} class="form-control" />
+                                </div> */}
                                 <div class="mb-3 col-md-6">
                                     <label><b>Ticket Status</b></label>
                                     <input type="text" name="helpcenter_ticket_status" value={data.helpcenter_ticket_status} onChange={handleInputChange} class="form-control" placeholder="Ticket Status" />

@@ -7,7 +7,7 @@ import { BASE_API_URL } from '../../../lib/constants.jsx';
 import './SearchModel.js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactPaginate from 'react-paginate';
-import { faSortUp, faSortDown, faEye, faFilePdf } from '@fortawesome/free-solid-svg-icons';
+import { faSortUp, faSortDown,faEnvelope, faEye, faFilePdf } from '@fortawesome/free-solid-svg-icons';
 let downloadCount = 0;
 
 const SearchModule = () => {
@@ -20,6 +20,10 @@ const SearchModule = () => {
     const [formData, setFormData] = useState({});
     const [allSkills, setAllSkills] = useState('no');
     const [triggerSearch, setTriggerSearch] = useState(false);
+    const [selectedEmails, setSelectedEmails] = useState([]);
+    const [selectAll, setSelectAll] = useState(false);
+    const [message, setMessage] = useState('');
+    const [data, setData] = useState([]); // Initialize data with an empty array
 
     const [errors, setErrors] = useState({
         candidate_skills: '',
@@ -33,7 +37,7 @@ const SearchModule = () => {
     const itemsPerPage = 10; // Updated to 10 items per page
     const offset = currentPage * itemsPerPage;
     const pageCount = Math.ceil(tableData.length / itemsPerPage);
- 
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -210,6 +214,44 @@ const SearchModule = () => {
     const handleSearch = () => {
         setTriggerSearch(true);
     };
+    const handleCheckboxChangeEmail = (email) => {
+        setSelectedEmails(prevSelectedEmails =>
+            prevSelectedEmails.includes(email)
+                ? prevSelectedEmails.filter(e => e !== email)
+                : [...prevSelectedEmails, email]
+        );
+    };
+
+    const handleSelectAll = () => {
+        if (selectAll) {
+            setSelectedEmails([]); // Deselect all
+
+        } else {
+            setSelectedEmails(data.map(data => data.candidate_email)); // Select all
+        }
+        setSelectAll(!selectAll); // Toggle selectAll state
+    };
+
+
+    const sendEmails = async () => {
+        if (selectedEmails.length === 0) {
+            setMessage('Please select at least one email to send.');
+            return;
+        }
+        setMessage('Sending emails...');
+        try {
+            const response = await axios.post(`${BASE_API_URL}candidate/send-mail`, { emails: selectedEmails });
+            console.log('Response:', response.data);
+            setMessage(response.data.msg);
+            setTimeout(() => setMessage(''), 2000);
+            // Reset selected emails and checkboxes after sending emails
+            setSelectedEmails([]);
+            setSelectAll(false);
+        } catch (error) {
+            console.error('Error sending emails:', error);
+            setMessage('Error sending emails.');
+        }
+    };
     return (
         <>
             <Nav />
@@ -283,15 +325,24 @@ const SearchModule = () => {
                     </button>
                 </div>
                 <div className="mb-5 col-md-1">
-                <label><b>Export data</b></label>
+                    <label><b>Export data</b></label>
 
-                {/* <div class="containerSearching icon_manage"> */}
+                    {/* <div class="containerSearching icon_manage"> */}
                     <button onClick={openView} title="View Data" className='export_design btn btn-primary'>
                         Export&nbsp; <FontAwesomeIcon icon={faEye} />
                     </button>
 
-
+                   
                 </div>
+                <div className="mb-5 col-md-1">
+                    <label><b>Send Emails</b></label>
+                    {/* <div class="containerSearching icon_manage"> */}
+                    <button onClick={sendEmails} title="Send mail" className='export_design btn btn-primary'>
+                    Send Emails <FontAwesomeIcon icon={faEnvelope} />
+                    </button>
+ 
+                </div>
+                {message && <div className="mt-3 alert alert-success">{message}</div>}
 
                 <div className="table-responsive">
 
@@ -316,13 +367,16 @@ const SearchModule = () => {
                                 <th scope="col" onClick={() => handleSort('candidate_selection_status')}><b>Hiring Status</b> {sortColumn === 'candidate_selection_status' && (
                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                 )}</th>
-                                 <th scope="col" onClick={() => handleSort('candidate_skills')}><b>Skills </b>{sortColumn === 'candidate_skills' && (
+                                <th scope="col" onClick={() => handleSort('candidate_skills')}><b>Skills </b>{sortColumn === 'candidate_skills' && (
                                     <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
                                 )}</th>
-                                <th scope="col" onClick={() => handleSort('candidate_document_proof')}><b>Document Proof </b>{sortColumn === 'candidate_document_proof' && (
-                                    <FontAwesomeIcon icon={sortDirection === 'asc' ? faSortUp : faSortDown} />
-                                )}</th>
-
+                                <th scope="col"  ><b>Document Proof </b></th>
+                                <th>
+                                    <button style={{
+                                        border: 'none',
+                                        backgroundColor: 'white'
+                                    }} title="Send Mail"><FontAwesomeIcon icon={faEnvelope} /></button>
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="customtable">
@@ -347,6 +401,13 @@ const SearchModule = () => {
 
                                         </button>
                                     </td>
+                                    <td>
+                                        <input style={{ marginLeft: "18px" }}
+                                            type="checkbox"
+                                            checked={selectedEmails.includes(data.candidate_email)}
+                                            onChange={() => handleCheckboxChangeEmail(data.candidate_email)}
+                                        />
+                                    </td>
 
 
                                 </tr>
@@ -363,16 +424,16 @@ const SearchModule = () => {
                         activeClassName={'active'}
                     />
                 </div> */}
-                 {tableData.length > itemsPerPage && (
-                <div className="pagination-container">
-                    <ReactPaginate
-                        pageCount={pageCount}
-                        onPageChange={handlePageChange}
-                        containerClassName={'pagination'}
-                        activeClassName={'active'}
-                    />
-                </div>
-            )}
+                {tableData.length > itemsPerPage && (
+                    <div className="pagination-container">
+                        <ReactPaginate
+                            pageCount={pageCount}
+                            onPageChange={handlePageChange}
+                            containerClassName={'pagination'}
+                            activeClassName={'active'}
+                        />
+                    </div>
+                )}
             </div>
             <Footer />
         </>

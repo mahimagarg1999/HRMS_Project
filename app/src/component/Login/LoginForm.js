@@ -54,63 +54,7 @@ const LoginForm = () => {
         setErrors(newErrors);
         return isValid;
     };
-    // const onSubmitForm = async e => {
-    //     e.preventDefault();
-    //     if (validateForm()) {
-    //         try {
-    //             const response = await fetch(`${BASE_API_URL}user/login`, {
-    //                 method: 'POST',
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                 },
-    //                 body: JSON.stringify(form),
-    //             });
-    //             const data = await response.json();
-    //             setmsg(data.msg)
-    //             if (response.ok) {
-    //                 // Handle successful login
-    //                 console.log(data.user._id);
-    //                 try {
-    //                     const response = await fetch(`${BASE_API_URL}user/get?userid=${data.user._id}`, {
-    //                         method: 'GET',
-    //                     });
-
-    //                     // Check if the response is successful (status code 200)
-    //                     if (!response.ok) {
-    //                         throw new Error('Failed to fetch user data');
-    //                     }
-
-    //                     // Parse the JSON response
-    //                     const userData = await response.json();
-    //                     console.log("User data:", userData);
-    //                     const name = userData.data.fname + " " + userData.data.lname
-    //                     localStorage.setItem("_id", userData.data._id)
-    //                     localStorage.setItem("name", name)
-    //                     localStorage.setItem("email", userData.data.email)
-    //                     localStorage.setItem("password", userData.data.password)
-    //                     localStorage.setItem("role", userData.data.role)
-    //                     if (userData.data.role == "admin") {
-    //                         navigate('/admin');
-    //                     }
-
-    //                     else {
-    //                         navigate('/user');
-    //                     }
-
-    //                 } catch (err) {
-    //                     // Handle errors
-    //                     console.error("Error fetching user data:", err);
-    //                 }
-
-    //             } else {
-    //                 // Handle unsuccessful login
-    //                 console.error('Login failed');
-    //             }
-    //         } catch (error) {
-    //             console.error('Error occurred:', error);
-    //         }
-    //     }
-    // };
+   
     const onSubmitForm = async e => {
         e.preventDefault();
         if (validateForm()) {

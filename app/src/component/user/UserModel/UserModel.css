@@ -249,12 +249,7 @@ th {
    text-align: center
 }
 
-.editButton {
-   color: rgb(40, 118, 154) !important;
-   border: none;
-   margin-left: 10%;
-   background-color: white;
-}
+
 
 .backButton {
    position: absolute;

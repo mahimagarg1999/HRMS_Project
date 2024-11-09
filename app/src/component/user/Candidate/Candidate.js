@@ -26,7 +26,6 @@ const CandidateModule = () => {
     const [sortDirection, setSortDirection] = useState('ascending');
     const [ids, setIds] = useState([]);
     const [resume, setResume] = useState('');
-    const [selectedFile, setSelectedFile] = useState('');
     const [query, setQuery] = useState('');
     const [profiles, setProfiles] = useState([]);
     const [availableSkills, setAvailableSkills] = useState([]);
@@ -89,7 +88,6 @@ const CandidateModule = () => {
                 }
 
                 console.log('idproof', resume)
-                console.log('selectedFile', selectedFile)
 
             };
             reader.readAsDataURL(file);
@@ -123,11 +121,28 @@ const CandidateModule = () => {
         fetchData();
     }, [togle]);
     // =============check
+    // useEffect(() => {
+    //     // Fetch profiles from API when the component mounts
+    //     const fetchProfiles = async () => {
+    //         try {
+    //             const response = await axios.get(`${BASE_API_URL}/recruitment/get_profile`);
+    //             if (response.data.success) {
+    //                 setProfiles(response.data.data); // Set profiles in state
+    //             } else {
+    //                 console.error('Failed to fetch profiles:', response.data.msg);
+    //             }
+    //         } catch (error) {
+    //             console.error('Error fetching profiles:', error);
+    //         }
+    //     };
+
+    //     fetchProfiles();
+    // }, []);
     useEffect(() => {
         // Fetch profiles from API when the component mounts
         const fetchProfiles = async () => {
             try {
-                const response = await axios.get(`${BASE_API_URL}/recruitment/get_profile`);
+                const response = await axios.get(`${BASE_API_URL}/profiles/list`);
                 if (response.data.success) {
                     setProfiles(response.data.data); // Set profiles in state
                 } else {
@@ -140,6 +155,30 @@ const CandidateModule = () => {
 
         fetchProfiles();
     }, []);
+    useEffect(() => {
+        const fetchSkillsByProfile = async () => {
+            if (formData.profile) {
+                setAvailableSkills([]); // Clear available skills before fetching new ones
+                try {
+                    const response = await axios.get(`${BASE_API_URL}/skills/getskillbyprofile`, {
+                        params: { profile: formData.profile }
+                    });
+                    if (response.data.success) {
+                        const skills = response.data.data.map(item => item.skills);
+                        setAvailableSkills(skills); // Set filtered skills based on selected profile
+                    } else {
+                        console.error('Failed to fetch skills:', response.data.msg);
+                    }
+                } catch (error) {
+                    console.error('Error fetching skills:', error);
+                }
+            } else {
+                setAvailableSkills([]); // If no profile is selected, ensure skills are empty
+            }
+        };
+
+        fetchSkillsByProfile();
+    }, [formData.profile]);
     useEffect(() => {
         const fetchSkills = async () => {
             try {
@@ -172,9 +211,9 @@ const CandidateModule = () => {
             candidate_expected_salary: '',
             candidate_expected_joining_date: '',
             candidate_marrital_status: '',
-            candidate_machine_round: '',
-            candidate_technical_interview_round: '',
-            candidate_hr_interview_round: '',
+
+            interview_rounds: '',
+
             candidate_selection_status: '',
             candidate_feedback: '',
             source_of_candidate: '',
@@ -184,6 +223,7 @@ const CandidateModule = () => {
             tenth_percentage: '',
             twelfth_percentage: '',
             graduationPercentage: '',
+            postGraduationPercentage: '',
             profile: ''
         }
         setFormData(formDataNew)
@@ -557,6 +597,9 @@ const CandidateModule = () => {
             const response = await axios.post(`${BASE_API_URL}candidate/send-mail`, { emails: selectedEmails });
             console.log('Response:', response.data);
             setMessage(response.data.msg);
+            if (response.data.success) {
+                closePopup();
+            }
             setTimeout(() => setMessage(''), 2000);
             // Reset selected emails and checkboxes after sending emails
             setSelectedEmails([]);
@@ -569,14 +612,14 @@ const CandidateModule = () => {
     const openModal1 = (candidateId) => {
         setModalIsOpen1(prevState => ({
             ...prevState,
-            [candidateId]: true // Set modal open for this recruitment ID
+            [candidateId]: true
         }));
         fetchCandidateData(candidateId);
     };
     const closeModal1 = (candidateId) => {
         setModalIsOpen1(prevState => ({
             ...prevState,
-            [candidateId]: false // Set modal closed for this recruitment ID
+            [candidateId]: false
         }));
     };
 
@@ -586,7 +629,7 @@ const CandidateModule = () => {
             setModalData(response.data); // Ensure response.data contains the correct data structure
             setModalIsOpen1(prevState => ({
                 ...prevState,
-                [id]: true // Set modal open for this recruitment ID
+                [id]: true
             }));
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -600,14 +643,11 @@ const CandidateModule = () => {
                 <div style={{ backgroundColor: '#28769a' }}>
                     <h1 className='headerUser'>WELCOME TO CANDIDATE PAGE</h1>
                 </div>
-                <div >
-
-
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-body text-center">
-
+                <div>
+                    <div className="row">
+                        <div className="col-12">
+                            <div className="card">
+                                <div className="card-body text-center">
                                     <div className='icon_manage'>
                                         <button onClick={openView} title="View Data" className='button_design_view'>
                                             Export&nbsp; <FontAwesomeIcon icon={faEye} />
@@ -629,59 +669,73 @@ const CandidateModule = () => {
                                         <div>
                                             <div>
                                                 <div>
-                                                    <div class="row">
-                                                        <div class="col-md-6 offset-md-3">
-                                                            <div class="signup-form">
-                                                                <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
-                                                                    <div style={{ textAlign: 'center' }}>
-                                                                        <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Create Your Account</h4>
+                                                    <div className="row">
+                                                        <div className="col-md-6 offset-md-3">
+                                                            <div className="signup-form">
+                                                                <form onSubmit={handleSubmit} className="mt-5 border p-4 bg-light shadow">
+                                                                    <div className="addHeading">
+                                                                        <h4 style={{ display: 'inline' }} className="mb-5 text-secondary"><b>ADD CANDIDATE DATA</b></h4>
                                                                         <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
                                                                     </div>
 
-                                                                    <div class="row">
-                                                                        <div class="mb-3 col-md-6">
+                                                                    <div className="row">
+                                                                        <div className="mb-3 col-md-6">
                                                                             <label><b>Candidate ID*</b></label>
-                                                                            <input type="text" name="candidate_id" value={formData.candidate_id} onChange={handleInputChange} class="form-control" placeholder="Candidate" />
+                                                                            <input type="text" name="candidate_id" value={formData.candidate_id} onChange={handleInputChange} className="form-control" placeholder="Candidate" />
                                                                             {errors.candidate_id && <span className="error" style={{ color: 'red' }}>{errors.candidate_id}</span>}
 
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
+                                                                        <div className="mb-3 col-md-6">
                                                                             <label><b>First Name*</b></label>
-                                                                            <input type="text" name="candidate_first_name" value={formData.candidate_first_name} onChange={handleInputChange} class="form-control" placeholder="First Name" />
+                                                                            <input type="text" name="candidate_first_name" value={formData.candidate_first_name} onChange={handleInputChange} className="form-control" placeholder="First Name" />
                                                                             {errors.candidate_first_name && <span className="error" style={{ color: 'red' }}>{errors.candidate_first_name}</span>}
 
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
+                                                                        <div className="mb-3 col-md-6">
                                                                             <label><b>Last Name*</b></label>
-                                                                            <input type="text" name="candidate_last_name" value={formData.candidate_last_name} onChange={handleInputChange} class="form-control" placeholder="Last Name" />
+                                                                            <input type="text" name="candidate_last_name" value={formData.candidate_last_name} onChange={handleInputChange} className="form-control" placeholder="Last Name" />
                                                                             {errors.candidate_last_name && <span className="error" style={{ color: 'red' }}>{errors.candidate_last_name}</span>}
 
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
+                                                                        <div className="mb-3 col-md-6">
                                                                             <label><b>Mobile No*</b></label>
-                                                                            <input type="text" name="candidate_mobile" value={formData.candidate_mobile} onChange={handleInputChange} class="form-control" placeholder="Mobile Number" />
+                                                                            <input type="text" name="candidate_mobile" value={formData.candidate_mobile} onChange={handleInputChange} className="form-control" placeholder="Mobile Number" />
                                                                             {errors.candidate_mobile && <span className="error" style={{ color: 'red' }}>{errors.candidate_mobile}</span>}
 
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
+                                                                        <div className="mb-3 col-md-6">
                                                                             <label><b>Alternate Mobile No</b></label>
-                                                                            <input type="text" name="candidate_alternate_mobile" value={formData.candidate_alternate_mobile} onChange={handleInputChange} class="form-control" placeholder="Alternate Mobile Number" />
+                                                                            <input type="text" name="candidate_alternate_mobile" value={formData.candidate_alternate_mobile} onChange={handleInputChange} className="form-control" placeholder="Alternate Mobile Number" />
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
+                                                                        <div className="mb-3 col-md-6">
                                                                             <label><b>Email*</b></label>
-                                                                            <input type="email" name="candidate_email" value={formData.candidate_email} onChange={handleInputChange} class="form-control" placeholder="Email" />
+                                                                            <input type="email" name="candidate_email" value={formData.candidate_email} onChange={handleInputChange} className="form-control" placeholder="Email" />
                                                                             {errors.candidate_email && <span className="error" style={{ color: 'red' }}>{errors.candidate_email}</span>}
 
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
+                                                                        <div className="mb-3 col-md-6">
                                                                             <label><b>Skype Id</b></label>
-                                                                            <input type="text" name="candidate_skype" value={formData.candidate_skype} onChange={handleInputChange} class="form-control" placeholder="Skype ID" />
+                                                                            <input type="text" name="candidate_skype" value={formData.candidate_skype} onChange={handleInputChange} className="form-control" placeholder="Skype ID" />
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
+                                                                        <div className="mb-3 col-md-6">
                                                                             <label><b>LinkedIn Profile</b></label>
-                                                                            <input type="text" name="candidate_linkedIn_profile" value={formData.candidate_linkedIn_profile} onChange={handleInputChange} class="form-control" placeholder="LinkedIn Profile" />
+                                                                            <input type="text" name="candidate_linkedIn_profile" value={formData.candidate_linkedIn_profile} onChange={handleInputChange} className="form-control" placeholder="LinkedIn Profile" />
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
+                                                                        {/* <div className="mb-3 col-md-6">
+                                                                            <label><b>Profile*</b></label>
+                                                                            <select name="profile"
+                                                                                value={formData.profile}
+                                                                                onChange={handleInputChange}
+                                                                                className="form-control">
+                                                                                {profiles.map(profile => (
+                                                                                    <option key={profile.profile_id} value={profile.profile_id}>
+                                                                                        {profile.profile}
+                                                                                    </option>
+                                                                                ))}
+                                                                            </select>
+                                                                            {errors.profile && <span className="error" style={{ color: 'red' }}>{errors.profile}</span>}
+                                                                        </div>
+                                                                        <div className="mb-3 col-md-6">
                                                                             <label><b>Skills</b></label>
                                                                             <div className="skills-container">
                                                                                 <div className="available-skills">
@@ -704,24 +758,8 @@ const CandidateModule = () => {
                                                                             </div>
 
                                                                             {errors.candidate_skills && <span className="error" style={{ color: 'red' }}>{errors.candidate_skills}</span>}
-                                                                        </div>
-
+                                                                        </div> */}
                                                                         <div className="mb-3 col-md-6">
-                                                                            <label><b>Profile*</b></label>
-
-                                                                            <select name="profile"
-                                                                                value={formData.profile}
-                                                                                onChange={handleInputChange}
-                                                                                className="form-control">
-                                                                                {profiles.map(profile => (
-                                                                                    <option key={profile.profile_id} value={profile.profile_id}>
-                                                                                        {profile.profile}
-                                                                                    </option>
-                                                                                ))}
-                                                                            </select>
-                                                                            {errors.profile && <span className="error" style={{ color: 'red' }}>{errors.profile}</span>}
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
                                                                             <label><b>Experience*</b></label>
                                                                             <select
                                                                                 name="candidate_experience"
@@ -745,84 +783,211 @@ const CandidateModule = () => {
                                                                             {errors.candidate_experience && <span className="error" style={{ color: 'red' }}>{errors.candidate_experience}</span>}
 
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
+                                                                        <div className="mb-3 col-md-6">
                                                                             <label><b>Expected Salary*</b></label>
-                                                                            <input type="text" name="candidate_expected_salary" value={formData.candidate_expected_salary} onChange={handleInputChange} class="form-control" placeholder="Expected Salary" />
+                                                                            <input type="text" name="candidate_expected_salary" value={formData.candidate_expected_salary} onChange={handleInputChange} className="form-control" placeholder="Expected Salary" />
                                                                             {errors.candidate_expected_salary && <span className="error" style={{ color: 'red' }}>{errors.candidate_expected_salary}</span>}
 
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
+                                                                        {/* <div className="mb-3 col-md-6">
+                                                                            <label><b>Profile*</b></label>
+                                                                            <select name="profile"
+                                                                                value={formData.profile}
+                                                                                onChange={handleInputChange}
+                                                                                className="form-control">
+                                                                                <option value="">Select a Profile</option>
+                                                                                {profiles.map(profile => (
+                                                                                    <option key={profile.profile_id} value={profile.profile_id}>
+                                                                                        {profile.profile}
+                                                                                    </option>
+                                                                                ))}
+                                                                            </select>
+                                                                            {errors.profile && <span className="error" style={{ color: 'red' }}>{errors.profile}</span>}
+
+                                                                            <div className="mb-3 col-md-6">
+                                                                                <label><b>Skills</b></label>
+                                                                                <div className="skills-container">
+                                                                                    <div className="available-skills">
+                                                                                        <select className="form-control" multiple size="4">
+                                                                                            {availableSkills.length === 0 ? (
+                                                                                                <option disabled>No skills available</option>
+                                                                                            ) : (
+                                                                                                availableSkills.map(skill => (
+                                                                                                    <option key={skill} onClick={() => handleAddSkill(skill)}>
+                                                                                                        {skill}
+                                                                                                    </option>
+                                                                                                ))
+                                                                                            )}
+                                                                                        </select>
+                                                                                    </div>
+                                                                                    <div className="selected-skills">
+                                                                                        <label>Selected Skills</label>
+                                                                                        <div>
+                                                                                            {selectedSkills.map(skill => (
+                                                                                                <SkillTag key={skill} skill={skill} onRemove={handleRemoveSkill} />
+                                                                                            ))}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                {errors.candidate_skills && <span className="error" style={{ color: 'red' }}>{errors.candidate_skills}</span>}
+                                                                            </div>
+                                                                        </div> */}
+                                                                        <div className="mb-3 row">
+                                                                            <div className="col-md-6">
+                                                                                <label><b>Profile*</b></label>
+                                                                                <select
+                                                                                    name="profile"
+                                                                                    value={formData.profile}
+                                                                                    onChange={handleInputChange}
+                                                                                    className="form-control"
+                                                                                >
+                                                                                    <option value="">Select a Profile</option>
+                                                                                    {profiles.map(profile => (
+                                                                                        <option key={profile.profile_id} value={profile.profile_id}>
+                                                                                            {profile.profile}
+                                                                                        </option>
+                                                                                    ))}
+                                                                                </select>
+                                                                                {errors.profile && <span className="error" style={{ color: 'red' }}>{errors.profile}</span>}
+                                                                            </div>
+
+                                                                            <div className="col-md-6">
+                                                                                <label><b>Skills</b></label>
+                                                                                <div className="skills-container">
+                                                                                    <div className="available-skills">
+                                                                                        <select className="form-control" multiple size="4">
+                                                                                            {availableSkills.length === 0 ? (
+                                                                                                <option disabled>No skills available</option>
+                                                                                            ) : (
+                                                                                                availableSkills.map(skill => (
+                                                                                                    <option key={skill} onClick={() => handleAddSkill(skill)}>
+                                                                                                        {skill}
+                                                                                                    </option>
+                                                                                                ))
+                                                                                            )}
+                                                                                        </select>
+                                                                                    </div>
+                                                                                    <div className="selected-skills">
+                                                                                        <label>Selected Skills</label>
+                                                                                        <div>
+                                                                                            {selectedSkills.map(skill => (
+                                                                                                <SkillTag key={skill} skill={skill} onRemove={handleRemoveSkill} />
+                                                                                            ))}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                {errors.candidate_skills && <span className="error" style={{ color: 'red' }}>{errors.candidate_skills}</span>}
+                                                                            </div>
+                                                                        </div>
+
+
+
+
+
+
+                                                                        <div className="mb-3 col-md-6">
                                                                             <label><b>Joining Date</b></label>
-                                                                            <input type="date" name="candidate_expected_joining_date" value={formData.candidate_expected_joining_date} onChange={handleInputChange} class="form-control" />
+                                                                            <input type="date" name="candidate_expected_joining_date" value={formData.candidate_expected_joining_date} onChange={handleInputChange} className="form-control" />
                                                                         </div>
 
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Marrital Status</b></label>
-                                                                            <input type="text" name="candidate_marrital_status" value={formData.candidate_marrital_status} onChange={handleInputChange} class="form-control" placeholder="Marrital Status" />
+
+                                                                        <div className="mb-3 col-md-6">
+                                                                            <label><b>Marital Status</b></label>
+                                                                            <select
+                                                                                name="candidate_marrital_status"
+                                                                                value={formData.candidate_marrital_status}
+                                                                                onChange={handleInputChange}
+                                                                                className="form-control"
+                                                                            >
+                                                                                <option value="">Select Status</option>
+                                                                                <option value="Married">Married</option>
+                                                                                <option value="Unmarried">Unmarried</option>
+                                                                            </select>
                                                                         </div>
 
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Machine Round</b></label>
-                                                                            <input type="text" name="candidate_machine_round" value={formData.candidate_machine_round} onChange={handleInputChange} class="form-control" placeholder="Machine Round" />
+
+
+                                                                        <div className="mb-3 col-md-6">
+                                                                            <label><b>Interview Rounds</b></label>
+                                                                            <select
+                                                                                name="interview_rounds"
+                                                                                value={formData.interview_rounds}
+                                                                                onChange={handleInputChange}
+                                                                                className="form-control" >
+                                                                                <option value=""> Select Round </option>
+                                                                                <option value="Telephonic Round">Telephonic Round</option>
+                                                                                <option value="Machine Round">Machine Round
+                                                                                </option>
+                                                                                <option value="Face-to-Face Round">Face-to-Face Round</option>
+                                                                                <option value="HR Round">HR Round</option>
+                                                                            </select>
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Technical Round</b></label>
-                                                                            <input type="text" name="candidate_technical_interview_round" value={formData.candidate_technical_interview_round} onChange={handleInputChange} class="form-control" placeholder="Technical Interview Round" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Interview Round</b></label>
-                                                                            <input type="text" name="candidate_hr_interview_round" value={formData.candidate_hr_interview_round} onChange={handleInputChange} class="form-control" placeholder="HR Interview Round" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
+                                                                        <div className="mb-3 col-md-6">
                                                                             <label><b>Selection Status</b></label>
-                                                                            {/* <input type="text" name="candidate_selection_status" value={formData.candidate_selection_status} onChange={handleInputChange} class="form-control" placeholder="Selection Status" /> */}
                                                                             <select
                                                                                 name="candidate_selection_status"
                                                                                 value={formData.candidate_selection_status}
                                                                                 onChange={handleInputChange}
                                                                                 className="form-control" >
                                                                                 <option value=""> Selection Status </option>
-                                                                                <option value="Rejected">Rejected</option>
+                                                                                <option value="In Progress">In Progress</option>
                                                                                 <option value="On Hold">On Hold</option>
                                                                                 <option value="Hired">Hired</option>
+                                                                                <option value="Rejected">Rejected</option>
                                                                                 <option value="NA">NA</option>
 
 
                                                                             </select>
                                                                         </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Feedback</b></label>
-                                                                            <input type="text" name="candidate_feedback" value={formData.candidate_feedback} onChange={handleInputChange} class="form-control" placeholder="Feedback" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Source of candidate</b></label>
-                                                                            <input type="text" name="source_of_candidate" value={formData.source_of_candidate} onChange={handleInputChange} class="form-control" placeholder="From Consultancy" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
+
+
+                                                                        <div className="mb-3 col-md-6">
                                                                             <label><b>Candidate Address</b></label>
-                                                                            <input type="text" name="candidate_address" value={formData.candidate_address} onChange={handleInputChange} class="form-control" placeholder="Address" />
+                                                                            <textarea type="text" name="candidate_address" value={formData.candidate_address} onChange={handleInputChange} className="form-control" placeholder="Address" ></textarea>
+                                                                        </div>
+                                                                        <div className="mb-3 col-md-6">
+                                                                            <label><b>Feedback</b></label>
+                                                                            <textarea name="candidate_feedback" value={formData.candidate_feedback} onChange={handleInputChange} className="form-control" placeholder="Feedback"></textarea>
+                                                                        </div>
+                                                                        <div className="mb-3 col-md-6">
+                                                                            <label><b>Source of candidate</b></label>
+                                                                            <select
+                                                                                name="source_of_candidate"
+                                                                                value={formData.source_of_candidate}
+                                                                                onChange={handleInputChange}
+                                                                                className="form-control" >
+                                                                                <option value=""> Selection Of Candidate </option>
+                                                                                <option value="Consultancy">Consultancy</option>
+                                                                                <option value="LinkedIn">LinkedIn</option>
+                                                                                <option value="Direct">Direct</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div className="mb-3 col-md-6">
+                                                                            <label><b>Document Proof</b></label>
+                                                                            <input type="file" onChange={handleFileChange} className="form-control" placeholder='candidate document proof' name="candidate_document_proof" />
+                                                                        </div>
+                                                                        <div className="mb-3 col-md-6">
+                                                                            <label><b>10th  Percentage</b></label>
+                                                                            <input type="number" name="tenth_percentage" value={formData.tenth_percentage} onChange={handleInputChange} className="form-control" placeholder="Tenth Percentage" />
+                                                                        </div>
+                                                                        <div className="mb-3 col-md-6">
+                                                                            <label><b>12th  Percentage</b></label>
+                                                                            <input type="number" name="twelfth_percentage" value={formData.twelfth_percentage} onChange={handleInputChange} className="form-control" placeholder="Twelfth Percentage" />
+                                                                        </div>
+                                                                        <div className="mb-3 col-md-6">
+                                                                            <label><b>Graduation  Percentage</b></label>
+                                                                            <input type="number" name="graduationPercentage" value={formData.graduationPercentage} onChange={handleInputChange} className="form-control" placeholder="Graduation Percentage" />
+                                                                        </div>
+                                                                        <div className="mb-3 col-md-6">
+                                                                            <label><b>Post Graduation Per</b></label>
+                                                                            <input type="number" name="postGraduationPercentage" value={formData.postGraduationPercentage} onChange={handleInputChange} className="form-control" placeholder="Post Graduation %" />
                                                                         </div>
 
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Document Proof</b></label>
-                                                                            <input type="file" onChange={handleFileChange} class="form-control" placeholder='candidate document proof' name="candidate_document_proof" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>10th  Percentage</b></label>
-                                                                            <input type="number" name="tenth_percentage" value={formData.tenth_percentage} onChange={handleInputChange} class="form-control" placeholder="Tenth Percentage" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>12th  Percentage</b></label>
-                                                                            <input type="number" name="twelfth_percentage" value={formData.twelfth_percentage} onChange={handleInputChange} class="form-control" placeholder="Twelfth Percentage" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Graduation  Percentage</b></label>
-                                                                            <input type="number" name="graduationPercentage" value={formData.graduationPercentage} onChange={handleInputChange} class="form-control" placeholder="Graduation Percentage" />
-                                                                        </div>
 
 
                                                                     </div>
-                                                                    <div class="col-md-12">
+                                                                    <div className="col-md-12">
                                                                         <button type="submit">Add Candidate</button>
                                                                     </div>
                                                                     <span style={{ color: 'green', textAlign: 'center' }}>{message && <p>{message}</p>}</span>
@@ -836,7 +1001,7 @@ const CandidateModule = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div class="containerOnce">
+                                <div className="containerOnce">
                                     <input
                                         type="text"
                                         value={query}
@@ -884,19 +1049,12 @@ const CandidateModule = () => {
                                                         border: 'none',
                                                         backgroundColor: 'white'
                                                     }} title="Send Mail"><FontAwesomeIcon icon={faEnvelope} /></button>
-                                                    {/* <input
-                                                        type="checkbox"
-                                                        checked={selectAll}
-                                                        onChange={handleSelectAll}
-                                                    /> */}
-
                                                 </th>
 
                                             </tr>
                                         </thead>
                                         <tbody className="customtable">
 
-                                            {/* {tableData.map((data, index) => ( */}
                                             {tableData.slice(offset, offset + itemsPerPage).map((data, index) => (
                                                 <tr key={index}>
 
@@ -910,7 +1068,6 @@ const CandidateModule = () => {
 
                                                     <td>{data.candidate_selection_status}</td>
                                                     <td>
-                                                        {/* <a style={{ color: 'rgb(40, 118, 154)' }} href={`http://localhost:5000/${data.candidate_document_proof}`} target="_blank">{data.candidate_document_proof}</a> */}
                                                         <button
                                                             className="editButton"
                                                             onClick={() => window.open(`http://localhost:5000/${data.candidate_document_proof}`, '_blank')}
@@ -923,7 +1080,6 @@ const CandidateModule = () => {
                                                     <td>
                                                         <button className="editButton" onClick={() => DeleteData(data._id)} title="Delete Data">  <FontAwesomeIcon icon={faTrash} /></button>
                                                         <button className="editButton" onClick={() => openModal(data._id)} title="Edit Data">
-
                                                             <FontAwesomeIcon icon={faEdit} />
                                                         </button>
                                                         <button

@@ -174,7 +174,10 @@ const RecruitmentModule = () => {
                 settogle(!togle)
                 console.log(response.data); // Handle the response as needed
                 setMessage(response.data.msg);
-
+                if (response.data.success) {
+                    closePopup();
+                }
+                setTimeout(() => setMessage(''), 3000);
             } catch (error) {
                 console.error('Error:', error);
                 // setMessage("Add consultancy failed");
@@ -437,6 +440,7 @@ const RecruitmentModule = () => {
                                         <span> <button className="button_design" onClick={() => { DEletemulti() }}    >
                                             MultiDel&nbsp;<FontAwesomeIcon icon={faTrashAlt} />
                                         </button></span>
+                                        
                                     </div>
                                     {isOpen && (
                                         <div>
@@ -664,26 +668,23 @@ const RecruitmentModule = () => {
                                                     <td className="description-cell">{data.profile} </td>
 
                                                     <td>{data.interviewer}</td>
-                                                    {/* <td className="description-cell">
-                                                        {expandedRows.includes(data._id) ? (
+                                                    <td >
+                                                        {data.description.split(' ').length > 4 ? (
                                                             <>
-                                                                {data.description} <button className="show_more" onClick={() => toggleRow(data._id)}>Show less</button>
+                                                                {expandedRows.includes(data._id) ? (
+                                                                    <>
+                                                                        {data.description}
+                                                                        <button className="show_more" onClick={() => toggleRow(data._id)}>Show less</button>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        {data.description.split(' ').slice(0, 3).join(' ')}...
+                                                                        <button className="show_more" onClick={() => toggleRow(data._id)}>Show more</button>
+                                                                    </>
+                                                                )}
                                                             </>
                                                         ) : (
-                                                            <>
-                                                                {data.description.split(' ').slice(0, 3).join(' ')}...<button className="show_more" onClick={() => toggleRow(data._id)}>Show more</button>
-                                                            </>
-                                                        )}
-                                                    </td> */}
-                                                    <td className="description-cell">
-                                                        {expandedRows.includes(data._id) ? (
-                                                            <>
-                                                                {data.description} <button className="show_more" onClick={() => toggleRow(data._id)}>Show less</button>
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                {data.description.split(' ').slice(0, 3).join(' ')}...<button className="show_more" onClick={() => toggleRow(data._id)}>Show more</button>
-                                                            </>
+                                                            <>{data.description}</>
                                                         )}
                                                     </td>
                                                     <td >{data.no_of_candidate}</td>

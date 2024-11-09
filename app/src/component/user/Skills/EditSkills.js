@@ -2,46 +2,43 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios'; // For Axios
- import 'reactjs-popup/dist/index.css';
+import 'reactjs-popup/dist/index.css';
 import Modal from 'react-modal';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
 import CloseButton from 'react-bootstrap/CloseButton';
 
 const ModalBox = ({ isOpen, onRequestClose, skillsId }) => {
+    const [errors, setErrors] = useState({});
 
     const [data, setData] = useState([])
-    const [resume, setResume] = useState('');
-    const [message, setMessage] = useState('');
+     const [message, setMessage] = useState('');
+    const [availableProfile, setAvailableProfile] = useState([]);
+    const [selectedProfile, setSelectedProfile] = useState([]);
     const [profiles, setProfiles] = useState([]);
  
-   
+    
+
     useEffect(() => {
-        if (isOpen) {
-            setMessage('')
-            setResume('')
-            console.log('model open', skillsId)
-            // Fetch data for the given skillsId
+        if (isOpen ) {
+            setMessage('');
+            
             if (skillsId) {
                 const fetchData = async () => {
                     try {
-
                         const response = await axios.get(`${BASE_API_URL}skills/get?skillid=${skillsId}`);
-                        setData(response.data.data)
-                        console.log('data', data)
-
-                    } catch (error) {
-                        console.log('model open error')
-
+                        const skilldata = response.data.data;
+                        setData(skilldata);
+                        setSelectedProfile(skilldata.profile || []);
+                     } catch (error) {
                         console.error('Error fetching Skills data:', error);
                     }
                 };
 
                 fetchData();
+
             }
         }
-    }, [isOpen]);
-
-
+    }, [isOpen, skillsId, profiles]);
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setData((prevState) => ({
@@ -49,38 +46,92 @@ const ModalBox = ({ isOpen, onRequestClose, skillsId }) => {
             [name]: value
         }));
     };
-    useEffect(() => {
-        // Fetch profiles from API when the component mounts
-        const fetchProfiles = async () => {
-            try {
-                const response = await axios.get(`${BASE_API_URL}/recruitment/get_profile`);
-                if (response.data.success) {
-                    setProfiles(response.data.data); // Set profiles in state
-                } else {
-                    console.error('Failed to fetch profiles:', response.data.msg);
-                }
-            } catch (error) {
-                console.error('Error fetching profiles:', error);
-            }
-        };
-
-        fetchProfiles();
-    }, []);
+    
     const handleSubmit = async (e) => {
-        const mydata = data;
-       e.preventDefault();
-        // Handle form submission here
-        try {
-            const response = await axios.put(`${BASE_API_URL}skills/edit`, data);
-            console.log(response.data); // Handle the response as needed
-            // onRequestClose(); // Close the modal if request is successful
-            setMessage(response.data.msg);
+        e.preventDefault();
+        const mydata = { ...data, profile: selectedProfile, id: data._id };
 
+        try {
+            const response = await axios.put(`${BASE_API_URL}skills/edit`, mydata);
+            setMessage(response.data.msg);
         } catch (error) {
             console.error('Error:', error);
         }
     };
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const response = await axios.get(`${BASE_API_URL}profiles/list`);
+                console.log("response data--->", response.data.data)
+                if (response.data.success) {
+                    const profiles = response.data.data;
+                    const profileMap = profiles.reduce((map, item) => {
+                        map[item.profile_id] = item.profile;
+                        return map;
+                    }, {});
+                     setAvailableProfile(profiles);
 
+                }
+            } catch (error) {
+                console.error("Error fetching profiles:", error);
+            }
+        };
+
+        fetchProfile();
+    }, []);
+ 
+    const handleAddProfile = (profile) => {
+        if (!selectedProfile.some(p => p.profile_id === profile.profile_id)) {
+            const updatedSelectedProfile = [...selectedProfile, profile];
+            setSelectedProfile(updatedSelectedProfile);
+            setAvailableProfile(prev => prev.filter(p => p.profile_id !== profile.profile_id));
+
+            // Only store profile names in formData
+            setData(prev => ({
+                ...prev,
+                profile: updatedSelectedProfile.map(p => p.profile),
+                profile_id: updatedSelectedProfile.map(p => p.profile_id)
+            }));
+
+            // Clear error if any profile is selected
+            if (updatedSelectedProfile.length > 0) {
+                setErrors(prevErrors => {
+                    const { profile, ...rest } = prevErrors;
+                    return rest;
+                });
+            }
+        }
+    };
+
+    const handleRemoveProfile = (profile) => {
+        const updatedSelectedProfile = selectedProfile.filter(p => p.profile_id !== profile.profile_id);
+        setSelectedProfile(updatedSelectedProfile);
+        setAvailableProfile(prev => [...prev, profile]);
+
+        // Update formData to remove profile
+        setData(prev => ({
+            ...prev,
+            profile: updatedSelectedProfile.map(p => p.profile),
+            profile_id: updatedSelectedProfile.map(p => p.profile_id)
+        }));
+
+        // Set error if no profiles are left
+        if (updatedSelectedProfile.length === 0) {
+            setErrors(prevErrors => ({
+                ...prevErrors,
+                profile: "At least one profile is required"
+            }));
+        }
+    };
+
+
+    // ProfileTag Component
+    const ProfileTag = ({ profile, onRemove }) => (
+        <div className="skill-tag">
+            {profile}
+            <button onClick={onRemove}>x</button>
+        </div>
+    );
     return (
         <Modal
             isOpen={isOpen}
@@ -103,7 +154,6 @@ const ModalBox = ({ isOpen, onRequestClose, skillsId }) => {
                     padding: '20px',
                     backgroundColor: 'rgba(0, 0, 0, 0.1)',
                     border: 'none',
-                    // overflow: 'hidden', // Prevent scroll
 
                 }
             }}
@@ -121,10 +171,6 @@ const ModalBox = ({ isOpen, onRequestClose, skillsId }) => {
 
                             </div>
                             <div class="row">
-                                {/* <div class="mb-3 col-md-6">
-                                    <label><b>Name</b></label>
-                                    <input type="text" name="name" value={data.name} onChange={handleInputChange} class="form-control" placeholder="Name" />
-                                </div> */}
                                 <div className="mb-3 col-md-6">
                                     <label><b>Skills*</b></label>
                                     <select
@@ -157,7 +203,40 @@ const ModalBox = ({ isOpen, onRequestClose, skillsId }) => {
                                         <option value="Jquery">Jquery</option>
                                         <option value="XAMPP">XAMPP</option>
                                     </select>
-                                 </div>
+                                </div>
+                             
+                                <div className="mb-3 col-md-6">
+                                    <label><b>Profile</b></label>
+                                    <div className="skills-container">
+                                        <div className="available-skills">
+                                            <select className="form-control" multiple size="4">
+                                                {availableProfile.map(profile => (
+                                                    <option
+                                                        key={profile.profile_id}
+                                                        value={profile.profile_id}
+                                                        onClick={() => handleAddProfile(profile)}
+                                                    >
+                                                        {profile.profile}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="selected-skills">
+                                            <label>Selected Profile</label>
+                                            <div>
+                                                {selectedProfile.map(profile => (
+                                                    <ProfileTag
+                                                        key={profile.profile_id}
+                                                        profile={profile.profile}
+                                                        onRemove={() => handleRemoveProfile(profile)}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {errors.profile && <span className="error" style={{ color: 'red' }}>{errors.profile}</span>}
+                                </div>
+
 
                                 <div class="mb-3 col-md-6">
                                     <label><b>Description</b></label>

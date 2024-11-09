@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import './Employee.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from 'axios'; // For Axios
+import axios from 'axios';
 import ModalBox from './EditEmployeeModel.js';
 import Nav from '../../navComponent/Nav';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactPaginate from 'react-paginate';
-import { faEdit, faTrashAlt, faTrash, faSortUp, faSortDown, faPlusCircle, faEye, faFilePdf } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrashAlt, faTrash, faSortUp,faEnvelope, faSortDown, faPlusCircle, faEye, faFilePdf } from '@fortawesome/free-solid-svg-icons';
 import Footer from '../../FooterModule/Footer.js';
 import { BASE_API_URL } from '../../../lib/constants.jsx';
 import EmployeeDataModal from './EmployeeDataModal'
 let downloadCount = 0;
-
-// import lib
 
 const EmployeeModule = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -38,6 +36,8 @@ const EmployeeModule = () => {
     const [sortDirection, setSortDirection] = useState('ascending');
     const [modalIsOpen1, setModalIsOpen1] = useState(false);
     const [modalData, setModalData] = useState(null);
+    const [selectAll, setSelectAll] = useState(false);
+    const [selectedEmails, setSelectedEmails] = useState([]);
 
     const handlePageChange = ({ selected }) => {
         setCurrentPage(selected); // Update the current page when pagination changes
@@ -203,38 +203,6 @@ const EmployeeModule = () => {
             console.error("The selected file is not a Blob.");
         }
     };
-    // const handleFileChange = (e) => {
-    //     const file = e.target.files[0];
-    //     if (file instanceof Blob) {
-    //         const reader = new FileReader();
-    //         reader.onloadend = () => {
-    //             if (e.target && e.target.name === 'id') {
-    //                 setidproofFile(reader.result);
-    //             } else if (e.target && e.target.name === 'resume_file') {
-    //                 setSelectedFile(reader.result);
-    //             } else if (e.target && e.target.name === 'mark') {
-    //                 setmarksheet(reader.result);
-    //             } else if (e.target && e.target.name === 'pancard') {
-    //                 setPancard(reader.result);
-    //             } else if (e.target && e.target.name === 'image') {
-    //                 setImage(reader.result);
-    //             } else {
-    //                 seteletter(reader.result);
-    //             }
-    //             console.log('idproof', idproof);
-    //             console.log('selectedFile', selectedFile);
-    //         };
-
-    //         // reader.readAsDataURL(file);
-    //         if (e.target.name === 'image') {
-    //             reader.readAsDataURL(file); // Read image files as Data URL
-    //         } else {
-    //             reader.readAsArrayBuffer(file); // Read non-image files as ArrayBuffer
-    //         }
-    //     } else {
-    //         console.error("The selected file is not a Blob.");
-    //     }
-    // };
 
     const fetchData = async () => {
         try {
@@ -313,31 +281,89 @@ const EmployeeModule = () => {
 
 
     // Function to handle form submission
+    // const handleSubmit = async (e) => {
+    //     console.log("check resume", selectedFile);
+    //     e.preventDefault();
+    //     formData.employee_skills = selectedSkills; // Add selected skills to form data
+    //     formData.employee_resume = selectedFile;
+    //     formData.employee_id_proof = idproof;
+    //     formData.employee_marksheet = marksheet;
+    //     formData.employee_pan_card = pancard;
+    //     formData.employee_experience_letter = e_letter;
+    //     formData.employee_marksheet = marksheet;
+    //     formData.image = image.split(',')[1]
+    //     // Handle form submission here, for example, send data to backend or perform validation
+    //     console.log('Form Data:', formData);
+
+    //     if (validateForm()) {
+    //         try {
+    //             const response = await axios.post(`${BASE_API_URL}employee/create`, formData);
+    //             settogle(!togle);
+    //             console.log(response.data); // Handle the response as needed
+    //             setMessage(response.data.msg);
+    //         } catch (error) {
+    //             console.error('Error:', error);
+    //         }
+    //     }
+    // };
     const handleSubmit = async (e) => {
         console.log("check resume", selectedFile);
         e.preventDefault();
-        formData.employee_skills = selectedSkills; // Add selected skills to form data
+    
+        formData.employee_skills = selectedSkills;
         formData.employee_resume = selectedFile;
         formData.employee_id_proof = idproof;
         formData.employee_marksheet = marksheet;
         formData.employee_pan_card = pancard;
         formData.employee_experience_letter = e_letter;
         formData.employee_marksheet = marksheet;
-        formData.image = image.split(',')[1]
+    
+        // Check if an image is added; if not, use a default image URL
+        if (image) {
+            formData.image = image.split(',')[1];
+        } else {
+            // Fetch the default image and convert it to Base64
+            try {
+                // const defaultImageUrl = "https://www.shutterstock.com/image-vector/image-not-found-grayscale-photo-260nw-1737334631.jpg";
+                const defaultImageUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEjJZqF_yr3mhCcpLSU9SMn95TPq2AbQ1lv-4onQT6iQSqEagk5acckI-caocwV-O1OVA&usqp=CAU";
 
-        // mydata.image.split(',')[1]
-
-        // Handle form submission here, for example, send data to backend or perform validation
+                const response = await fetch(defaultImageUrl);
+                const blob = await response.blob();
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = () => {
+                    formData.image = reader.result.split(',')[1];
+                    submitForm(); // Call submitForm after setting the default image
+                };
+            } catch (error) {
+                console.error('Error fetching default image:', error);
+            }
+            return; // Return to wait for the image processing before submitting
+        }
+    
+        submitForm(); // Call submitForm when image is already available
+    };
+    
+    // Extract the form submission logic into a separate function
+    const submitForm = async () => {
         console.log('Form Data:', formData);
-
+    
         if (validateForm()) {
             try {
                 const response = await axios.post(`${BASE_API_URL}employee/create`, formData);
                 settogle(!togle);
                 console.log(response.data); // Handle the response as needed
                 setMessage(response.data.msg);
+                if (response.data.success) {
+                    closePopup();
+                }
+                setTimeout(() => setMessage(''), 3000);
+
+                 
             } catch (error) {
                 console.error('Error:', error);
+                setTimeout(() => setMessage(''), 3000);
+
             }
         }
     };
@@ -449,8 +475,7 @@ const EmployeeModule = () => {
         // Convert rows
         const rows = data.map(row => {
             return Object.values(row).map(value => {
-                // Check if the value is an array (like candidate_skills)
-                if (Array.isArray(value)) {
+                 if (Array.isArray(value)) {
                     return `"${value.join(', ')}"`; // Join array elements into a single string with commas
                 }
                 return value;
@@ -491,10 +516,7 @@ const EmployeeModule = () => {
             .catch(error => console.error('Error:', error));
     };
 
-    // const openView = () => {
-    //     const csv = convertToCSV(tableData);
-    //     downloadCSV(csv, 'data.csv');
-    // };
+
     const openView = () => {
         const csv = convertToCSV(tableData);
         downloadCount += 1; // Increment the download count
@@ -550,6 +572,35 @@ const EmployeeModule = () => {
         }
     };
 
+    // send mail
+    const sendEmails = async () => {
+        if (selectedEmails.length === 0) {
+            setMessage('Please select at least one email to send.');
+            return;
+        }
+        setMessage('Sending emails...');
+        try {
+            const response = await axios.post(`${BASE_API_URL}employee/send-mail`, { emails: selectedEmails });
+            console.log('Response:', response.data);
+            setMessage(response.data.msg);
+            setTimeout(() => setMessage(''), 2000);
+            // Reset selected emails and checkboxes after sending emails
+            setSelectedEmails([]);
+            setSelectAll(false);
+        } catch (error) {
+            console.error('Error sending emails:', error);
+            setMessage('Error sending emails.');
+            setTimeout(() => setMessage(''), 2000);
+        }
+    };
+    const handleCheckboxChangeEmail = (email) => {
+        setSelectedEmails(prevSelectedEmails =>
+            prevSelectedEmails.includes(email)
+                ? prevSelectedEmails.filter(e => e !== email)
+                : [...prevSelectedEmails, email]
+        );
+    };
+
     return (
         <>
             <div >
@@ -573,7 +624,11 @@ const EmployeeModule = () => {
                                         </button>
                                         <span> <button className="button_design" onClick={() => { Deletemulti() }}    >
                                             MultiDel&nbsp;<FontAwesomeIcon icon={faTrashAlt} />
-                                        </button></span></div>
+                                        </button></span>
+                                        <span>   <button onClick={sendEmails} className='button_design'>Send Emails &nbsp; <FontAwesomeIcon icon={faEnvelope} /></button>
+                                        </span>
+                                        </div>
+                                        {message && <div className="mt-3 alert alert-success">{message}</div>}
 
                                     {isOpen && (
                                         <div>
@@ -586,113 +641,72 @@ const EmployeeModule = () => {
 
                                                                 <form onSubmit={handleSubmit} class="mt-5 border p-4 bg-light shadow">
                                                                     <div style={{ textAlign: 'center' }}>
-                                                                        <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">Create Your Account</h4>
+                                                                        <h4 style={{ display: 'inline', marginRight: '10px' }} className="mb-5 text-secondary">ADD EMPLOYEE DATA</h4>
                                                                         <button style={{ float: 'right', fontSize: '20px', backgroundColor: '#ddc7c7', border: 'none' }} className="close" onClick={closePopup}>&times;</button>
                                                                     </div>
                                                                     <div class="row">
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Code*</b></label>
+                                                                            <label><b>Emp Code*</b></label>
                                                                             <input type="text" name="employee_code" value={formData.employee_code} onChange={handleInputChange} class="form-control" placeholder="Emp Code" />
                                                                             {errors.employee_code && <span className="error" style={{ color: 'red' }}>{errors.employee_code}</span>}
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee First Name*</b></label>
+                                                                            <label><b>First Name*</b></label>
                                                                             <input type="text" name="employee_first_name" value={formData.employee_first_name} onChange={handleInputChange} class="form-control" placeholder="First Name" />
                                                                             {errors.employee_first_name && <span className="error" style={{ color: 'red' }}>{errors.employee_first_name}</span>}
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Last Name*</b></label>
+                                                                            <label><b>Last Name*</b></label>
                                                                             <input type="text" name="employee_last_name" value={formData.employee_last_name} onChange={handleInputChange} class="form-control" placeholder="Last Name" />
                                                                             {errors.employee_last_name && <span className="error" style={{ color: 'red' }}>{errors.employee_last_name}</span>}
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Mobile No*</b></label>
+                                                                            <label><b>Mobile No*</b></label>
                                                                             <input type="text" name="employee_mobile" value={formData.employee_mobile} onChange={handleInputChange} class="form-control" placeholder="Mobile Number" />
                                                                             {errors.employee_mobile && <span className="error" style={{ color: 'red' }}>{errors.employee_mobile}</span>}
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Alternate Mo. No.</b></label>
+                                                                            <label><b>Alternate Mobile No.</b></label>
                                                                             <input type="text" name="employee_alternate_mobile" value={formData.employee_alternate_mobile} onChange={handleInputChange} class="form-control" placeholder="Alternate Mobile Number" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Email*</b></label>
+                                                                            <label><b>Email*</b></label>
                                                                             <input type="email" name="employee_email" value={formData.employee_email} onChange={handleInputChange} class="form-control" placeholder="Email" />
                                                                             {errors.employee_email && <span className="error" style={{ color: 'red' }}>{errors.employee_email}</span>}
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Password*</b></label>
+                                                                            <label><b>Password*</b></label>
                                                                             <input type="text" name="employee_password" value={formData.employee_password} onChange={handleInputChange} class="form-control" placeholder="Password" />
                                                                             {errors.employee_password && <span className="error" style={{ color: 'red' }}>{errors.employee_password}</span>}
                                                                         </div>
+
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Address</b></label>
-                                                                            {/* <input type="text" name="employee_address" value={formData.employee_address} onChange={handleInputChange} class="form-control" placeholder="Address" /> */}
+                                                                            <label><b>City</b></label>
+                                                                            <input type="text" name="employee_city" value={formData.employee_city} onChange={handleInputChange} class="form-control" placeholder="City" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <label><b>State</b></label>
+                                                                            <input type="text" name="employee_state" value={formData.employee_state} onChange={handleInputChange} class="form-control" placeholder="State" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <label><b>Additional Information</b></label>
+                                                                            <input type="text" name="employee_other_info" value={formData.employee_other_info} onChange={handleInputChange} class="form-control" placeholder="Employee Info" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6"  >
+                                                                            <label><b>DOB</b></label>
+                                                                            <input type="date" name="employee_dob" value={formData.employee_dob} onChange={handleInputChange} class="form-control" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6" >
+                                                                            <label ><b>DOJ</b></label>
+                                                                            <input type="date" name="employee_doj" value={formData.employee_doj} onChange={handleInputChange} class="form-control" />
+                                                                        </div>
+                                                                        <div class="mb-3 col-md-6">
+                                                                            <label><b>Address</b></label>
                                                                             <textarea name="employee_address" value={formData.employee_address} onChange={handleInputChange} class="form-control" placeholder="Address"></textarea>
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee City</b></label>
-                                                                            <input type="text" name="employee_city" value={formData.employee_city} onChange={handleInputChange} class="form-control" placeholder="City" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee State</b></label>
-                                                                            <input type="text" name="employee_state" value={formData.employee_state} onChange={handleInputChange} class="form-control" placeholder="State" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Other Info</b></label>
-                                                                            <input type="text" name="employee_other_info" value={formData.employee_other_info} onChange={handleInputChange} class="form-control" placeholder="Employee Info" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6"  >
-                                                                            <label><b>Date of Birth</b></label>
-                                                                            <input type="date" name="employee_dob" value={formData.employee_dob} onChange={handleInputChange} class="form-control" />
-                                                                        </div>
-                                                                        <div class="mb-3 col-md-6" >
-                                                                            <label ><b>Date of Joining</b></label>
-                                                                            <input type="date" name="employee_doj" value={formData.employee_doj} onChange={handleInputChange} class="form-control" />
-                                                                        </div>
-                                                                        {/* <div className="row"> */}
-                                                                        {/* <div className="mb-3 col-md-6">
-                                                                            <label><b>Skills</b></label>
-                                                                            <select className="form-control" multiple size="3">
-                                                                                {availableSkills.map(skill => (
-                                                                                    <option key={skill} onClick={() => handleAddSkill(skill)}>
-                                                                                        {skill}
-                                                                                    </option>
-                                                                                ))}
-                                                                            </select>
-                                                                        </div>
-                                                                        <div className="mb-3 col-md-6">
-                                                                            <label><b>Selected Skills</b></label>
-                                                                            <div className="selected-skills">
-                                                                                {selectedSkills.map(skill => (
-                                                                                    <SkillTag key={skill} skill={skill} onRemove={handleRemoveSkill} />
-                                                                                ))}
-                                                                            </div>
-                                                                        </div> */}
-                                                                        {/* <div className="mb-3 col-md-12">
-                                                                            <label><b>Skills</b></label>
-                                                                            <div className="skills-container">
-                                                                                <div className="available-skills">
-                                                                                    <select className="form-control" multiple size="4">
-                                                                                        {availableSkills.map(skill => (
-                                                                                            <option key={skill} onClick={() => handleAddSkill(skill)}>
-                                                                                                {skill}
-                                                                                            </option>
-                                                                                        ))}
-                                                                                    </select>
-                                                                                </div>
-                                                                                <div className="selected-skills">
-                                                                                    <label>Selected Skills</label>
-                                                                                    <div>
-                                                                                        {selectedSkills.map(skill => (
-                                                                                            <SkillTag key={skill} skill={skill} onRemove={handleRemoveSkill} />
-                                                                                        ))}
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div> */}
-                                                                        <div class="mb-3 col-md-6">
-                                                                            <label><b>Skills</b></label>
+                                                                            <label><b>Employee Skills</b></label>
                                                                             <div className="skills-container">
                                                                                 <div className="available-skills">
                                                                                     <select className="form-control" multiple size="4">
@@ -717,8 +731,7 @@ const EmployeeModule = () => {
 
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Employee Experience*</b></label>
-                                                                            {/* <input type="text" name="employee_experience" value={formData.employee_experience} onChange={handleInputChange} class="form-control" placeholder="Experience" /> */}
+                                                                            <label><b>Experience*</b></label>
                                                                             <select
                                                                                 name="employee_experience"
                                                                                 value={formData.employee_experience}
@@ -745,7 +758,7 @@ const EmployeeModule = () => {
                                                                         </div>
 
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Resume</b></label>
+                                                                            <label><b>Upload Resume</b></label>
                                                                             <input type="file" onChange={handleFileChange} class="form-control" placeholder='resume file' name="resume_file" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
@@ -762,17 +775,17 @@ const EmployeeModule = () => {
                                                                             <input type="file" name="pancard" onChange={handleFileChange} class="form-control" placeholder="Pan Card" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Image</b></label>
+                                                                            <label><b>Profile Picture</b></label>
                                                                             <input type="file" name="image" onChange={handleFileChange} class="form-control" placeholder="Image" />
                                                                         </div>
 
 
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b> Expirence Letter</b></label>
+                                                                            <label><b> Experience Certificate</b></label>
                                                                             <input type="file" name="e_letter" onChange={handleFileChange} class="form-control" placeholder="Experience Letter" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Address Proof</b></label>
+                                                                            <label><b>Permanent Address Proof</b></label>
 
                                                                             <input type="text" name="employee_permanant_address_proof" value={formData.employee_permanant_address_proof} onChange={handleInputChange} class="form-control" placeholder="Permanant address proof" />
                                                                         </div>
@@ -781,19 +794,19 @@ const EmployeeModule = () => {
                                                                             <input type="text" name="employee_local_address_proof" value={formData.employee_local_address_proof} onChange={handleInputChange} class="form-control" placeholder="Local address proof" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>First Reference Name</b></label>
+                                                                            <label><b>Reference One Name</b></label>
                                                                             <input type="text" name="employee_reference_one_name" value={formData.employee_reference_one_name} onChange={handleInputChange} class="form-control" placeholder="Reference One Name" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>First Reference Mobile No.</b></label>
+                                                                            <label><b>Reference One Mobile</b></label>
                                                                             <input type="text" name="employee_reference_one_mobile" value={formData.employee_reference_one_mobile} onChange={handleInputChange} class="form-control" placeholder="Reference One Mobile" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Second Reference Name</b></label>
+                                                                            <label><b>Reference Two Name</b></label>
                                                                             <input type="text" name="employee_reference_two_name" value={formData.employee_reference_two_name} onChange={handleInputChange} class="form-control" placeholder="Reference Two Name" />
                                                                         </div>
                                                                         <div class="mb-3 col-md-6">
-                                                                            <label><b>Second Reference Mobile No.</b></label>
+                                                                            <label><b>Reference Two Mobile</b></label>
                                                                             <input type="text" name="employee_reference_two_mobile" value={formData.employee_reference_two_mobile} onChange={handleInputChange} class="form-control" placeholder="Reference Two Mobile" />
                                                                         </div>
 
@@ -853,6 +866,12 @@ const EmployeeModule = () => {
                                                         <input type="checkbox" id="mainCheckbox" />
                                                     </label>
                                                 </th>
+                                                <th>
+                                                    <button style={{
+                                                        border: 'none',
+                                                        backgroundColor: 'white'
+                                                    }} title="Send Mail"><FontAwesomeIcon icon={faEnvelope} /></button>
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody className="customtable">
@@ -911,6 +930,14 @@ const EmployeeModule = () => {
                                                             <span className="checkmark"></span>
                                                         </label>
                                                     </td>
+
+                                                    <td>
+                                                        <input style={{ marginLeft: "18px" }}
+                                                            type="checkbox"
+                                                            checked={selectedEmails.includes(data.employee_email)}
+                                                            onChange={() => handleCheckboxChangeEmail(data.employee_email)}
+                                                        />
+                                                    </td>
                                                     <ModalBox isOpen={modalIsOpen} employeeId={selectedEmployeeId} onRequestClose={closeModal}>
                                                         <h2>Modal Title</h2>
                                                         <p>Modal Content</p>
@@ -938,13 +965,9 @@ const EmployeeModule = () => {
                             </div>
                         </div>
                     </div>
-
                 </div >
-
                 <div>
-
                 </div>
-
 
             </div >
             <Footer />        </>
